@@ -1,9 +1,9 @@
 <template>
   <div id="app">
-    <NavBar class="fixed-navBar"></NavBar>
+      <NavBar class="navBar"></NavBar>
     <div class="right-side">
-      <HeadBar></HeadBar>
-      <router-view/>
+      <HeadBar class="headBar" manager="ManagerME"></HeadBar>
+        <router-view class="content" />
     </div>
   </div>
 </template>
@@ -22,4 +22,34 @@ export default {
 </script>
 
 <style lang="sass">
-</style>>
+*
+  box-sizing: border-box
+body
+  height: 100vh
+  background: #f2f2f2
+a
+  text-decoration: none
+  color: black
+span
+  display: inline-block
+.clearify::after
+  content: ''
+  height: 0
+  overflow: hidden
+  display: block
+  visibility: hidden
+  clear: both
+.navBar
+  width: 12.5%
+  float: left
+  display: inline-block
+.right-side
+  width: 87.5%
+  float: left
+  display: inline-block
+  .headBar
+    position: relative
+    z-index: -1
+  .content
+    padding: 50px
+</style>

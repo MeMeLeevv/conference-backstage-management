@@ -15,16 +15,9 @@ export default new Router({
       component: Home
     },
     {
-      path: '/columnConfig',
-      name: 'columnConfig',
-      // route level code-splitting
-      // this generates a separate chunk (about.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      children: [
-        {
-        path: 'headImage', component: HeadImage
-        }
-      ]
+      path: '/columnConfig/headImage',
+      name: 'headImage',
+      component: HeadImage
     }
   ]
 })
