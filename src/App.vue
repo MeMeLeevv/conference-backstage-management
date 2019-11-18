@@ -14,6 +14,15 @@ import HeadBar from './components/global/headBar'
 
 export default {
   name: 'app',
+  created () {
+    // this.getDevice()
+  },
+  methods: {
+    getDevice () {
+      window.deviceWidth = document.body.clientWidth
+      window.deviceHeight = document.body.clientHeight
+    }
+  },
   components: {
     NavBar,
     HeadBar
