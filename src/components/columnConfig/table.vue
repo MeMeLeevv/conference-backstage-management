@@ -4,26 +4,29 @@
       ref="multipleTable"
       :data="tableData"
       tooltip-effect="dark"
-      style="width: 92%"
+      style="width: 98%"
       @selection-change="handleSelectionChange"
       :fit="true"
     >
       <div v-for="item in initTable" :key="item.id">
+        <!-- 多选类 -->
         <el-table-column v-if="item.type === 'checkbox'" label="" :width="item.widthPercent" align="center" type="selection"></el-table-column>
+        <!-- 文本框类 -->
         <el-table-column v-if="item.type === 'text'" :label="item.label" :width="item.widthPercent" align="center" show-overflow-tooltip>
         <template slot-scope="scope">
             <el-input v-if="multipleSelection.length !== 0 && scope.row.edit"
             v-model="scope.row[item.key]"
             >
             </el-input>
-            <span v-else>{{scope.row[item.key]}}</span>
+            <span v-else class="ellipsis">{{scope.row[item.key]}}</span>
         </template>
       </el-table-column>
+      <!-- 图片类 -->
       <el-table-column v-if="item.type === 'image'" :label="item.label" :width="item.widthPercent" align="center">
         <template slot-scope="scope">
             <div class="relativePos">
               <el-input v-if="scope.row.edit" type="file" class="hidden fileInput"
-            v-model="scope.row[item.key]">
+            v-model="scope.row[item.key]" title="请选择本地图片">
             </el-input>
             <el-image
               :style="`width: ${item.widthPercent}px; height: 100px`"
@@ -33,6 +36,7 @@
             </div>
         </template>
       </el-table-column>
+      <!-- 下拉类 -->
       <el-table-column v-if="item.type === 'select'" :label="item.label" :width="item.widthPercent" align="center" show-overflow-tooltip>
         <template slot-scope="scope">
             <el-select v-if="multipleSelection.length !== 0 && scope.row.edit" v-model="scope.row[item.key]" style="width: 50%">
@@ -350,6 +354,11 @@ export default {
 
 <style lang="sass" scoped>
 $inputHeight: 76px
+.ellipsis
+  width: 100%
+  display: inline-block
+  overflow: hidden
+  text-overflow: ellipsis
 .redColor
   color: red
 .greenColor

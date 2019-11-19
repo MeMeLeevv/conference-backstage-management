@@ -8,9 +8,11 @@
       <el-dialog :title="`请编辑${title}信息`" center :visible.sync="dialogFormVisible">
         <el-form :model="form">
           <div v-for="item in initDialog" :key="item.id">
+            <!-- 文本框类 -->
             <el-form-item v-if="item.type === 'text'" :label="`${item.label}${item.required ? '*' : ''} : `" :label-width="formLabelWidth">
               <el-input style="width: 95%" v-model="form[item.key]" autocomplete="off"></el-input>
             </el-form-item>
+            <!-- 开关类 -->
             <el-form-item v-if="item.type === 'Switch'" :label="`${item.label}${item.required ? '*' : ''} : `" :label-width="formLabelWidth">
               <el-switch
                 v-model="form[item.key]"
@@ -19,6 +21,7 @@
               </el-switch>
               <span>{{form[item.key] ? '显示' : '隐藏'}}</span>
             </el-form-item>
+            <!-- 图片类 -->
             <el-form-item v-if="item.type === 'image'" :label="`${item.label}${item.required ? '*' : ''} : `" :label-width="formLabelWidth">
               <div class="relativePos">
                 <el-input type="file" style="width: 20%" class="hidden fileInput"
@@ -29,14 +32,15 @@
                 fit="contain"
                 src=""
                 >
-                <div slot="error" class="image-slot">
-                  <div class="absoluteCenter">
-                    <i class="el-icon-picture-outline "></i>
-                    <span class="">上传照片</span>
+                <div slot="error" class="">
+                  <div class="absoluteCenter" v-if="!form[item.key]">
+                    <i class="el-icon-picture-outline uploadWord pic" style=""></i>
+                    <span class="uploadWord word" style="">上传照片</span>
                   </div>
                 </div>
               </el-image>
               </div>
+              <div class="tip">建议尺寸为200*200像素，大小小于200k</div>
             </el-form-item>
           </div>
         </el-form>
@@ -120,7 +124,7 @@ export default {
 </script>
 
 <style lang="sass" scoped>
-$inputHeight: 76px
+$inputHeight: 100px
 .relativePos
   position: relative
   width: 100%
@@ -130,10 +134,22 @@ $inputHeight: 76px
 .hidden
   opacity: 0
 .absoluteCenter
+  width: 100%
   position: absolute
   left: 50%
   top: 50%
   transform: translate(-50%, -50%)
+  .uploadWord
+    width: 100%
+    display: inline-block
+    position: relative
+    text-align: center
+    line-height: 20px
+    font-size: 14px
+  .pic
+    top: 10px
+  .word
+    bottom: 10px
 #header
   height: 30px
   .title
@@ -180,8 +196,19 @@ $inputHeight: 76px
     transform: translate(0, -50%)
     margin: 0 auto
     background: #f2f2f2
+  .el-form-item__label
+    vertical-align: top
   .el-form-item__content
+    vertical-align: top
+    line-height: 20px
     span
-      margin: 0 10px
+      margin: 5px 5px
       font-size: 15px
+  .tip
+    margin: 10px 0 0 0
+    height: 20px
+    line-height: 20px
+    font-size: 14px
+  .el-switch+span
+      line-height: 30px
 </style>
