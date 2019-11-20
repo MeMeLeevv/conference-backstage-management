@@ -1,5 +1,6 @@
 <template>
     <div id="headImage">
+      <!-- 大会头图集合 -->
       <ConfigHeader></ConfigHeader>
       <Table class="flexTable"></Table>
     </div>

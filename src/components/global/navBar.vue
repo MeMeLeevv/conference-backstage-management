@@ -1,5 +1,5 @@
 <template>
-  <div id="navBar" class="clearify">
+  <div id="navBar" class="clearify"><!-- 可利用transition进行过度 -->
     <el-col :span="3">
       <el-menu
         :default-active="$route.path"
@@ -58,7 +58,7 @@ export default {
           },
           {
             title: '大会亮点',
-            url: '/columnConfig/highlights'
+            url: '/columnConfig/highlight'
           },
           {
             title: '大会嘉宾',
@@ -87,7 +87,7 @@ export default {
           },
           {
             title: '大会亮点',
-            url: '/meetingManage/highlights'
+            url: '/meetingManage/highlight'
           },
           {
             title: '大会嘉宾',
@@ -116,7 +116,7 @@ export default {
           },
           {
             title: '大会亮点',
-            url: '/orderManage/highlights'
+            url: '/orderManage/highlight'
           },
           {
             title: '大会嘉宾',
@@ -145,7 +145,7 @@ export default {
           },
           {
             title: '大会亮点',
-            url: '/clientFeedback/highlights'
+            url: '/clientFeedback/highlight'
           },
           {
             title: '大会嘉宾',

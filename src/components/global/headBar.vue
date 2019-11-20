@@ -1,6 +1,11 @@
 <template>
   <div id="headBar" class="clearify">
-      <span class="title">管理后台 —— 2019全球未来科技大会·广州站</span>
+    <div class="avatar">
+      <el-avatar :size="30" style="vertical-align:middle" src="https://mir-s3-cdn-cf.behance.net/project_modules/max_1200/da132c85978729.5d8bbe537d947.gif" @error="errorHandler">
+      <img src="https://cube.elemecdn.com/e/fd/0fc7d20532fdaf769a25683617711png.png"/>
+    </el-avatar>
+    </div>
+      <span class="title">{{title}}</span><!-- 这里title需要和用户点击的大会项目有关 -->
       <div class="rightSize">
         <span class="manager"><i class="iconfont icon-people"></i>{{manager}}</span>
         <span class="exit"><i class="iconfont icon-exit"></i>退出</span>
@@ -13,9 +18,18 @@
 export default {
   name: 'headBar',
   props: {
+    title: {
+      type: String,
+      default: '大会管理后台'
+    },
     manager: {
       type: String,
       default: '管理员XXX'
+    }
+  },
+  methods: {
+    errorHandler () { /* 头像加载失败 */
+      return true
     }
   },
   components: {
@@ -29,14 +43,25 @@ export default {
 #headBar
   width: 100%
   height: 60px
+  position: relative
   padding: 0 10%
   background: white
+  .avatar
+    position: absolute
+    left: 13%
+    top: 0
+    height: 60px
+    line-height: 60px
   .title
+    position: absolute
+    left: 15%
     line-height: 60px
     font-size: 24px
     font-weight: 700
   .rightSize
-    float: right
+    position: absolute
+    right: 13%
+    top: 0
     cursor: pointer
     .manager,.exit
       margin: 0 10px 0 0

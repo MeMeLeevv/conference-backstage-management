@@ -118,15 +118,15 @@
 export default {
   name: 'flexTable',
   props: {
-    initTable: {
+    initTable: {/* 初始化表格样式，输入表头类型 */
       type: Array,
       default: function () {
         return [
           {
-            label: '显示状态',
-            widthPercent: 0.12,
-            type: 'select',
-            key: 'state'
+            label: '显示状态', // 表头名
+            widthPercent: 0.12, // 表头占父类长度百分比
+            type: 'select', // 表头input类型
+            key: 'state' // 他对应表格数据tableData对象里的key值
           },
           {
             label: '', // 迷之位置。。。。
@@ -154,6 +154,53 @@ export default {
           }
         ]
       }
+    },
+    tableData: {/* 表格数据 */
+      type: Array,
+      default: function () {
+        return [ // 如果用户编辑成空数据！！！
+          {
+            id: 0,
+            thumbnail: '',
+            name: '234233333333333333333333333333333333333333',
+            link: '23423777777777777777777777777777777777',
+            edit: false, /* 是否为可编辑状态 */
+            state: true
+          },
+          {
+            id: 1,
+            thumbnail: '',
+            name: 'rew',
+            link: 'werw',
+            edit: false,
+            state: true
+          },
+          {
+            id: 2,
+            thumbnail: '',
+            name: 'werw',
+            link: 'werwer',
+            edit: false,
+            state: true
+          },
+          {
+            id: 3,
+            thumbnail: '',
+            name: 'werw',
+            link: 'werw',
+            edit: false,
+            state: true
+          },
+          {
+            id: 4,
+            thumbnail: '',
+            name: 'wer',
+            edit: false,
+            link: 'wer',
+            state: true
+          }
+        ]
+      }
     }
   },
   data () {
@@ -169,48 +216,6 @@ export default {
         value: false,
         label: '隐藏'
       }],
-      tableData: [ // 如果用户编辑成空数据！！！
-        {
-          id: 0,
-          thumbnail: '',
-          name: '234233333333333333333333333333333333333333',
-          link: '23423777777777777777777777777777777777',
-          edit: false,
-          state: true
-        },
-        {
-          id: 1,
-          thumbnail: '',
-          name: 'rew',
-          link: 'werw',
-          edit: false,
-          state: true
-        },
-        {
-          id: 2,
-          thumbnail: '',
-          name: 'werw',
-          link: 'werwer',
-          edit: false,
-          state: true
-        },
-        {
-          id: 3,
-          thumbnail: '',
-          name: 'werw',
-          link: 'werw',
-          edit: false,
-          state: true
-        },
-        {
-          id: 4,
-          thumbnail: '',
-          name: 'wer',
-          edit: false,
-          link: 'wer',
-          state: true
-        }
-      ],
       multipleSelection: []
     }
   },

@@ -1,8 +1,9 @@
 <template>
   <div id="app">
-      <NavBar class="navBar"></NavBar>
-    <div class="right-side">
-      <HeadBar class="headBar" manager="ManagerME"></HeadBar>
+      <NavBar v-if="!isIndex" class="navBar"></NavBar>
+    <div class="right-side" :style="`width: ${isIndex ? '100%' : '87.5%'}`">
+      <HeadBar class="headBar" manager="ManagerME"></HeadBar><!-- 这里需要传props：title来变换大会header的值，
+      取值方法是首页的组件监测到用户点击项目后触发传参给父组件，也就是调用这里的title改变 -->
         <router-view class="content" />
     </div>
   </div>
@@ -14,8 +15,24 @@ import HeadBar from './components/global/headBar'
 
 export default {
   name: 'app',
-  created () {
+  data () {
+    return {
+      isIndex: true
+    }
+  },
+  created () { /* 第一次加载或者刷新的时候判断路由 */
     // this.getDevice()
+    console.log(this.$route.path, 'this.$route.path')
+    if (this.$route.path === '/') { /* 如果是首页，则不显示navbar */
+      this.isIndex = true
+    } else {
+      this.isIndex = false
+    }
+  },
+  watch: {
+    '$route' (to, from) {
+      console.log(to, 'to')
+    }
   },
   methods: {
     getDevice () {
@@ -53,7 +70,6 @@ span
   float: left
   display: inline-block
 .right-side
-  width: 87.5%
   float: left
   display: inline-block
   .headBar
