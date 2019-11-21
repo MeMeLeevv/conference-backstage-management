@@ -23,21 +23,21 @@ export default {
   created () { /* 第一次加载或者刷新的时候判断路由 */
     // this.getDevice()
     console.log(this.$route.path, 'this.$route.path')
-    if (this.$route.path === '/') { /* 如果是首页，则不显示navbar */
-      this.isIndex = true
-    } else {
-      this.isIndex = false
-    }
+    this.isIndex = this.$route.path === '/' /* 如果是首页，则不显示navbar */
   },
   watch: {
     '$route' (to, from) {
-      console.log(to, 'to')
+      // console.log(to, 'to')
+      this.isIndex = to.path === '/'
     }
   },
   methods: {
     getDevice () {
       window.deviceWidth = document.body.clientWidth
       window.deviceHeight = document.body.clientHeight
+    },
+    setIsIndex (index) {
+      return index === '/'
     }
   },
   components: {

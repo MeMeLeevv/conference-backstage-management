@@ -7,8 +7,8 @@
 </template>
 
 <script>
-import ConfigHeader from './configHeader'
-import Table from './table'
+import ConfigHeader from './common/configHeader'
+import Table from './common/table'
 export default {
   name: 'guests',
   data () {

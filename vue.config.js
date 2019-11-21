@@ -6,11 +6,20 @@ const config = {
   publicPath: '/',
   // 选项...
   devServer: {
-    port: 8080, // 端口号
+    port: 8000, // 端口号
     host: 'localhost',
     https: false, // https:{type:Boolean}
     open: false, // 配置自动启动浏览器
-    hotOnly: true
+    hotOnly: true,
+    proxy: {
+      '/api': {/* 跨域，这里假设有个api地址，前端请求时都要加上 /api/*** ，这里检测到有 /api 时就会执行这里，将 /api/*** 替换成 http://localhost:8080/*** */
+        target: 'http://localhost:8080/',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/api': ''
+        }
+      }
+    }
   }, // 配置多个代理
   parallel: require('os').cpus().length > 1,
   configureWebpack: {

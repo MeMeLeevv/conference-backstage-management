@@ -1,13 +1,13 @@
 <template>
     <div id="home">
         <span class="middle">
-          <div class="block" @click="gotoHeadImage" v-for="meeting in meetingData" :key="meeting.id">
+          <div class="block" @click="gotoHeadImage($event)" v-for="meeting in meetingData" :data-id="meeting.id" :key="meeting.id">
             <span class="avatar">
-              <el-avatar :size="100" :src="meeting.avatar" @error="errorHandler">
+              <el-avatar :size="100" :src="meeting.avatar" @error="errorHandler"><!-- meeting.commonImg.imgurl -->
                 <img src="https://cube.elemecdn.com/e/fd/0fc7d20532fdaf769a25683617711png.png"/>
               </el-avatar>
             </span>
-            <div class="title">{{meeting.title}}</div>
+            <div class="title">{{meeting.projectName}}</div>
         </div>
         </span>
     </div>
@@ -38,11 +38,44 @@ export default {
       ]
     }
   },
+  created () {
+    let that = this
+    this.$axios.get('/api/conferencegetProjectAll').then(function (res) {
+      // console.log(typeof (res.data)) // srting
+      let data = JSON.parse(res.data)/* 返回字段是字符串序列，需要把它转换成对象格式 */
+      // console.log(data, 'data')
+      if (data.code !== '1') return false
+      // 请求成功
+      that.meetingData = data.data
+    }).catch(function (error) {
+      console.log(error)
+    }).finally(function () {
+
+    })
+  },
+  mounted () {
+    this.$nextTick(function () {
+    })
+  },
   methods: {
     errorHandler () { /* 头像加载失败 */
       return true
     }, /* '/columnConfig/headImage' */
-    gotoHeadImage () {
+    gotoHeadImage (e) { /* 点击图片跳转 */
+      console.log(e.target, 'this')
+      let target = e.target
+      let id
+      if (target.nodeName.toLowerCase() === 'img') {
+        id = target.parentNode.parentNode.parentNode.dataset.id
+      } else if (target.nodeName.toLowerCase() === 'div') {
+        if (target.className === 'block') {
+          id = target.dataset.id
+        } else if (target.className === 'title') {
+          id = target.parentNode.dataset.id
+        }
+      }
+      console.log(id, 'id')
+      this.$router.push(`/${id}`)
     }
   }
 }

@@ -3,6 +3,7 @@
     <el-col :span="3">
       <el-menu
         :default-active="$route.path"
+        :default-opened="openColumn"
         class="el-menu-vertical-demo"
         @open="handleOpen"
         @close="handleClose"
@@ -40,6 +41,8 @@
 export default {
   name: 'navBar',
   data () {
+    var id = this.$route.params.id //   /117/columnConfig/headImage
+    var openColumn = id.substr(0, id.lastIndexOf('/')) // 获取/117/columnConfig，来自动展开激活的那一栏
     return {
       navMsg: [
         {
@@ -50,31 +53,31 @@ export default {
         },
         {
           title: '栏目配置',
-          url: '',
+          url: `/${id}/columnConfig`,
           icon: 'icon-more',
           subTitle: [{
             title: '大会头图',
-            url: '/columnConfig/headImage'
+            url: `/${id}/columnConfig/headImage`
           },
           {
             title: '大会亮点',
-            url: '/columnConfig/highlight'
+            url: `/${id}/columnConfig/highlight`
           },
           {
             title: '大会嘉宾',
-            url: '/columnConfig/guests'
+            url: `/${id}/columnConfig/guests`
           },
           {
             title: '合作伙伴',
-            url: '/columnConfig/partners'
+            url: `/${id}/columnConfig/partners`
           },
           {
             title: '合作媒体',
-            url: '/columnConfig/cooperativeMedia'
+            url: `/${id}/columnConfig/cooperativeMedia`
           },
           {
             title: '大会地址',
-            url: '/columnConfig/address'
+            url: `/${id}/columnConfig/address`
           }]
         },
         {
@@ -164,16 +167,19 @@ export default {
             url: '/clientFeedback/address'
           }]
         }
-      ]
+      ],
+      openColumn: [openColumn]
     }
+  },
+  created () {
   },
   components: {},
   methods: {
     handleOpen (key, keyPath) {
-      console.log(key, keyPath)
+      // console.log(key, keyPath, 'open')
     },
     handleClose (key, keyPath) {
-      console.log(key, keyPath)
+      // console.log(key, keyPath, 'close')
     }
   }
 }

@@ -26,9 +26,10 @@
             <!-- 图片类 -->
             <el-form-item v-if="item.type === 'image'" prop="image" :label="item.label" :label-width="formLabelWidth" required>
               <el-upload
-                action=""
+                action="/api/filesaveImg"
                 list-type="picture-card"
-                :before-upload="beforeAvatarUpload"
+                name="img"
+                :on-success="uploadSuccess"
                 :on-preview="handlePictureCardPreview"
                 :on-remove="handleRemove"
                 :limit="1"
@@ -111,7 +112,7 @@ export default {/* 信息如果都已经验证成功，则用formData结合上�
           }]
       }
     },
-    form: {
+    form: {/* 提交到后台的数据 */
       type: Object,
       default: function () {
         return {
@@ -156,6 +157,11 @@ export default {/* 信息如果都已经验证成功，则用formData结合上�
     }
   },
   methods: {
+    uploadSuccess (response, file, fileList) {
+      console.log(response, 'res')
+      console.log(file, 'file')
+      console.log(fileList, 'fileList')
+    },
     handleRemove (file, fileList) {
       console.log(file, fileList)
     },
