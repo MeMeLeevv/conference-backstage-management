@@ -8,6 +8,14 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import axios from 'axios'
+import VueQuillEditor from 'vue-quill-editor' // 需要首先加载vue
+
+// require styles
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import 'quill/dist/quill.bubble.css'
+
+Vue.use(VueQuillEditor)
 
 Vue.config.productionTip = false
 Vue.use(ElementUI)

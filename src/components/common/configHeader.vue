@@ -1,76 +1,79 @@
 <template>
     <div id="header">
       <span class="title">{{title}}管理</span>
-      <span class="button" @click="dialogFormVisible = true">
+      <div class="dialog" v-if="needDialog">
+        <span class="button" @click="dialogFormVisible = true">
         <i class="iconfont icon-plus"></i>
         新增{{title}}
-      </span>
-      <!-- 弹窗 -->
-      <el-dialog :title="`请编辑${title}信息`" center :visible.sync="dialogFormVisible">
-        <el-form :model="form" ref="ruleForm" :rules="rules">
-          <div v-for="item in initDialog" :key="item.id">
-            <!-- 文本框类 -->
-            <el-form-item v-if="item.type === 'text'" prop="name"
-            :label="item.label" :label-width="formLabelWidth" :required="item.required">
-              <el-input style="width: 95%" v-model="form[item.key]" autocomplete="off" ></el-input>
-            </el-form-item>
-            <!-- 开关类 -->
-            <el-form-item v-if="item.type === 'Switch'" :label="item.label" :label-width="formLabelWidth">
-              <el-switch
-                v-model="form[item.key]"
-                active-color="#13ce66"
-                inactive-color="#ff4949">
-              </el-switch>
-              <span>{{form[item.key] ? '显示' : '隐藏'}}</span>
-            </el-form-item>
-            <!-- 图片类 -->
-            <el-form-item v-if="item.type === 'image'" prop="image" :label="item.label" :label-width="formLabelWidth" required>
-              <el-upload
-                action="/api/filesaveImg"
-                list-type="picture-card"
-                name="img"
-                :on-success="uploadSuccess"
-                :on-preview="handlePictureCardPreview"
-                :on-remove="handleRemove"
-                :limit="1"
-                :on-exceed="handExceed"
-                >
-                <i class="el-icon-plus"></i>
-                <div slot="tip" class="el-upload__tip">只能上传一张图片文件，且不超过500kb</div>
-              </el-upload>
-              <el-dialog :visible.sync="dialogVisible"><!-- 预览图片 -->
-                <img width="100%" :src="form[item.key]" alt="">
-              </el-dialog>
-              <el-input type="text" style="width: 20%; visibility: hidden" class="hidden fileInput"
-              v-model="form[item.key]"><!-- 此处可以伪装，如果上传图片成功，input填满，如果验证不合格，清空input，提交时便可以全部都能验证了 -->
-              </el-input>
-              <!-- <div class="relativePos">
-                <el-input type="file" style="width: 20%" class="hidden fileInput"
-              v-model="form[item.key]">
-              </el-input>
-              <el-image
-                :style="`width: 100px; height: 100px`"
-                fit="contain"
-                src=""
-                >
-                <div slot="error" class="">
-                  <div class="absoluteCenter" v-if="!form[item.key]">
-                    <i class="el-icon-picture-outline uploadWord pic" style=""></i>
-                    <span class="uploadWord word" style="">上传照片</span>
+        </span>
+        <!-- 弹窗 -->
+        <el-dialog :title="`请编辑${title}信息`" center :visible.sync="dialogFormVisible">
+          <el-form :model="form" ref="ruleForm" :rules="rules">
+            <div v-for="item in initDialog" :key="item.id">
+              <!-- 文本框类 -->
+              <el-form-item v-if="item.type === 'text'" prop="name"
+              :label="item.label" :label-width="formLabelWidth" :required="item.required">
+                <el-input style="width: 95%" v-model="form[item.key]" autocomplete="off" ></el-input>
+              </el-form-item>
+              <!-- 开关类 -->
+              <el-form-item v-if="item.type === 'Switch'" :label="item.label" :label-width="formLabelWidth">
+                <el-switch
+                  v-model="form[item.key]"
+                  active-color="#13ce66"
+                  inactive-color="#ff4949">
+                </el-switch>
+                <span>{{form[item.key] ? '显示' : '隐藏'}}</span>
+              </el-form-item>
+              <!-- 图片类 -->
+              <el-form-item v-if="item.type === 'image'" prop="image" :label="item.label" :label-width="formLabelWidth" required>
+                <el-upload
+                  action="/api/filesaveImg"
+                  list-type="picture-card"
+                  name="img"
+                  :before-upload="beforeAvatarUpload"
+                  :on-success="uploadSuccess"
+                  :on-preview="handlePictureCardPreview"
+                  :on-remove="handleRemove"
+                  :limit="1"
+                  :on-exceed="handExceed"
+                  >
+                  <i class="el-icon-plus"></i>
+                  <div slot="tip" class="el-upload__tip">只能上传一张图片文件，且不超过500kb</div>
+                </el-upload>
+                <el-dialog :visible.sync="dialogVisible"><!-- 预览图片 -->
+                  <img width="100%" :src="form[item.key]" alt="">
+                </el-dialog>
+                <el-input type="text" style="width: 20%; visibility: hidden" class="hidden fileInput"
+                v-model="form[item.key]"><!-- 此处可以伪装，如果上传图片成功，input填满，如果验证不合格，清空input，提交时便可以全部都能验证了 -->
+                </el-input>
+                <!-- <div class="relativePos">
+                  <el-input type="file" style="width: 20%" class="hidden fileInput"
+                v-model="form[item.key]">
+                </el-input>
+                <el-image
+                  :style="`width: 100px; height: 100px`"
+                  fit="contain"
+                  src=""
+                  >
+                  <div slot="error" class="">
+                    <div class="absoluteCenter" v-if="!form[item.key]">
+                      <i class="el-icon-picture-outline uploadWord pic" style=""></i>
+                      <span class="uploadWord word" style="">上传照片</span>
+                    </div>
                   </div>
+                </el-image>
                 </div>
-              </el-image>
-              </div>
-              <div class="tip">建议尺寸为200*200像素，大小小于200k</div> -->
+                <div class="tip">建议尺寸为200*200像素，大小小于200k</div> -->
 
-            </el-form-item>
+              </el-form-item>
+            </div>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFormVisible = false">取 消</el-button>
+            <el-button type="primary" @click="submitForm('ruleForm')">确 定</el-button>
           </div>
-        </el-form>
-        <div slot="footer" class="dialog-footer">
-          <el-button @click="dialogFormVisible = false">取 消</el-button>
-          <el-button type="primary" @click="submitForm('ruleForm')">确 定</el-button>
-        </div>
-      </el-dialog>
+        </el-dialog>
+      </div>
     </div>
 </template>
 
@@ -78,6 +81,10 @@
 export default {/* 信息如果都已经验证成功，则用formData结合上传后台，触发父元素刷新表格 */
   name: 'configHeader',
   props: {
+    needDialog: {
+      type: Boolean,
+      default: true
+    },
     title: {/* 用于编辑header里的‘xxx管理’文字 */
       type: String,
       default: '轮播图'
@@ -175,7 +182,7 @@ export default {/* 信息如果都已经验证成功，则用formData结合上�
     },
     beforeAvatarUpload (file) {
       const isJPG = this.isImage(file.type)
-      const isLt2M = file.size / 500 < 1
+      const isLt2M = file.size / 1024 / 1024 < 1
       if (!isJPG) {
         this.$message.error('请上传图片格式的文件!')
       }

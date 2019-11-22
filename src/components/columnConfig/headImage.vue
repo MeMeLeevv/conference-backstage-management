@@ -49,8 +49,8 @@
 </template>
 
 <script>
-import ConfigHeader from './common/configHeader'
-import Table from './common/table'
+import ConfigHeader from '../common/configHeader'
+import Table from '../common/table'
 export default {
   name: 'headImage',
   components: {

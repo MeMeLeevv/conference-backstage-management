@@ -9,6 +9,8 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {// 初始化状态设置要全局访问的state对象
+    deviceWidth: document.body.clientWidth,
+    deviceHeight: document.body.clientHeight,
     activites: [],
     items: [],
     inspire: [],

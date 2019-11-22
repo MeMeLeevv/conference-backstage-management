@@ -5,7 +5,9 @@ import Highlight from './components/columnConfig/highlight'
 import Partners from './components/columnConfig/partners'
 import Guests from './components/columnConfig/guests'
 import CooperativeMedia from './components/columnConfig/cooperativeMedia'
+import Background from './components/columnConfig/background'
 import Home from './components/home'
+import Login from './components/login'
 import BackStage from './components/backStage'
 
 Vue.use(Router)
@@ -20,12 +22,22 @@ export default new Router({
       component: Home
     },
     {
+      path: '/login',
+      name: 'login',
+      component: Login
+    },
+    {
       path: '/:id',
       component: BackStage,
       children: [
         {
           path: 'columnConfig/headImage', /* 这里不能填 /columnConfig/headImage ,第一个“/”会被认为是根目录，而这里应该是继承上一级的id目录 */
           component: HeadImage
+
+        },
+        {
+          path: 'columnConfig/background', /* 这里不能填 /columnConfig/headImage ,第一个“/”会被认为是根目录，而这里应该是继承上一级的id目录 */
+          component: Background
 
         },
         {

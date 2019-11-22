@@ -60,6 +60,10 @@ export default {
             url: `/${id}/columnConfig/headImage`
           },
           {
+            title: '大会背景',
+            url: `/${id}/columnConfig/background`
+          },
+          {
             title: '大会亮点',
             url: `/${id}/columnConfig/highlight`
           },
