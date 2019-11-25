@@ -23,12 +23,15 @@
 </template>
 
 <script>
+import { mapGetters, mapMutations } from 'vuex'
 export default {
   name: 'login',
   data () {
     var validateUser = (rule, value, callback) => { /* 检测input = text的，要不为空 */
       if (!value) {
         return callback(new Error('内容不能为空！'))
+      } else {
+        callback()
       }
     }
     /*     var validatePassword = (rule, value, callback) => {
@@ -53,16 +56,37 @@ export default {
     }
   },
   created () {
+
+  },
+  computed: {
+    ...mapGetters(['getOriginPage', 'getHasLogin'])
   },
   methods: {
+    ...mapMutations([
+      'setHasLogin'
+    ]),
     submitForm (formName) {
+      console.log('00')
       this.$refs[formName].validate((valid) => {
         if (valid) {
           alert('submit!')
-          this.$axios.post('/api/loginCheck', this.form).then((res) => {
+          console.log(this.form, 'this.form')
+
+          this.$axios.get(`/api/loginCheck?user=${this.form.user}&password=${this.form.password}`).then((res) => { // 提交登录数据
             let data = JSON.parse(res.data)
-            console.log(data, '登录成功')
-            this.$router.push('/') // 跳转到首页
+            if (data.code === '1') {
+              console.log(data, '登录成功')
+              if (this.getOriginPage) { // 跳转到原来的页面
+                console.log(this.getOriginPage, '跳转到原来的页面:this.originPage')
+                this.setHasLogin(true)
+                this.$router.push(this.getOriginPage)
+              } else { // 否则默认跳转到首页
+                this.setHasLogin(true)
+                this.$router.push('/')
+              }
+            } else {
+              console.log('登录失败！请重试！')
+            }
           }).catch((err) => {
             console.log(err, '登陆失败')
           })
@@ -80,7 +104,7 @@ export default {
   width: 100%
   height: 100vh
   position: relative
-  background: center / cover no-repeat url(https://mir-s3-cdn-cf.behance.net/project_modules/1400_opt_1/69fb7187711043.5dc0b3f75df49.jpg)
+  background: center / cover no-repeat url(http://img.iimedia.cn/100011ebc20a66df727b206de85451e3a88a02c9566992aef1d70c5a34a7816e97d75)
   .wrapper
     width: 400px
     padding: 50px

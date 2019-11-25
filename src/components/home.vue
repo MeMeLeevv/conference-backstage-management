@@ -1,7 +1,7 @@
 <template>
     <div id="home">
         <span class="middle">
-          <div class="block" @click="gotoHeadImage($event)" v-for="meeting in meetingData" :data-id="meeting.id" :key="meeting.id">
+          <div class="block" v-for="meeting in meetingData" @click="gotoHeadImage($event,meeting.projectName,meeting.id)" :key="meeting.id">
             <span class="avatar">
               <el-avatar :size="100" :src="meeting.avatar" @error="errorHandler"><!-- meeting.commonImg.imgurl -->
                 <img src="https://cube.elemecdn.com/e/fd/0fc7d20532fdaf769a25683617711png.png"/>
@@ -14,6 +14,7 @@
 </template>
 
 <script>
+import { mapGetters, mapMutations } from 'vuex'
 export default {
   name: 'home',
   data () {
@@ -43,7 +44,7 @@ export default {
     this.$axios.get('/api/conferencegetProjectAll').then(function (res) {
       // console.log(typeof (res.data)) // srting
       let data = JSON.parse(res.data)/* 返回字段是字符串序列，需要把它转换成对象格式 */
-      // console.log(data, 'data')
+      console.log(data, 'data')
       if (data.code !== '1') return false
       // 请求成功
       that.meetingData = data.data
@@ -53,28 +54,23 @@ export default {
 
     })
   },
+  computed: {
+    ...mapGetters(['getBackStageTitle'])
+  },
   mounted () {
     this.$nextTick(function () {
     })
   },
   methods: {
+    ...mapMutations([
+      'setBackStageTitle'
+    ]),
     errorHandler () { /* 头像加载失败 */
       return true
     }, /* '/columnConfig/headImage' */
-    gotoHeadImage (e) { /* 点击图片跳转 */
-      console.log(e.target, 'this')
-      let target = e.target
-      let id
-      if (target.nodeName.toLowerCase() === 'img') {
-        id = target.parentNode.parentNode.parentNode.dataset.id
-      } else if (target.nodeName.toLowerCase() === 'div') {
-        if (target.className === 'block') {
-          id = target.dataset.id
-        } else if (target.className === 'title') {
-          id = target.parentNode.dataset.id
-        }
-      }
-      console.log(id, 'id')
+    gotoHeadImage (e, title, id) { /* 点击图片跳转 */
+      this.setBackStageTitle(title)
+      console.log(this.getBackStageTitle, 'getBackStageTitle')
       this.$router.push(`/${id}`)
     }
   }

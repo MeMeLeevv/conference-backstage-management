@@ -1,13 +1,12 @@
 <template>
     <div id="header">
       <span class="title">{{title}}管理</span>
-      <div class="dialog" v-if="needDialog">
-        <span class="button" @click="dialogFormVisible = true">
+      <span v-if="needDialog" class="button" @click="dialogFormVisible = true">
         <i class="iconfont icon-plus"></i>
         新增{{title}}
         </span>
         <!-- 弹窗 -->
-        <el-dialog :title="`请编辑${title}信息`" center :visible.sync="dialogFormVisible">
+        <el-dialog v-if="needDialog" :title="`请编辑${title}信息`" center :visible.sync="dialogFormVisible">
           <el-form :model="form" ref="ruleForm" :rules="rules">
             <div v-for="item in initDialog" :key="item.id">
               <!-- 文本框类 -->
@@ -74,7 +73,6 @@
           </div>
         </el-dialog>
       </div>
-    </div>
 </template>
 
 <script>

@@ -11,59 +11,37 @@ export default new Vuex.Store({
   state: {// 初始化状态设置要全局访问的state对象
     deviceWidth: document.body.clientWidth,
     deviceHeight: document.body.clientHeight,
-    activites: [],
-    items: [],
-    inspire: [],
-    banner: [],
-    video: [],
-    indexMsgReady: false,
-    demoNumber: 0
+    originPage: '', /* 保存要进入登录页时的来源页面，登录完成后继续返回那个页面 */
+    hasLogin: false,
+    backStageTitle: ''
   },
   getters: {// 来实时监听state值的变化(最新状态)
-    getIndexMsgReady (state) {
-      return state.indexMsgReady
+    getDeviceWidth (state) {
+      return state.deviceWidth
     },
-    changedDemoNumber (state) {
-      return state.demoNumber
+    getDeviceHeight (state) {
+      return state.deviceHeight
     },
-    getActivites (state) {
-      return state.activites
+    getOriginPage (state) {
+      return state.originPage
     },
-    getBanner (state) {
-      return state.banner
+    getHasLogin (state) {
+      return state.hasLogin
     },
-    getItems (state) {
-      return state.items
-    },
-    getVideo (state) {
-      return state.video
-    },
-    getInspire (state) {
-      return state.inspire
+    getBackStageTitle (state) {
+      return state.backStageTitle
     }
   },
   mutations: {// 一个对像可以放改变state初始值的方法，也可以进行改变state里的值
-    setIndexMsgReady (state) {
-      state.indexMsgReady = true
+    setOriginPage (state, path) {
+      state.originPage = path
     },
-    newNum (state, sum) {
-      state.demoNumber += sum
+    setHasLogin (state, boolean) {
+      state.hasLogin = boolean
     },
-    setActivites (state, activites) {
-      state.activites = activites
-      console.log('设置成功')
-    },
-    setBanner (state, banner) {
-      state.banner = banner
-    },
-    setVideo (state, video) {
-      state.video = video
-    },
-    setItems (state, items) {
-      state.items = items
-    },
-    setInspire (state, inspire) {
-      state.inspire = inspire
+    setBackStageTitle (state, title) {
+      console.log('setBackStageTitle success', title)
+      state.backStageTitle = title
     }
   },
   actions: {// 这个actions也是个对象变量，最大的作用就是里面的action方法 可以包含任意多个异步操作
