@@ -41,6 +41,7 @@ export default {
   },
   created () {
     let that = this
+    this.setBackStageTitle('')
     this.$axios.get('/api/conferencegetProjectAll').then(function (res) {
       // console.log(typeof (res.data)) // srting
       let data = JSON.parse(res.data)/* 返回字段是字符串序列，需要把它转换成对象格式 */
