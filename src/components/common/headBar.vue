@@ -1,14 +1,14 @@
 <template>
   <div id="headBar" class="clearify">
-    <div class="avatar">
+    <div v-if="showAvatar" class="avatar"><!-- 用户退出登录后清除相应记录 -->
       <el-avatar :size="30" style="vertical-align:middle" src="https://mir-s3-cdn-cf.behance.net/project_modules/max_1200/da132c85978729.5d8bbe537d947.gif" @error="errorHandler">
       <img src="https://cube.elemecdn.com/e/fd/0fc7d20532fdaf769a25683617711png.png"/>
     </el-avatar>
     </div>
-      <span class="title">{{title}}</span><!-- 这里title需要和用户点击的大会项目有关 -->
+      <span class="title" :style="`left: ${showAvatar ? '15%' : '5%'}`">{{title}}</span><!-- 这里title需要和用户点击的大会项目有关 -->
       <div class="rightSize">
         <span class="manager"><i class="iconfont icon-people"></i>{{manager}}</span>
-        <span class="exit"><i class="iconfont icon-exit"></i>退出</span>
+        <span class="exit" @click="$emit('exitAccount')"><i class="iconfont icon-exit"></i>退出</span>
       </div>
   </div>
 </template>
@@ -18,6 +18,10 @@
 export default {
   name: 'headBar',
   props: {
+    showAvatar: {
+      type: Boolean,
+      default: true
+    },
     title: {
       type: String,
       default: '大会管理后台'
@@ -54,7 +58,6 @@ export default {
     line-height: 60px
   .title
     position: absolute
-    left: 15%
     line-height: 60px
     font-size: 24px
     font-weight: 700

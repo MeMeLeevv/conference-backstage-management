@@ -10,6 +10,7 @@
       :on-preview="handlePictureCardPreview"
       :on-remove="handleRemove"
       :limit="limit"
+      :on-exceed="imgExceed"
     >
       <i class="el-icon-plus"></i>
       <div slot="tip" class="el-upload__tip">{{ addMsg }}</div>
@@ -30,17 +31,21 @@ export default {
       type: String,
       default: '/api/filesaveImg'
     },
-    showFileList: {
-      type: Boolean,
-      default: false
-    },
     limit: {
       type: Number,
       default: 1
     },
     addMsg: {
       type: String,
-      default: '只能上传一张图片文件，且不超过500kb'
+      default: '只能上传一张图片文件，且不超过200kb'
+    },
+    showFileList: {
+      type: Boolean,
+      default: true
+    },
+    inputName: {/* 图片地址对应的name值，方便整合成form一起提交到数据库 */
+      type: String,
+      default: ''
     }
   },
   data () {
@@ -51,30 +56,29 @@ export default {
     }
   },
   methods: {
-    uploadSuccess (response, file, fileList) {
-      console.log(response, 'res')
-      console.log(file, 'file')
-      console.log(fileList, 'fileList')
+    uploadSuccess (response, file, fileList) { /* 上传成功 */
+      let path = JSON.parse(response).data
+      // console.log(JSON.parse(response).data, 'res')
+      this.$emit('getImgPath', this.inputName, path)/* 触发父组件并传入图片地址 */
+      // console.log(file, 'file')
+      // console.log(fileList, 'fileList')
     },
     handleRemove (file, fileList) {
       console.log(file, fileList)
     },
-    handlePictureCardPreview (file) {
+    handlePictureCardPreview (file) { /* 预览的时候 */
+      console.log(file.url, 'file.url') /* blob的临时对象 */
       this.dialogImageUrl = file.url
       this.dialogVisible = true
     },
-    handleAvatarSuccess (res, file) {
-      this.imageUrl = URL.createObjectURL(file.raw)
-    },
-    beforeAvatarUpload (file) {
+    beforeAvatarUpload (file) { /* 上传前 */
       const isJPG = this.isImage(file.type)
-      const isLt2M = file.size / 1024 / 1024 < 1
-      console.log(file.size, 'file.size')
+      const isLt2M = (file.size / 1024 / 200).toPrecision(3) < 1
       if (!isJPG) {
         this.$message.error('请上传图片格式的文件!')
       }
       if (!isLt2M) {
-        this.$message.error('上传头像图片大小不能超过 1MB!')
+        this.$message.error('上传头像图片大小不能超过 200k!')
       }
       return isJPG && isLt2M
     },
@@ -95,6 +99,12 @@ export default {
           'image/gif'
         ].indexOf(ext) !== -1
       )
+    },
+    imgExceed () {
+      this.$message({
+        message: '图片只能上传指定数量！,请先删除已存在的图片！',
+        type: 'warning'
+      })
     }
   }
 }

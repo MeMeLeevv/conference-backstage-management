@@ -79,6 +79,10 @@
 export default {/* 信息如果都已经验证成功，则用formData结合上传后台，触发父元素刷新表格 */
   name: 'configHeader',
   props: {
+    action: {
+      type: String,
+      default: ''
+    },
     needDialog: {
       type: Boolean,
       default: true

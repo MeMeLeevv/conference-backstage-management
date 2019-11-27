@@ -48,6 +48,13 @@
       "unicode_decimal": 58892
     },
     {
+      "icon_id": "2377405",
+      "name": "我的大会员",
+      "font_class": "wodedahuiyuan",
+      "unicode": "e6c3",
+      "unicode_decimal": 59075
+    },
+    {
       "icon_id": "2402040",
       "name": "箭头",
       "font_class": "-arrow",
@@ -88,6 +95,13 @@
       "font_class": "-clock",
       "unicode": "e612",
       "unicode_decimal": 58898
+    },
+    {
+      "icon_id": "8358216",
+      "name": "放大",
+      "font_class": "fangda",
+      "unicode": "e65d",
+      "unicode_decimal": 58973
     }
   ]
 }

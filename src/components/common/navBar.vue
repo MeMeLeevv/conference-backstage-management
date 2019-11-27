@@ -43,6 +43,14 @@ export default {
   data () {
     var id = this.$route.params.id //   /117/columnConfig/headImage
     var openColumn = id.substr(0, id.lastIndexOf('/')) // 获取/117/columnConfig，来自动展开激活的那一栏
+    this.$axios.get(`/api/conferencegetColumnByCid?projectid=${id}`).then(res => { // 查询栏目
+      console.log(JSON.parse(res.data).data, '大会栏目')
+      let data = JSON.parse(res.data).data
+      data.forEach(item => {
+      })
+    }).catch(err => {
+      console.log(err)
+    })
     return {
       navMsg: [
         {
@@ -52,36 +60,49 @@ export default {
           subTitle: []
         },
         {
+          title: '大会信息',
+          url: `/${id}/conferenceMsg`,
+          icon: 'iconwodedahuiyuan',
+          subTitle: []
+        },
+        {
           title: '栏目配置',
           url: `/${id}/columnConfig`,
           icon: 'icon-more',
           subTitle: [{
             title: '大会头图',
-            url: `/${id}/columnConfig/headImage`
+            url: `/${id}/columnConfig/headImage`,
+            cid: ''
           },
           {
             title: '大会背景',
-            url: `/${id}/columnConfig/background`
+            url: `/${id}/columnConfig/background`,
+            cid: ''
           },
           {
             title: '大会亮点',
-            url: `/${id}/columnConfig/highlight`
+            url: `/${id}/columnConfig/highlight`,
+            cid: ''
           },
           {
             title: '大会嘉宾',
-            url: `/${id}/columnConfig/guests`
+            url: `/${id}/columnConfig/guests`,
+            cid: ''
           },
           {
             title: '合作伙伴',
-            url: `/${id}/columnConfig/partners`
+            url: `/${id}/columnConfig/partners`,
+            cid: ''
           },
           {
             title: '合作媒体',
-            url: `/${id}/columnConfig/cooperativeMedia`
+            url: `/${id}/columnConfig/cooperativeMedia`,
+            cid: ''
           },
           {
             title: '大会地址',
-            url: `/${id}/columnConfig/address`
+            url: `/${id}/columnConfig/address`,
+            cid: ''
           }]
         },
         {

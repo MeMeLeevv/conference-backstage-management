@@ -44,7 +44,7 @@ export default {
     this.setBackStageTitle('')
     this.$axios.get('/api/conferencegetProjectAll').then(function (res) {
       // console.log(typeof (res.data)) // srting
-      let data = JSON.parse(res.data)/* 返回字段是字符串序列，需要把它转换成对象格式 */
+      let data = JSON.parse(res.data)/* 返回字段是字符串序列，需要把它转换成对象格式 判断是否是字符串，是才要转！！！ */
       console.log(data, 'data')
       if (data.code !== '1') return false
       // 请求成功
@@ -60,18 +60,30 @@ export default {
   },
   mounted () {
     this.$nextTick(function () {
+      /* if (window.history && window.history.pushState) {
+        // 向历史记录中插入了当前页
+        history.pushState(null, null, document.URL)
+        window.addEventListener('popstate', this.goBack, false)
+      } */
     })
   },
+  /*   destroyed () {
+    window.removeEventListener('popstate', this.goBack, false)
+  }, */
   methods: {
     ...mapMutations([
       'setBackStageTitle'
     ]),
+    /* goBack () {
+      // console.log("点击了浏览器的返回按钮");
+      sessionStorage.clear()
+      window.history.back()
+    }, */
     errorHandler () { /* 头像加载失败 */
       return true
     }, /* '/columnConfig/headImage' */
     gotoHeadImage (e, title, id) { /* 点击图片跳转 */
       this.setBackStageTitle(title)
-      console.log(this.getBackStageTitle, 'getBackStageTitle')
       this.$router.push(`/${id}`)
     }
   }

@@ -9,6 +9,7 @@ import Background from './components/columnConfig/background'
 import Home from './components/home'
 import Login from './components/login'
 import BackStage from './components/backStage'
+import ConferenceMsg from './components/conferenceMsg'
 
 Vue.use(Router)
 
@@ -30,6 +31,11 @@ export default new Router({
       path: '/:id',
       component: BackStage,
       children: [
+        {
+          path: 'conferenceMsg',
+          name: 'conferenceMsg',
+          component: ConferenceMsg
+        },
         {
           path: 'columnConfig/headImage', /* 这里不能填 /columnConfig/headImage ,第一个“/”会被认为是根目录，而这里应该是继承上一级的id目录 */
           component: HeadImage

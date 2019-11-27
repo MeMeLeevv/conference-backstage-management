@@ -1,5 +1,5 @@
 <template>
-  <div id="login">
+  <div id="login" @keyup.enter="submitForm('form')">
     <div class="wrapper">
       <div class="title">登录</div>
       <el-form :model="form" ref="form" label-width="0px" :rules="rules" class="demo-ruleForm" center>
@@ -13,7 +13,7 @@
           label=""
           prop="password"
         >
-          <el-input name="password" prefix-icon="el-icon-lock" type="text" v-model="form.password" autocomplete="off" placeholder="请输入您的密码"></el-input>
+          <el-input name="password" prefix-icon="el-icon-lock" type="password" v-model="form.password" autocomplete="off" placeholder="请输入您的密码"></el-input>
         </el-form-item>
           <el-button class="loginBtn" type="primary" @click="submitForm('form')">登录</el-button>
       </el-form>
@@ -59,23 +59,28 @@ export default {
 
   },
   computed: {
-    ...mapGetters(['getOriginPage', 'getHasLogin'])
+    ...mapGetters(['getOriginPage', 'getHasLogin', 'getAccount'])
   },
   methods: {
     ...mapMutations([
-      'setHasLogin'
+      'setHasLogin', 'setAccount'
     ]),
-    submitForm (formName) {
-      console.log('00')
-      this.$refs[formName].validate((valid) => {
-        if (valid) {
-          alert('submit!')
-          console.log(this.form, 'this.form')
+    keybordEvent () {
 
+    },
+    submitForm (formName) {
+      this.$refs[formName].validate((valid) => {
+        const loading = this.$loading({ // 加载效果
+          lock: true,
+          text: '登录中...',
+          spinner: 'el-icon-loading',
+          background: 'rgba(255, 255, 255, 0.7)'
+        })
+        if (valid) {
           this.$axios.get(`/api/loginCheck?user=${this.form.user}&password=${this.form.password}`).then((res) => { // 提交登录数据
             let data = JSON.parse(res.data)
             if (data.code === '1') {
-              console.log(data, '登录成功')
+              this.setAccount(data.data) // 设置用户账号
               if (this.getOriginPage) { // 跳转到原来的页面
                 console.log(this.getOriginPage, '跳转到原来的页面:this.originPage')
                 this.setHasLogin(true)
@@ -84,11 +89,23 @@ export default {
                 this.setHasLogin(true)
                 this.$router.push('/')
               }
+              loading.close() /// 关闭加载
             } else {
-              console.log('登录失败！请重试！')
+              loading.close() /// 关闭加载
+              this.$message({
+                message: '登陆失败,请重试！',
+                type: 'error',
+                duration: '1000'
+              })
             }
           }).catch((err) => {
-            console.log(err, '登陆失败')
+            loading.close() /// 关闭加载
+            this.$message({
+              message: '登陆失败,请重试！' + err,
+              type: 'error',
+              duration: '1000'
+            })
+          }).finally(() => {
           })
         } else {
           console.log('error submit!!')

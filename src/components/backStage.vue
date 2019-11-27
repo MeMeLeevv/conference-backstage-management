@@ -1,5 +1,5 @@
 <template>
-  <div id="backStage">
+  <div id="backStage"><!-- 点击页面返回时会停留在http://localhost:8000/#/117，应该返回到首页 -->
     <router-view></router-view>
   </div>
 </template>
@@ -14,8 +14,11 @@ export default {
   },
   created () {
     this.id = this.$route.params.id
-    console.log(this.id, 'id in backStage')
-    this.$router.push(`/${this.id}/columnConfig/headImage`)
+    this.$router.push(`/${this.id}/conferenceMsg`)
+  },
+  computed: {
+  },
+  methods: {
   }
 }
 </script>

@@ -13,7 +13,8 @@ export default new Vuex.Store({
     deviceHeight: document.body.clientHeight,
     originPage: '', /* 保存要进入登录页时的来源页面，登录完成后继续返回那个页面 */
     hasLogin: false,
-    backStageTitle: ''
+    backStageTitle: '',
+    account: '' // 管理者的账户信息
   },
   getters: {// 来实时监听state值的变化(最新状态)
     getDeviceWidth (state) {
@@ -30,6 +31,9 @@ export default new Vuex.Store({
     },
     getBackStageTitle (state) {
       return state.backStageTitle
+    },
+    getAccount (state) {
+      return state.account
     }
   },
   mutations: {// 一个对像可以放改变state初始值的方法，也可以进行改变state里的值
@@ -40,8 +44,10 @@ export default new Vuex.Store({
       state.hasLogin = boolean
     },
     setBackStageTitle (state, title) {
-      console.log('setBackStageTitle success', title)
       state.backStageTitle = title
+    },
+    setAccount (state, acc) {
+      state.account = acc
     }
   },
   actions: {// 这个actions也是个对象变量，最大的作用就是里面的action方法 可以包含任意多个异步操作
