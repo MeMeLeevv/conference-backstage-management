@@ -13,7 +13,7 @@
           label=""
           prop="password"
         >
-          <el-input name="password" prefix-icon="el-icon-lock" type="password" v-model="form.password" autocomplete="off" placeholder="请输入您的密码"></el-input>
+          <el-input name="password" prefix-icon="el-icon-lock" type="password" show-password v-model="form.password" autocomplete="off" placeholder="请输入您的密码"></el-input>
         </el-form-item>
           <el-button class="loginBtn" type="primary" @click="submitForm('form')">登录</el-button>
       </el-form>

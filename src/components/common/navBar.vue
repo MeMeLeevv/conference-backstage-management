@@ -18,16 +18,16 @@
       <div v-for="nav in navMsg" :key="nav.id">
         <el-menu-item v-if="nav.subTitle.length===0" :index="nav.url">
           <i :class="nav.icon + ' iconfont'"></i>
-          <span>{{nav.title}}</span>
+          <span>{{nav.name}}</span>
         </el-menu-item>
         <el-submenu v-else :index="nav.url">
           <template slot="title">
            <i :class="nav.icon + ' iconfont'"></i>
-           <span>{{nav.title}}</span>
+           <span>{{nav.name}}</span>
           </template>
           <el-menu-item-group>
             <div v-for="sub in nav.subTitle" :key="sub.id">
-              <el-menu-item :index="sub.url">{{sub.title}}</el-menu-item>
+              <el-menu-item :index="sub.url">{{sub.name}}</el-menu-item>
             </div>
           </el-menu-item-group>
         </el-submenu>
@@ -38,157 +38,159 @@
 </template>
 
 <script>
+import { axiosGet } from '../../assets/js/axios'
+
 export default {
   name: 'navBar',
   data () {
     var id = this.$route.params.id //   /117/columnConfig/headImage
     var openColumn = id.substr(0, id.lastIndexOf('/')) // 获取/117/columnConfig，来自动展开激活的那一栏
-    this.$axios.get(`/api/conferencegetColumnByCid?projectid=${id}`).then(res => { // 查询栏目
+    /* this.$axios.get(`/api/conferencegetColumnByCid?projectid=${id}`).then(res => { // 查询栏目
       console.log(JSON.parse(res.data).data, '大会栏目')
       let data = JSON.parse(res.data).data
       data.forEach(item => {
       })
     }).catch(err => {
       console.log(err)
-    })
+    }) */
     return {
       navMsg: [
         {
-          title: '首页',
+          name: '首页',
           url: '/',
           icon: 'icon-index',
           subTitle: []
         },
         {
-          title: '大会信息',
+          name: '大会信息',
           url: `/${id}/conferenceMsg`,
           icon: 'iconwodedahuiyuan',
           subTitle: []
         },
         {
-          title: '栏目配置',
+          name: '栏目配置',
           url: `/${id}/columnConfig`,
           icon: 'icon-more',
           subTitle: [{
-            title: '大会头图',
+            name: '大会头图',
             url: `/${id}/columnConfig/headImage`,
             cid: ''
           },
           {
-            title: '大会背景',
+            name: '大会背景',
             url: `/${id}/columnConfig/background`,
             cid: ''
           },
           {
-            title: '大会亮点',
+            name: '大会亮点',
             url: `/${id}/columnConfig/highlight`,
             cid: ''
           },
           {
-            title: '大会嘉宾',
+            name: '大会嘉宾',
             url: `/${id}/columnConfig/guests`,
             cid: ''
           },
           {
-            title: '合作伙伴',
+            name: '合作伙伴',
             url: `/${id}/columnConfig/partners`,
             cid: ''
           },
           {
-            title: '合作媒体',
+            name: '合作媒体',
             url: `/${id}/columnConfig/cooperativeMedia`,
             cid: ''
           },
           {
-            title: '大会地址',
+            name: '大会地址',
             url: `/${id}/columnConfig/address`,
             cid: ''
           }]
         },
         {
-          title: '议程管理',
+          name: '议程管理',
           url: '/meetingManage',
           icon: 'icon-meeting',
           subTitle: [{
-            title: '大会头图',
+            name: '大会头图',
             url: '/meetingManage/headImage'
           },
           {
-            title: '大会亮点',
+            name: '大会亮点',
             url: '/meetingManage/highlight'
           },
           {
-            title: '大会嘉宾',
+            name: '大会嘉宾',
             url: '/meetingManage/guests'
           },
           {
-            title: '合作伙伴',
+            name: '合作伙伴',
             url: '/meetingManage/partners'
           },
           {
-            title: '合作媒体',
+            name: '合作媒体',
             url: '/meetingManage/cooperativeMedia'
           },
           {
-            title: '大会地址',
+            name: '大会地址',
             url: '/meetingManage/address'
           }]
         },
         {
-          title: '订单管理',
+          name: '订单管理',
           url: '/orderManage',
           icon: 'icon-order',
           subTitle: [{
-            title: '大会头图',
+            name: '大会头图',
             url: '/orderManage/headImage'
           },
           {
-            title: '大会亮点',
+            name: '大会亮点',
             url: '/orderManage/highlight'
           },
           {
-            title: '大会嘉宾',
+            name: '大会嘉宾',
             url: '/orderManage/guests'
           },
           {
-            title: '合作伙伴',
+            name: '合作伙伴',
             url: '/orderManage/partners'
           },
           {
-            title: '合作媒体',
+            name: '合作媒体',
             url: '/orderManage/cooperativeMedia'
           },
           {
-            title: '大会地址',
+            name: '大会地址',
             url: '/orderManage/address'
           }]
         },
         {
-          title: '客户反馈',
+          name: '客户反馈',
           url: '/clientFeedback',
           icon: 'icon-feedback',
           subTitle: [{
-            title: '大会头图',
+            name: '大会头图',
             url: '/clientFeedback/headImage'
           },
           {
-            title: '大会亮点',
+            name: '大会亮点',
             url: '/clientFeedback/highlight'
           },
           {
-            title: '大会嘉宾',
+            name: '大会嘉宾',
             url: '/clientFeedback/guests'
           },
           {
-            title: '合作伙伴',
+            name: '合作伙伴',
             url: '/clientFeedback/partners'
           },
           {
-            title: '合作媒体',
+            name: '合作媒体',
             url: '/clientFeedback/cooperativeMedia'
           },
           {
-            title: '大会地址',
+            name: '大会地址',
             url: '/clientFeedback/address'
           }]
         }
@@ -197,6 +199,31 @@ export default {
     }
   },
   created () {
+    /* 获取子栏目列表,初始化子栏目
+    subTitle: [{
+            name: '大会头图',
+            url: `/${id}/columnConfig/headImage`,
+            cid: '',
+            id: ''
+          }],
+    */
+    axiosGet('/api/conferencegetColumnListByCid', {
+      projectid: this.$route.params.id
+    }, (res) => {
+      let data = JSON.parse(res.data)
+      if (data.code === '1') {
+        let subTitle = data.data
+        subTitle.map(item => {
+          item.url = `/${item.cid}/columnConfig/${item.id}`
+        })
+        this.navMsg[3].subTitle = subTitle
+        console.log(this.navMsg[3], '查找列表成功')
+      } else {
+        console.log('请求成功！但是查找列表失败')
+      }
+    }, (err) => {
+      console.log(err, '查找列表失败')
+    })
   },
   components: {},
   methods: {

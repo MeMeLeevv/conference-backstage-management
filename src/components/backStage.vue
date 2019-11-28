@@ -14,6 +14,7 @@ export default {
   },
   created () {
     this.id = this.$route.params.id
+    /* url, data, successFn, failFn, finallyFn */
     this.$router.push(`/${this.id}/conferenceMsg`)
   },
   computed: {
