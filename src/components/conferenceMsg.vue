@@ -131,14 +131,26 @@ export default {
       }, {}, false)
     },
     /* 获取到image的name值和value值并赋值给form，以便提交表单
+    添加或者修改大会项目：
     请求参数：
+    project.projectName
+    project.projectType
+    project.status
     project.id
     projectImg
     backgroundImg
     返回：
+    id
+    projectName
+    projectType
+    status
+    mainColor
     commonImg.imgurl
     commonImgBackground.imgurl
     */
+    concatDataStr () {
+
+    },
     getImgPath (name, path) {
       this.form[name] = path
       /* 获取到地址链接后立即更新数据库 */
@@ -149,7 +161,8 @@ export default {
         if (data.code === '1') {
           console.log(data.data, 'data.data')
           // console.log(this.display, 'display')
-          name === 'projectImg' ? this.display.commonImg.imgurl = data.data.commonImg.imgurl : this.display.commonImgBackground.imgurl = data.data.commonImgBackground.imgurl
+          // name === 'projectImg' ? this.display.commonImg.imgurl = data.data.commonImg.imgurl : this.display.commonImgBackground.imgurl = data.data.commonImgBackground.imgurl
+          this.display.commonImgBackground.imgurl = data.data.commonImgBackground.imgurl
           console.log('修改成功！')
         } else {
           console.log('请求成功！但是修改失败')
