@@ -10,16 +10,20 @@
                 @change="onEditorChange($event)">
     </quill-editor>
     <div class="attach">
-      <div class="input">
+      <!-- <div class="input">
         <el-input
           placeholder="请输入标题，或者选择上传标题图"
           v-model="form.columnContent.title"
           clearable>
         </el-input>
-      </div>
+      </div> -->
       <div class="img">
         <span class="title">标题图 : </span>
-        <uploadImage @getImgPath="getImgPath" inputName="titleImg" class="upload" :limit="1" :showFileList="true" addMsg="如有需要，可配置图片，小于200k，非必选"></uploadImage>
+        <uploadImage @getImgPath="getImgPath" inputName="titleImg" class="upload" :limit="1" :showFileList="true" addMsg="标题文字可由标题图替代，小于200k，非必选"></uploadImage>
+      </div>
+      <div class="img">
+        <span class="title">配置图 : </span>
+        <uploadImage @getImgPath="getImgPath" inputName="columnImg" class="upload" :limit="2" :showFileList="true" addMsg="如有需要，可多张配置图片，小于200k，非必选"></uploadImage>
       </div>
     </div>
     <div class="submit">
@@ -30,9 +34,12 @@
 </template>
 
 <script>
-import ConfigHeader from '../common/configHeader'
-import UploadImage from '../common/uploadImage'
-import Qs from 'qs'
+import ConfigHeader from '../common/configHeader';
+import UploadImage from '../common/uploadImage';
+import Qs from 'qs';
+import { axiosPost, axiosGet } from '../../assets/js/axios';
+import { mapGetters } from 'vuex';
+import { getLocalData, getherMSg, concatDataStr } from '../../assets/js/base';
 
 export default {
   name: 'guests',
@@ -55,40 +62,91 @@ export default {
             [{ 'list': 'ordered' }, { 'list': 'bullet' }]
           ]
         }
+      },
+      columnMsg: {}/* 这里需要防止拉到数据后有些确实是没有值的但是在data收集栏目数据还是取取他的值，这样会造成取了undefined的造成error */
+    };
+  },
+  created () {
+    /* 取得当前栏目的信息 */
+    /*
+    修改所需参数
+    column.id
+    column.cid
+    column.name
+    column.type
+    titleImg
+    column.columnDescribe
+    columnImg: '.jpg'
+    column.maxContents
+    column.display
+    */
+    /*
+    返回数据：
+    ·id
+    ·cid
+    ·name
+    ·type
+    ·max_contents
+    column_describe
+    commonImgTitle.imgurl
+    commonImgColumn.imgurl
+    content_sorting
+    ·display
+    ·createTime
+    */
+    this.columnMsg = getLocalData(['columnMsg'])
+    axiosGet('/api/conferencegetColumnByColumnid', { columnId: this.columnMsg.id }, (res) => { /* 查询大会信息并展示在预览区，如果没有值要有初始化 */
+      let data = JSON.parse(res.data);
+      if (data.code === '1') {
+        this.columnMsg = data.data;
+        this.data = [/* 大会背景所需的数据集合 */
+          'column.id', `${this.columnMsg.id}`, 'column.cid', `${this.columnMsg.cid}`, 'column.name', `${this.columnMsg.name}`,
+          'column.type', `${this.columnMsg.type}`, 'titleImg', `${this.columnMsg.commonImgTitle && this.columnMsg.commonImgTitle.imgurl}`, 'column.columnDescribe', `${this.columnMsg.column_describe}`,
+          'columnImg', `${this.columnMsg.commonImgColumn && this.columnMsg.commonImgColumn.imgurl}`, 'column.maxContents', `${this.columnMsg.max_contents}`, 'column.display', `${this.columnMsg.display}`];
+        console.log(this.data, 'bgMsg');
+      } else {
+        console.log('请求成功！但是根据大会id查找大会信息失败');
       }
-    }
+    }, (err) => {
+      console.log(err, '根据大会id查找大会信息失败');
+    });
+  },
+  computed: {
+    ...mapGetters([
+      'getColumnMsg'
+    ])
   },
   mounted () {
     this.$nextTick(() => {
       // 初始化编辑器
-      let editor = document.querySelector('.ql-container.ql-snow')
-      let editorPanel = document.querySelector('.ql-toolbar.ql-snow')
+      let editor = document.querySelector('.ql-container.ql-snow');
+      let editorPanel = document.querySelector('.ql-toolbar.ql-snow');
       if (this.hideEditorPanel) { /* 是否隐藏editor面板 */
-        editorPanel.style.display = 'none'
+        editorPanel.style.columnMsg = 'none';
       }
       this.initStyle(editor, {
         'background': 'white',
         'height': '300px',
         'margin-top': '20px',
         'border-top': '1px solid #ccc'
-      })
-    })
+      });
+    });
   },
   methods: {/* 增加数据，由子组件触发 */
     initStyle (dom, styleArr) { // 更改编辑器默认样式
       for (let item in styleArr) {
-        dom.style[item] = styleArr[item]
+        dom.style[item] = styleArr[item];
       }
     },
     submit () { /* 提交数据 */
-      console.log(this.form, 'form')
+      console.log(this.form, 'form');
       this.$axios({/* 提交栏目信息 */
         method: 'post',
         url: '/api/filesaveColumnContent',
         data: this.form,
         transformRequest: [
           function (data) {
-            return Qs.stringify(data)
+            return Qs.stringify(data);
           }
         ],
         headers: {
@@ -97,31 +155,67 @@ export default {
       }).then(res => {
 
       }).catch(err => {
-        console.log(err)
-      }).finally()
+        console.log(err);
+      }).finally();
     },
-    getImgPath (name, value) { /* 获取图片链接，赋值给form */
-      this.form[name] = value
+
+    /*
+    column.id
+    column.cid
+    column.name
+    column.type
+    titleImg
+    */
+    getImgPath (name, value, multiple) { /* 获取图片链接，赋值给form */
+      this.form[name] = value;
+      console.log(this.columnMsg, 'this.columnMsg')
+      if (multiple) {
+        let data1 = concatDataStr(['columnContent.columnId', `${this.columnMsg.id}`, 'contentMore', `${value}`])
+        axiosPost('/api/saveContentMore', data1, (res) => { /* 查询大会信息并展示在预览区，如果没有值要有初始化 */
+          let data = JSON.parse(res.data);
+          if (data.code === '1') {
+            this.columnMsg = data.data;
+            console.log(data.data, '更新完毕');
+          } else {
+            console.log('请求成功！但是根据大会id查找大会信息失败');
+          }
+        }, (err) => {
+          console.log(err, '根据大会id查找大会信息失败');
+        });
+      } else {
+        let data = getherMSg(this.data, [[`${name}`, `${value}`]]); /// * 取得更新值之后的参数序列化 */
+        axiosPost('/api/filesaveColumnContent', data, (res) => { /* 查询大会信息并展示在预览区，如果没有值要有初始化 */
+          let data = JSON.parse(res.data);
+          if (data.code === '1') {
+            this.columnMsg = data.data;
+            console.log(data.data, '更新完毕');
+          } else {
+            console.log('请求成功！但是根据大会id查找大会信息失败');
+          }
+        }, (err) => {
+          console.log(err, '根据大会id查找大会信息失败');
+        });
+      }
     },
     onEditorBlur (editor) {
-      console.log('editor blur!', editor)
+      console.log('editor blur!', editor);
     },
     onEditorFocus (editor) {
-      console.log('editor focus!', editor)
+      console.log('editor focus!', editor);
     },
     onEditorReady (editor) {
-      console.log('editor ready!', editor)
+      console.log('editor ready!', editor);
     },
     onEditorChange ({ editor, html, text }) {
-      console.log('editor change!', editor, html, text)
-      this.form.columnContent.contentText = html
+      console.log('editor change!', editor, html, text);
+      this.form.columnContent.contentText = html;
     }
   },
   components: {
     ConfigHeader,
     UploadImage
   }
-}
+};
 </script>
 
 <style lang="sass" scoped>
@@ -131,6 +225,8 @@ export default {
     margin-bottom: 10px
   .attach
     margin-top: 20px
+    .img
+      margin: 20px 0
     .input
       width: 40%
       margin: 30px 0
@@ -139,7 +235,7 @@ export default {
       margin-right: 20px
       color: gray
     .upload
-      display: inline-block
+      columnMsg: inline-block
   .submit
     float: right
     margin-top: 20px

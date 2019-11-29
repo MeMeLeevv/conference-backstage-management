@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex';
 export default {
   name: 'home',
   data () {
@@ -37,23 +37,23 @@ export default {
           title: '2019年全球未来科技大会·广州站'
         }
       ]
-    }
+    };
   },
   created () {
-    let that = this
-    this.setBackStageTitle('')
+    let that = this;
+    this.setBackStageTitle('');
     this.$axios.get('/api/conferencegetProjectAll').then(function (res) {
       // console.log(typeof (res.data)) // srting
-      let data = JSON.parse(res.data)/* 返回字段是字符串序列，需要把它转换成对象格式 判断是否是字符串，是才要转！！！ */
-      console.log(data, 'data')
-      if (data.code !== '1') return false
+      let data = JSON.parse(res.data);/* 返回字段是字符串序列，需要把它转换成对象格式 判断是否是字符串，是才要转！！！ */
+      console.log(data, 'data');
+      if (data.code !== '1') return false;
       // 请求成功
-      that.meetingData = data.data
+      that.meetingData = data.data;
     }).catch(function (error) {
-      console.log(error)
+      console.log(error);
     }).finally(function () {
 
-    })
+    });
   },
   computed: {
     ...mapGetters(['getBackStageTitle'])
@@ -65,7 +65,7 @@ export default {
         history.pushState(null, null, document.URL)
         window.addEventListener('popstate', this.goBack, false)
       } */
-    })
+    });
   },
   /*   destroyed () {
     window.removeEventListener('popstate', this.goBack, false)
@@ -80,14 +80,14 @@ export default {
       window.history.back()
     }, */
     errorHandler () { /* 头像加载失败 */
-      return true
+      return true;
     }, /* '/columnConfig/headImage' */
     gotoHeadImage (e, title, id) { /* 点击图片跳转 */
-      this.setBackStageTitle(title)
-      this.$router.push(`/${id}`)
+      this.setBackStageTitle(title);
+      this.$router.push(`/${id}`);
     }
   }
-}
+};
 </script>
 
 <style lang="sass" scoped>

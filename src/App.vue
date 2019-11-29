@@ -10,9 +10,9 @@
 </template>
 
 <script>
-import NavBar from './components/common/navBar'
-import HeadBar from './components/common/headBar'
-import { mapGetters, mapMutations } from 'vuex'
+import NavBar from './components/common/navBar';
+import HeadBar from './components/common/headBar';
+import { mapGetters, mapMutations } from 'vuex';
 
 export default {
   name: 'app',
@@ -22,30 +22,28 @@ export default {
       to: '',
       from: '',
       isLogin: true
-    }
+    };
   },
   created () { /* 第一次加载或者刷新的时候判断路由 */
-    // this.getDevice()
-    // this.login()
-    this.checkLogin()
-    // console.log(this.$route.path, 'this.$route.path')
-    this.isLogin = this.$route.path === '/login' // 如果是登录页面 ，不显示navbar
-    this.isIndex = this.$route.path === '/' /* 如果是首页，则不显示navbar */
+    window.addEventListener('beforeupload', this.beforeunloadFn);
+    this.checkLogin();
+    this.isLogin = this.$route.path === '/login'; // 如果是登录页面 ，不显示navbar
+    this.isIndex = this.$route.path === '/'; /* 如果是首页，则不显示navbar */
     // console.log(this.isLogin, 'isLogin')
   },
   watch: {
     '$route' (to, from) { /* 记录路由的来源和去路 */
-      this.from = from.path
-      this.to = to.path
+      this.from = from.path;
+      this.to = to.path;
       // console.log(from, 'from')
       // console.log(to, 'to') // 此处的from需要赋值给login登陆成功后返回的原始页面，如果没有则默认返回首页
-      this.isIndex = to.path === '/'
-      this.isLogin = to.path === '/login'
+      this.isIndex = to.path === '/';
+      this.isLogin = to.path === '/login';
       if (this.isIndex) { // 如果是首页需要把大会标题初始化
-        this.setBackStageTitle('')
+        this.setBackStageTitle('');
       }
       if (this.from !== '/' && this.to.search(/(\/\d+)$/) !== -1) { /* 如果要返回首页，页面会停留在http://localhost:8000/#/117，要需要加以判断 */
-        this.$router.push('/') // 返回首页
+        this.$router.push('/'); // 返回首页
       }
     }
   },
@@ -63,32 +61,32 @@ export default {
     getDevice () {
     },
     setIsIndex (index) {
-      return index === '/'
+      return index === '/';
     },
     checkLogin () { // 检查登录状态
       this.$axios.get('/api/logingetState').then((res) => {
-        let data = JSON.parse(res.data)
-        console.log(data, 'logingetState')
-        let state = data.code
+        let data = JSON.parse(res.data);
+        console.log(data, 'logingetState');
+        let state = data.code;
         if (state === '1') { // 已登录，继续保留当前页面
-          this.setHasLogin(true) // 设置登录状态
-          this.setAccount(data.data)// 设置用户账号
+          this.setHasLogin(true); // 设置登录状态
+          this.setAccount(data.data);// 设置用户账号
         } else {
-          this.setHasLogin(false)
-          this.setOriginPage(this.from) // 先保存之前的页面链接
-          console.log(this.getHasLogin, 'this.getHasLogin')
-          this.$router.push('/login') // 去往登录页面
+          this.setHasLogin(false);
+          this.setOriginPage(this.from); // 先保存之前的页面链接
+          console.log(this.getHasLogin, 'this.getHasLogin');
+          this.$router.push('/login'); // 去往登录页面
         }
-      })
+      });
     },
     login () { /* 测试自用函数：先询问登录状态，如果显示已经登录就不需要发登录请求了 */
       this.$axios.get('/api/loginCheck?user=admin2&password=admin').then((res) => {
         // console.log(JSON.parse(res.data))
       }).catch((err) => {
-        console.log(err)
+        console.log(err);
       }).finally(() => {
         // console.log('done')
-      })
+      });
     },
     exitAccount () { /* 处理退出登录 */
       this.$axios.get('/api/loginoutLog').then(res => { // 退出成功，全局数据需要初始化
@@ -97,22 +95,28 @@ export default {
           type: 'success',
           duration: '1000',
           onClose: () => {
-            this.setAccount('')
-            this.setHasLogin(false)
-            this.setOriginPage('')
-            this.$router.push('/login')
+            this.setAccount('');
+            this.setHasLogin(false);
+            this.setOriginPage('');
+            this.$router.push('/login');
           }
-        })
+        });
       }).catch(err => {
-        console.log(err, '退出登录出错')
-      })
+        console.log(err, '退出登录出错');
+      });
+    },
+    beforeunloadFn (e) {
+      alert('刷新或者关闭');
     }
+  },
+  destroyed () {
+    window.removeEventListener('beforeupload', this.beforeunloadFn);
   },
   components: {
     NavBar,
     HeadBar
   }
-}
+};
 </script>
 
 <style lang="sass">

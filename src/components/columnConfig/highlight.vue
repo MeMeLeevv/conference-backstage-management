@@ -7,8 +7,8 @@
 </template>
 
 <script>
-import ConfigHeader from '../common/configHeader'
-import Table from '../common/table'
+import ConfigHeader from '../common/configHeader';
+import Table from '../common/table';
 export default {
   name: 'highlight',
   data () {
@@ -79,13 +79,13 @@ export default {
           edit: false
         }
       ]
-    }
+    };
   },
   components: {
     ConfigHeader,
     Table
   }
-}
+};
 </script>
 
 <style lang="sass" scoped>

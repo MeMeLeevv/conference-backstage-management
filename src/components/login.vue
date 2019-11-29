@@ -23,17 +23,17 @@
 </template>
 
 <script>
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex';
 export default {
   name: 'login',
   data () {
     var validateUser = (rule, value, callback) => { /* 检测input = text的，要不为空 */
       if (!value) {
-        return callback(new Error('内容不能为空！'))
+        return callback(new Error('内容不能为空！'));
       } else {
-        callback()
+        callback();
       }
-    }
+    };
     /*     var validatePassword = (rule, value, callback) => {
       console.log(value, 'value')
       if (!value) {
@@ -53,7 +53,7 @@ export default {
           { validator: validateUser, trigger: 'blur' }
         ]
       }
-    }
+    };
   },
   created () {
 
@@ -75,46 +75,46 @@ export default {
           text: '登录中...',
           spinner: 'el-icon-loading',
           background: 'rgba(255, 255, 255, 0.7)'
-        })
+        });
         if (valid) {
           this.$axios.get(`/api/loginCheck?user=${this.form.user}&password=${this.form.password}`).then((res) => { // 提交登录数据
-            let data = JSON.parse(res.data)
+            let data = JSON.parse(res.data);
             if (data.code === '1') {
-              this.setAccount(data.data) // 设置用户账号
+              this.setAccount(data.data); // 设置用户账号
               if (this.getOriginPage) { // 跳转到原来的页面
-                console.log(this.getOriginPage, '跳转到原来的页面:this.originPage')
-                this.setHasLogin(true)
-                this.$router.push(this.getOriginPage)
+                console.log(this.getOriginPage, '跳转到原来的页面:this.originPage');
+                this.setHasLogin(true);
+                this.$router.push(this.getOriginPage);
               } else { // 否则默认跳转到首页
-                this.setHasLogin(true)
-                this.$router.push('/')
+                this.setHasLogin(true);
+                this.$router.push('/');
               }
-              loading.close() /// 关闭加载
+              loading.close(); /// 关闭加载
             } else {
-              loading.close() /// 关闭加载
+              loading.close(); /// 关闭加载
               this.$message({
                 message: '登陆失败,请重试！',
                 type: 'error',
                 duration: '1000'
-              })
+              });
             }
           }).catch((err) => {
-            loading.close() /// 关闭加载
+            loading.close(); /// 关闭加载
             this.$message({
               message: '登陆失败,请重试！' + err,
               type: 'error',
               duration: '1000'
-            })
+            });
           }).finally(() => {
-          })
+          });
         } else {
-          console.log('error submit!!')
-          return false
+          console.log('error submit!!');
+          return false;
         }
-      })
+      });
     }
   }
-}
+};
 </script>
 <style lang="sass" scoped>
 #login

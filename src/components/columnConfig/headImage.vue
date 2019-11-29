@@ -62,8 +62,8 @@
 </template>
 
 <script>
-import ImageShow from '../common/imageShow'
-import UploadImage from '../common/uploadImage'
+import ImageShow from '../common/imageShow';
+import UploadImage from '../common/uploadImage';
 
 export default {
   name: 'headImage',
@@ -72,43 +72,43 @@ export default {
     UploadImage
   },
   data () {
-    var id = this.$route.params.id
+    var id = this.$route.params.id;
     return {
       form: {
 
       },
       id: id, // 大会id
       cid: '' // 栏目id
-    }
+    };
   },
   created () {
-    let that = this
+    let that = this;
     this.$axios.get(`/api/conferencegetColumnByCid?projectid=${this.id}`).then((res) => { /* 请求大会栏目的所有信息 */
-      res = JSON.parse(res.data)
-      console.log(res, 'headImage')
+      res = JSON.parse(res.data);
+      console.log(res, 'headImage');
       if (res.code === '1') {
-        let data = res.data
-        data = data.filter(item => item.name === '大会背景')[0] /* 筛选出大会背景信息 */
-        console.log(data, 'data')
-        this.cid = data.cid
+        let data = res.data;
+        data = data.filter(item => item.name === '大会背景')[0]; /* 筛选出大会背景信息 */
+        console.log(data, 'data');
+        this.cid = data.cid;
         that.$axios.get(`/api/conferencegetColumnByCid?columnId=${data.cid}`).then((ress) => {
-          let columnData = JSON.parse(ress.data)
-          console.log(columnData, 'column')
-        })
+          let columnData = JSON.parse(ress.data);
+          console.log(columnData, 'column');
+        });
       }
     }).catch((error) => {
-      console.log(error)
+      console.log(error);
     }).finally(() => {
 
-    })
+    });
   },
   methods: {
     getImgPath (name, path) { /* 获取到image的name值和value值并赋值给form，以便提交表单 */
-      this.form[name] = path
-      console.log(this.form, 'form')
+      this.form[name] = path;
+      console.log(this.form, 'form');
     }
   }
-}
+};
 </script>
 
 <style lang="sass" scoped>

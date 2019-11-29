@@ -152,7 +152,7 @@ export default {
             type: 'text',
             key: 'link'
           }
-        ]
+        ];
       }
     },
     tableData: {/* 表格数据 */
@@ -199,7 +199,7 @@ export default {
             link: 'wer',
             state: true
           }
-        ]
+        ];
       }
     }
   },
@@ -217,17 +217,17 @@ export default {
         label: '隐藏'
       }],
       multipleSelection: []
-    }
+    };
   },
   mounted () {
-    let that = this
+    let that = this;
     this.$nextTick(function () {
       // that.getDevice()
       // 消除input上的border
       that.initTable.forEach((item, index) => {
-        that.initTable[index].widthPercent = document.body.clientWidth * item.widthPercent
-      })
-    })
+        that.initTable[index].widthPercent = document.body.clientWidth * item.widthPercent;
+      });
+    });
   },
   created () {
     // this.init()
@@ -247,114 +247,114 @@ export default {
       // console.log(this.shortInput)
     }, */
     setNewValue (row) { // 确定更改新值
-      let that = this
+      let that = this;
       this.$confirm('是否确定修改所选行信息？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.toggleSelection() // 取消所有选择状态，让model的值于data的tableData的值同步更新
-        row.edit = false // 清除所有编辑状态
+        this.toggleSelection(); // 取消所有选择状态，让model的值于data的tableData的值同步更新
+        row.edit = false; // 清除所有编辑状态
         that.$message({
           type: 'success',
           message: '修改成功!'
-        })
+        });
       }).catch(() => {
-        that.$refs.multipleTable.clearSelection()
+        that.$refs.multipleTable.clearSelection();
         that.$message({
           type: 'info',
           message: '已取消修改'
-        })
-      })
+        });
+      });
     },
     keepOldValue (row) { // 取消更改
-      let that = this
+      let that = this;
       this.$confirm('是否确定恢复原值？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
         for (let rr in row) { // 恢复旧值
-          row[rr] = row[`old${rr}`]
+          row[rr] = row[`old${rr}`];
         }
-        this.toggleSelection()
-        row.edit = false
+        this.toggleSelection();
+        row.edit = false;
         that.$message({
           type: 'success',
           message: '恢复成功!'
-        })
+        });
       }).catch(() => {
-        that.$refs.multipleTable.clearSelection()
+        that.$refs.multipleTable.clearSelection();
         that.$message({
           type: 'info',
           message: '已取消恢复'
-        })
-      })
+        });
+      });
     },
     editClick (row) { // 点击编辑
       for (let rr in row) { // 编辑前先保存旧值
-        row[`old${rr}`] = row[rr]
+        row[`old${rr}`] = row[rr];
       }
       // console.log(row, 'editRow')
-      this.clearEdit() /// 先清除掉之前的编辑态
-      this.toggleSelection([row])
-      row.edit = true
+      this.clearEdit(); /// 先清除掉之前的编辑态
+      this.toggleSelection([row]);
+      row.edit = true;
     },
     deleteThis (row) { // 点击删除
-      this.clearEdit()
-      this.toggleSelection([row])
-      this.batchDelete()
+      this.clearEdit();
+      this.toggleSelection([row]);
+      this.batchDelete();
     },
     clearEdit () { // 清除所有编辑状态
       for (let i = 0; i < this.tableData.length; i++) {
         if (this.tableData[i].edit) { // 查询之前编辑的那个状态，如果点击编辑且修改后不做任何处理又跳转到另一行编辑，保留之前的值
           for (let j in this.tableData[i]) {
-            this.tableData[i][j] = this.tableData[i][`old${j}`]
+            this.tableData[i][j] = this.tableData[i][`old${j}`];
           }
-          this.tableData[i].edit = false
+          this.tableData[i].edit = false;
         }
       }
     },
     batchDelete () { // 点击批量删除
-      let that = this
+      let that = this;
       this.$confirm('是否确定删除所选行信息？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
         that.multipleSelection.forEach(item => { // 寻找对应的id号然后删除
-          let id = item.id
-          let findIndex = this.tableData.findIndex(item => item.id === id)
-          that.tableData.splice(findIndex, 1)
-        })
+          let id = item.id;
+          let findIndex = this.tableData.findIndex(item => item.id === id);
+          that.tableData.splice(findIndex, 1);
+        });
         that.$message({
           type: 'success',
           message: '删除成功!'
-        })
+        });
       }).catch(() => {
-        that.$refs.multipleTable.clearSelection()
+        that.$refs.multipleTable.clearSelection();
         that.$message({
           type: 'info',
           message: '已取消删除'
-        })
-      })
+        });
+      });
     },
     toggleSelection (rows) {
-      let that = this
-      that.$refs.multipleTable.clearSelection()
+      let that = this;
+      that.$refs.multipleTable.clearSelection();
       if (rows) {
         rows.forEach(row => {
           // console.log(row, 'row')
-          that.$refs.multipleTable.toggleRowSelection(row)
-        })
+          that.$refs.multipleTable.toggleRowSelection(row);
+        });
       }
     },
     handleSelectionChange (val) {
-      this.multipleSelection = val
+      this.multipleSelection = val;
       // console.log(val, 'val')
     }
   }
-}
+};
 </script>
 
 <style lang="sass" scoped>

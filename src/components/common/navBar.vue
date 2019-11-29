@@ -26,7 +26,7 @@
            <span>{{nav.name}}</span>
           </template>
           <el-menu-item-group>
-            <div v-for="sub in nav.subTitle" :key="sub.id">
+            <div v-for="sub in nav.subTitle" @click="saveColumnMsg(sub)" :key="sub.id">
               <el-menu-item :index="sub.url">{{sub.name}}</el-menu-item>
             </div>
           </el-menu-item-group>
@@ -38,21 +38,14 @@
 </template>
 
 <script>
-import { axiosGet } from '../../assets/js/axios'
+import { axiosGet } from '../../assets/js/axios';
+import { storeLocalData } from '../../assets/js/base';
 
 export default {
   name: 'navBar',
   data () {
-    var id = this.$route.params.id //   /117/columnConfig/headImage
-    var openColumn = id.substr(0, id.lastIndexOf('/')) // 获取/117/columnConfig，来自动展开激活的那一栏
-    /* this.$axios.get(`/api/conferencegetColumnByCid?projectid=${id}`).then(res => { // 查询栏目
-      console.log(JSON.parse(res.data).data, '大会栏目')
-      let data = JSON.parse(res.data).data
-      data.forEach(item => {
-      })
-    }).catch(err => {
-      console.log(err)
-    }) */
+    var id = this.$route.params.id; //   /117/columnConfig/headImage
+    var openColumn = id.substr(0, id.lastIndexOf('/')); // 获取/117/columnConfig，来自动展开激活的那一栏
     return {
       navMsg: [
         {
@@ -71,41 +64,7 @@ export default {
           name: '栏目配置',
           url: `/${id}/columnConfig`,
           icon: 'icon-more',
-          subTitle: [{
-            name: '大会头图',
-            url: `/${id}/columnConfig/headImage`,
-            cid: ''
-          },
-          {
-            name: '大会背景',
-            url: `/${id}/columnConfig/background`,
-            cid: ''
-          },
-          {
-            name: '大会亮点',
-            url: `/${id}/columnConfig/highlight`,
-            cid: ''
-          },
-          {
-            name: '大会嘉宾',
-            url: `/${id}/columnConfig/guests`,
-            cid: ''
-          },
-          {
-            name: '合作伙伴',
-            url: `/${id}/columnConfig/partners`,
-            cid: ''
-          },
-          {
-            name: '合作媒体',
-            url: `/${id}/columnConfig/cooperativeMedia`,
-            cid: ''
-          },
-          {
-            name: '大会地址',
-            url: `/${id}/columnConfig/address`,
-            cid: ''
-          }]
+          subTitle: []
         },
         {
           name: '议程管理',
@@ -196,7 +155,7 @@ export default {
         }
       ],
       openColumn: [openColumn]
-    }
+    };
   },
   created () {
     /* 获取子栏目列表,初始化子栏目
@@ -210,20 +169,20 @@ export default {
     axiosGet('/api/conferencegetColumnListByCid', {
       projectid: this.$route.params.id
     }, (res) => {
-      let data = JSON.parse(res.data)
+      let data = JSON.parse(res.data);
       if (data.code === '1') {
-        let subTitle = data.data
+        let subTitle = data.data;
         subTitle.map(item => {
-          item.url = `/${item.cid}/columnConfig/${item.id}`
-        })
-        this.navMsg[3].subTitle = subTitle
-        console.log(this.navMsg[3], '查找列表成功')
+          item.url = `/${item.cid}/columnConfig/column${item.type}`;
+        });
+        this.navMsg[2].subTitle = subTitle;
+        console.log(this.navMsg[2], '查找列表成功');
       } else {
-        console.log('请求成功！但是查找列表失败')
+        console.log('请求成功！但是查找列表失败');
       }
     }, (err) => {
-      console.log(err, '查找列表失败')
-    })
+      console.log(err, '查找列表失败');
+    });
   },
   components: {},
   methods: {
@@ -232,9 +191,12 @@ export default {
     },
     handleClose (key, keyPath) {
       // console.log(key, keyPath, 'close')
+    },
+    saveColumnMsg (msg) {
+      storeLocalData([['columnMsg', msg]]);/* navbar被点击后在localStorage中储存栏目信息 */
     }
   }
-}
+};
 </script>
 
 <style lang="sass">

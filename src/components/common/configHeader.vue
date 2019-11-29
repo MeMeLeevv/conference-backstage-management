@@ -118,7 +118,7 @@ export default {/* 信息如果都已经验证成功，则用formData结合上�
             type: 'text',
             key: 'link',
             required: false
-          }]
+          }];
       }
     },
     form: {/* 提交到后台的数据 */
@@ -131,25 +131,25 @@ export default {/* 信息如果都已经验证成功，则用formData结合上�
           desc: '',
           edit: false,
           state: true
-        }
+        };
       }
     }
   },
   data () { /* 新发现！ */
     var validateName = (rule, value, callback) => { /* 检测input = text的，要不为空 */
       if (!value) {
-        return callback(new Error('内容不能为空！'))
+        return callback(new Error('内容不能为空！'));
       }
-    }
+    };
     var validateImage = (rule, value, callback) => { /* 检测图片地址，除了要是图片，而且还应该检测是否为合格的存在的可以展示的图片 */
-      console.log(value, 'value')
+      console.log(value, 'value');
       if (!value) {
-        return callback(new Error('请选择一张图片'))
+        return callback(new Error('请选择一张图片'));
       }
       if (!this.isImage(value)) {
-        return callback(new Error('文件格式需要是图片！请重新选择'))
+        return callback(new Error('文件格式需要是图片！请重新选择'));
       }
-    }
+    };
     return {
       url: 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg',
       dialogFormVisible: false,
@@ -163,57 +163,57 @@ export default {/* 信息如果都已经验证成功，则用formData结合上�
           { validator: validateImage, trigger: 'change' }
         ]
       }
-    }
+    };
   },
   methods: {
     uploadSuccess (response, file, fileList) {
-      console.log(response, 'res')
-      console.log(file, 'file')
-      console.log(fileList, 'fileList')
+      console.log(response, 'res');
+      console.log(file, 'file');
+      console.log(fileList, 'fileList');
     },
     handleRemove (file, fileList) {
-      console.log(file, fileList)
+      console.log(file, fileList);
     },
     handlePictureCardPreview (file) {
-      this.form.thumbnail = file.url
-      this.dialogVisible = true
-      this.$refs['ruleForm'].validateField('image') // 主动去验证image字段
+      this.form.thumbnail = file.url;
+      this.dialogVisible = true;
+      this.$refs['ruleForm'].validateField('image'); // 主动去验证image字段
     },
     handleAvatarSuccess (res, file) {
-      this.imageUrl = URL.createObjectURL(file.raw)
+      this.imageUrl = URL.createObjectURL(file.raw);
     },
     beforeAvatarUpload (file) {
-      const isJPG = this.isImage(file.type)
-      const isLt2M = file.size / 1024 / 1024 < 1
+      const isJPG = this.isImage(file.type);
+      const isLt2M = file.size / 1024 / 1024 < 1;
       if (!isJPG) {
-        this.$message.error('请上传图片格式的文件!')
+        this.$message.error('请上传图片格式的文件!');
       }
       if (!isLt2M) {
-        this.$message.error('上传头像图片大小不能超过 2MB!')
+        this.$message.error('上传头像图片大小不能超过 2MB!');
       }
-      return isJPG && isLt2M
+      return isJPG && isLt2M;
     },
     handExceed () {
-      this.$message.error('只能选择一张图!重新上传请删除前一张图！')
+      this.$message.error('只能选择一张图!重新上传请删除前一张图！');
     },
     submitForm (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          alert('submit!')
-          this.emitAdd()// 触发父组件方法
+          alert('submit!');
+          this.emitAdd();// 触发父组件方法
         } else {
-          console.log('error submit!!')
-          return false
+          console.log('error submit!!');
+          return false;
         }
-      })
+      });
     },
     emitAdd () { /* 触发父组件的addMsg方法 */
-      console.log('子组件开始触发父组件方法')
-      this.dialogFormVisible = false
-      this.$emit('addMsg')
+      console.log('子组件开始触发父组件方法');
+      this.dialogFormVisible = false;
+      this.$emit('addMsg');
     },
     isImage (ext) {
-      return ['png', 'jpg', 'jpeg', 'bmp', 'gif', 'webp', 'psd', 'svg', 'tiff', 'image/jpeg', 'image/png', 'image/gif'].indexOf(ext) !== -1
+      return ['png', 'jpg', 'jpeg', 'bmp', 'gif', 'webp', 'psd', 'svg', 'tiff', 'image/jpeg', 'image/png', 'image/gif'].indexOf(ext) !== -1;
     }
     /* isImage (url) {
       let index = url.lastIndexOf('.')
@@ -221,7 +221,7 @@ export default {/* 信息如果都已经验证成功，则用formData结合上�
       return ['png', 'jpg', 'jpeg', 'bmp', 'gif', 'webp', 'psd', 'svg', 'tiff'].indexOf(ext.toLowerCase()) !== -1
     } */
   }
-}
+};
 </script>
 
 <style lang="sass" scoped>

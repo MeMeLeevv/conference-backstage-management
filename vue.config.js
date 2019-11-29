@@ -1,6 +1,6 @@
 // vue.config.js
 // var saveOrGet = 0 // 正常运行网页（输入“0”）|| 存数据（输入“1”）,会自动结束进程！！
-var webpack = require('webpack')
+var webpack = require('webpack');
 
 const config = {
   publicPath: '/',
@@ -30,7 +30,7 @@ const config = {
       })
     ]
   }
-}
+};
 
 // app.use('/', apiRoutes)
-module.exports = config
+module.exports = config;

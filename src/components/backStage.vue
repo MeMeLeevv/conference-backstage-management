@@ -10,18 +10,17 @@ export default {
   data () {
     return {
       id: ''
-    }
+    };
   },
   created () {
-    this.id = this.$route.params.id
-    /* url, data, successFn, failFn, finallyFn */
-    this.$router.push(`/${this.id}/conferenceMsg`)
+    this.id = this.$route.params.id;
+    this.$router.push(`/${this.id}/conferenceMsg`);
   },
   computed: {
   },
   methods: {
   }
-}
+};
 </script>
 <style lang="sass" scoped>
 

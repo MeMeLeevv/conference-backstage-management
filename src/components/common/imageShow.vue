@@ -1,7 +1,7 @@
 <template>
   <div id="imageShow">
     <div class="avatar" @mouseover="showShape = true" @mouseout="showShape = false" @click="dialogVisible = true">
-      <el-avatar :class="`${showShape ? 'shape' : ''}`" shape="square" :size="size" fit="cover" :src="url"></el-avatar>
+      <el-avatar :class="`${showShape ? 'shape' : ''}`" shape="square" :size="size" fit="fill" :src="url"></el-avatar>
     </div>
     <el-dialog :visible.sync="dialogVisible"><!-- 预览图片,dialog标签不能在avatar类所在的标签下作为子元素，因为dialog显示时是以avatar类标签为父元素而撑满整个屏幕，点击关闭dialog时他会冒泡触发avatar类标签的click导致dialog无法被关闭 -->
       <img @click.stop="" width="100%" :src="url" alt="" />
@@ -28,11 +28,11 @@ export default {
     return {
       dialogVisible: false,
       showShape: false
-    }
+    };
   },
   methods: {
   }
-}
+};
 </script>
 
 <style lang="sass" scoped>

@@ -1,12 +1,12 @@
-import axios from 'axios'
-import Qs from 'qs'
+import axios from 'axios';
+import Qs from 'qs';
 
 export function axiosGet (url, data, successFn, failFn, finallyFn) {
   axios({
     method: 'get',
     url: url,
     params: data
-  }).then(successFn).catch(failFn).finally(finallyFn)
+  }).then(successFn).catch(failFn).finally(finallyFn);
 }
 
 export function axiosPost (url, data, successFn, failFn, finallyFn, qs) {
@@ -22,5 +22,5 @@ export function axiosPost (url, data, successFn, failFn, finallyFn, qs) {
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
     }
-  }).then(successFn).catch(failFn).finally(finallyFn)
+  }).then(successFn).catch(failFn).finally(finallyFn);
 }

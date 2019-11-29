@@ -7,8 +7,8 @@
 </template>
 
 <script>
-import ConfigHeader from '../common/configHeader'
-import Table from '../common/table'
+import ConfigHeader from '../common/configHeader';
+import Table from '../common/table';
 export default {
   name: 'guests',
   data () {
@@ -113,18 +113,18 @@ export default {
           state: true
         }
       ]
-    }
+    };
   },
   methods: {/* 增加数据，由子组件触发 */
     updateMsg () {
-      console.log('子组件触发父组件完成')
+      console.log('子组件触发父组件完成');
     }
   },
   components: {
     ConfigHeader,
     Table
   }
-}
+};
 </script>
 
 <style lang="sass" scoped>

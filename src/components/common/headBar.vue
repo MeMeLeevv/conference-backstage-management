@@ -33,12 +33,12 @@ export default {
   },
   methods: {
     errorHandler () { /* 头像加载失败 */
-      return true
+      return true;
     }
   },
   components: {
   }
-}
+};
 </script>
 
 <style lang="sass">

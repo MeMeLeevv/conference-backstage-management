@@ -40,11 +40,13 @@
 </template>
 
 <script>
-import { mapGetters, mapMutations } from 'vuex'
-import UploadImage from './common/uploadImage'
-import ImageShow from './common/imageShow'
-import { Sketch } from 'vue-color'
-import { axiosGet, axiosPost } from '../assets/js/axios'
+import { mapGetters, mapMutations } from 'vuex';
+import UploadImage from './common/uploadImage';
+import ImageShow from './common/imageShow';
+import { Sketch } from 'vue-color';
+import { axiosGet, axiosPost } from '../assets/js/axios';
+import { getherMSg } from '../assets/js/base';
+
 export default {
   name: 'conferenceMsg',
   data () {
@@ -69,7 +71,7 @@ export default {
         a: 1
       },
       a: 1
-    }
+    };
     return {
       errorImg: 'https://cube.elemecdn.com/e/fd/0fc7d20532fdaf769a25683617711png.png',
       showColor: false,
@@ -84,21 +86,34 @@ export default {
       },
       form: {
         colors: defaultProps
-      }
-    }
+      },
+      data: []
+    };
   },
   created () {
+    /*
+    返回参数：
+    id
+    projectName
+    projectType
+    status
+    mainColor
+    commonImg.imgurl
+    commonImgBackground.imgurl
+     */
     axiosGet('/api/conferencegetProjectById', { projectid: this.$route.params.id }, (res) => { /* 查询大会信息并展示在预览区，如果没有值要有初始化 */
-      let data = JSON.parse(res.data)
+      let data = JSON.parse(res.data);
       if (data.code === '1') {
-        this.display = data.data
-        console.log(data.data, '根据大会id查找大会信息成功')
+        this.display = data.data;
+        this.data = [/* 大会信息请求必须的数据 */
+          'project.mainColor', `${this.display.mainColor}`, 'project.id', `${this.display.id}`, 'project.projectName', `${this.display.projectName}`,
+          'project.projectType', `${this.display.projectType}`, 'project.status', `${this.display.projectType}`, 'projectImg', `${this.display.commonImg && this.display.commonImg.imgurl}`, 'backgroundImg', `${this.display.commonImgBackground && this.display.commonImgBackground.imgurl}`];
       } else {
-        console.log('请求成功！但是根据大会id查找大会信息失败')
+        console.log('请求成功！但是根据大会id查找大会信息失败');
       }
     }, (err) => {
-      console.log(err, '根据大会id查找大会信息失败')
-    })
+      console.log(err, '根据大会id查找大会信息失败');
+    });
   },
   computed: {
     ...mapGetters(['getOriginPage', 'getHasLogin', 'getAccount'])
@@ -109,7 +124,7 @@ export default {
     ]),
     updateColor () { /* 注意节流！！ */
       // console.log('updateColor')
-      let color = `rgba(${this.form.colors.rgba.r},${this.form.colors.rgba.g},${this.form.colors.rgba.b},${this.form.colors.rgba.a})`
+      let color = `rgba(${this.form.colors.rgba.r},${this.form.colors.rgba.g},${this.form.colors.rgba.b},${this.form.colors.rgba.a})`;
       /*
       请求的参数network上需要以下形式，可以模仿input标签上的name = project.id来提交数据
       Form Data
@@ -118,17 +133,18 @@ export default {
       如果使用qs，数据参数提交形式会变成project[id]或者 'project': {'id': '117','mainColor': 'rgba(*, *, *, *)'}
       这些都不能提交到数据库
       */
-      axiosPost('/api/filesaveProject', `project.id=${this.$route.params.id}&project.mainColor=${color}`, (res) => {
-        let data = JSON.parse(res.data)
+      let data = getherMSg(this.data, [['project.mainColor', `${color}`]]); /* 取得更新值之后的参数序列化 */
+      axiosPost('/api/filesaveProject', data, (res) => {
+        let data = JSON.parse(res.data);
         if (data.code === '1') {
-          this.display.mainColor = color
-          console.log(data.data, '修改大会主色调成功！')
+          this.display.mainColor = color;
+          console.log(data.data, '修改大会主色调成功！');
         } else {
-          console.log('请求成功！但是修改大会主色调失败')
+          console.log('请求成功！但是修改大会主色调失败');
         }
       }, (err) => {
-        console.log(err, '修改大会主色调失败')
-      }, {}, false)
+        console.log(err, '修改大会主色调失败');
+      }, {}, false);
     },
     /* 获取到image的name值和value值并赋值给form，以便提交表单
     添加或者修改大会项目：
@@ -139,6 +155,7 @@ export default {
     project.id
     projectImg
     backgroundImg
+    project.mainColor
     返回：
     id
     projectName
@@ -148,28 +165,22 @@ export default {
     commonImg.imgurl
     commonImgBackground.imgurl
     */
-    concatDataStr () {
-
-    },
     getImgPath (name, path) {
-      this.form[name] = path
+      this.form[name] = path;
       /* 获取到地址链接后立即更新数据库 */
-
-      axiosPost('/api/filesaveProject', `project.id=${this.$route.params.id}&${name}=${path}`, (res) => {
-        console.log(path, 'path')
-        let data = JSON.parse(res.data)
+      let data = getherMSg(this.data, [[`${name}`, `${path}`]]);
+      axiosPost('/api/filesaveProject', data, (res) => {
+        console.log(path, 'path');
+        let data = JSON.parse(res.data);
         if (data.code === '1') {
-          console.log(data.data, 'data.data')
-          // console.log(this.display, 'display')
-          // name === 'projectImg' ? this.display.commonImg.imgurl = data.data.commonImg.imgurl : this.display.commonImgBackground.imgurl = data.data.commonImgBackground.imgurl
-          this.display.commonImgBackground.imgurl = data.data.commonImgBackground.imgurl
-          console.log('修改成功！')
+          this.display = data.data;
+          console.log('修改成功！');
         } else {
-          console.log('请求成功！但是修改失败')
+          console.log('请求成功！但是修改失败');
         }
       }, (err) => {
-        console.log(err, '修改失败')
-      }, {}, false)
+        console.log(err, '修改失败');
+      }, {}, false);
     }
   },
   components: {
@@ -177,7 +188,7 @@ export default {
     ImageShow,
     'sketch-picker': Sketch
   }
-}
+};
 </script>
 <style lang="sass" scoped>
 $colorShow: 20px
