@@ -9,6 +9,10 @@
                 @ready="onEditorReady($event)"
                 @change="onEditorChange($event)">
     </quill-editor>
+    <div class="submit">
+      <el-button class="save" @click="submit">保存</el-button>
+      <el-button class="cancel" @click="cancel">取消</el-button>
+    </div>
     <div class="attach">
       <!-- <div class="input">
         <el-input
@@ -25,10 +29,6 @@
         <span class="title">配置图 : </span>
         <uploadImage @getImgPath="getImgPath" inputName="columnImg" class="upload" :limit="2" :showFileList="true" addMsg="如有需要，可多张配置图片，小于200k，非必选"></uploadImage>
       </div>
-    </div>
-    <div class="submit">
-      <el-button class="save" @click="submit">保存</el-button>
-      <el-button class="cancel">取消</el-button>
     </div>
   </div>
 </template>
@@ -138,7 +138,7 @@ export default {
         dom.style[item] = styleArr[item];
       }
     },
-    submit () { /* 提交数据 */
+    submit () { /* 提交富文本数据，一加载先在后台抓取初始文本数据并保留在一个临时数据中，提交后就直接传数据到后台并覆盖原来的文本信息，取消的话就直接将临时数据再次覆盖当前文本信息 */
       console.log(this.form, 'form');
       this.$axios({/* 提交栏目信息 */
         method: 'post',
@@ -158,7 +158,9 @@ export default {
         console.log(err);
       }).finally();
     },
+    cancel () {
 
+    },
     /*
     column.id
     column.cid
@@ -224,7 +226,7 @@ export default {
   .headTitle
     margin-bottom: 10px
   .attach
-    margin-top: 20px
+    margin-top: 50px
     .img
       margin: 20px 0
     .input
@@ -233,6 +235,7 @@ export default {
     span.title
       vertical-align: top
       margin-right: 20px
+      margin: 5px 0
       color: gray
     .upload
       columnMsg: inline-block

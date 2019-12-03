@@ -11,6 +11,7 @@ import Home from './components/home';
 import Login from './components/login';
 import BackStage from './components/backStage';
 import ConferenceMsg from './components/conferenceMsg';
+import AgendaManage from './components/agendaManage';
 
 Vue.use(Router);
 
@@ -29,7 +30,7 @@ export default new Router({
       component: Login
     },
     {
-      path: '/:id',
+      path: '/:id(\\d+)',/* 只匹配数字 */
       component: BackStage,
       children: [
         {
@@ -66,8 +67,13 @@ export default new Router({
           path: 'columnConfig/column10',
           name: 'cooperativeMedia',
           component: CooperativeMedia
+        },
+        {
+          path: 'agendaManage_*',
+          name: 'agendaManage',
+          component: AgendaManage
         }
       ]
-    }
+    },
   ]
 });

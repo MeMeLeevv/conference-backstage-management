@@ -1,6 +1,10 @@
 <template>
     <div id="header">
       <span class="title">{{title}}管理</span>
+      <span v-if="needDeleteBtn" class="button" @click="$emit('deleteAgenda')">
+        <i class="iconfont icon-delete"></i>
+        删除{{title}}
+        </span>
       <span v-if="needDialog" class="button" @click="dialogFormVisible = true">
         <i class="iconfont icon-plus"></i>
         新增{{title}}
@@ -86,6 +90,10 @@ export default {/* 信息如果都已经验证成功，则用formData结合上�
     needDialog: {
       type: Boolean,
       default: true
+    },
+    needDeleteBtn: {
+      type: Boolean,
+      default: false
     },
     title: {/* 用于编辑header里的‘xxx管理’文字 */
       type: String,

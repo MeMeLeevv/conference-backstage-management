@@ -6,7 +6,7 @@ export function storeLocalData (stateArr) {
 }
 
 export function getLocalData (stateArr) {
-  /* 需要的参数格式为: [[key, value] */
+  /* 需要的参数格式为: [key] */
   let result = [];
   stateArr.forEach(e => {
     result.push(JSON.parse(localStorage.getItem(e)));

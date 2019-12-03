@@ -13,6 +13,7 @@
 import NavBar from './components/common/navBar';
 import HeadBar from './components/common/headBar';
 import { mapGetters, mapMutations } from 'vuex';
+import { storeLocalData, getLocalData } from './assets/js/base'
 
 export default {
   name: 'app',
@@ -25,11 +26,18 @@ export default {
     };
   },
   created () { /* 第一次加载或者刷新的时候判断路由 */
-    window.addEventListener('beforeupload', this.beforeunloadFn);
     this.checkLogin();
     this.isLogin = this.$route.path === '/login'; // 如果是登录页面 ，不显示navbar
     this.isIndex = this.$route.path === '/'; /* 如果是首页，则不显示navbar */
     // console.log(this.isLogin, 'isLogin')
+  },
+  mounted () {
+    let _this = this/* 保存this指向，在window.onbeforeunload可以成功找到route的path */
+    window.onbeforeunload = function (e) { /* 页面卸载的时候保留之前的路由值，例如刷新的时候可以保留之前的页面 */
+      e.preventDefault()
+      e.returnValue = 'hello1';
+      storeLocalData([['oldRouter', _this.$route.path]])
+    }
   },
   watch: {
     '$route' (to, from) { /* 记录路由的来源和去路 */
@@ -71,6 +79,11 @@ export default {
         if (state === '1') { // 已登录，继续保留当前页面
           this.setHasLogin(true); // 设置登录状态
           this.setAccount(data.data);// 设置用户账号
+
+          let oldRouter = getLocalData(['oldRouter'])
+          if (oldRouter) {
+            this.$router.push(oldRouter[0])
+          }
         } else {
           this.setHasLogin(false);
           this.setOriginPage(this.from); // 先保存之前的页面链接
@@ -104,13 +117,12 @@ export default {
       }).catch(err => {
         console.log(err, '退出登录出错');
       });
-    },
-    beforeunloadFn (e) {
-      alert('刷新或者关闭');
     }
   },
+  beforeDestroy () {
+  },
   destroyed () {
-    window.removeEventListener('beforeupload', this.beforeunloadFn);
+    window.onbeforeunload = null
   },
   components: {
     NavBar,
