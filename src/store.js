@@ -16,7 +16,25 @@ export default new Vuex.Store({
     hasLogin: false,
     backStageTitle: '',
     account: '', // 管理者的账户信息
-    columnMsg: {} /* 保存当前被点击时候的栏目id */
+    columnMsg: {}, /* 保存当前被点击时候的栏目id */
+    temporaryAgenda: {/* 保存本地临时 */
+      id: '',/* 最好跟temporaryAgenda的index挂钩，这样可以很方便的查找到数据 */
+      title: '请输入议程名称',
+      date: '请输入议程名称',
+      address: '请输入议程地址',
+      contents: [
+        {
+          time: '',
+          plate: '',
+          content: {
+            title: '',
+            host: '',
+            guests: ''
+          },
+          editable: false
+        }
+      ]
+    }
   },
   getters: {// 来实时监听state值的变化(最新状态)
     getDeviceWidth (state) {

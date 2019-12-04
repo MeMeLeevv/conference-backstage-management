@@ -31,9 +31,9 @@
               <el-menu-item :index="sub.url" >
                 <div v-if="!sub.showInput">
                   {{sub.name}}
-                  <i v-if="sub.showEditIcon" class="iconfont iconedit" @click="sub.showInput=true"></i>
+                  <i v-if="sub.showEditIcon" class="iconfont iconedit" @click="(sub.showInput=true) && (sub.oldTitle=sub.name)"></i>
                 </div>
-                <div @click.stop.once="sub.oldTitle=sub.name" v-else class="inputArea">
+                <div @click.stop v-else class="inputArea">
                   <input placeholder="请输入标题" v-model="sub.name" />
                   <span class="icon">
                     <span title="确定" @click="(sub.showInput=false)&&submit(sub.id,sub.name)" class="iconfont icongou"></span>
@@ -60,7 +60,7 @@
                 </el-menu-item>
               </div>
             </div>
-            <el-button class="addBtn" @click="addNewAgenda" plain>新增议程</el-button>
+            <el-button class="addBtn" @click="addNewAgenda">新增议程</el-button>
           </el-menu-item-group>
         </el-submenu>
       </div>
@@ -190,8 +190,8 @@ export default {
       let data = JSON.parse(res.data);
       if (data.code === '1') {
         let subTitle = data.data;
-        subTitle.map(item => {
-          item.url = `/${item.cid}/columnConfig/column${item.type}`;
+        subTitle.map(item => { /* 新增栏目同一type的url都一样，如此一来都可以请求到同一个组件中，然后根据栏目id来拉取不同的数据 */
+          item.url = `/${item.cid}/columnConfig/column${item.type}`; // 这里加入栏目id也可以
           item.showEditIcon = false /* 是否显示编辑图标 */
           item.showInput = false /* 是否显示编辑input */
         });
@@ -215,10 +215,10 @@ export default {
   },
   components: {},
   methods: {
-    addNewAgenda () { /* 新增议程的时候先往subTitle那里push临时的议程路由对象路径/xxx/agendaManage/:agenda，agenda最好随机，
-    利用agenda来区分本地保存的和后台请求的数据，只要新建就在store文件里保存agenda并初始化所有数据为空，保存按钮便更新store数据，但页面需要格式检查。只要一发布议程，便摧毁后台的对应数据。
+    addNewAgenda () { /* 一次只能新增一次议程，！！！！新增议程的时候先往subTitle那里push临时的议程路由对象路径/xxx/agendaManage/:index，index（栏目id）最好与store的temporaryAgenda挂钩，
+    利用agenda来区分本地保存的和后台请求的数据，只要新建就在store文件里保存id = index 并初始化所有数据为空，保存按钮便更新store数据，但页面需要格式检查。保存时候不摧毁，但是仍然要发送请求，只要一发布议程，便摧毁后台的对应数据。
     只要在store中找到agenda，就不在后台中查找，否则去后台查找。
-    加载页面时先去后台取数据，之后再去本地查找
+    刚加载页面时全部去后台取数据，不需要本地去找
     */
 
     },
@@ -243,9 +243,13 @@ export default {
   box-sizing: border-box
 .center
   text-align: center
-.addBtn
+.addBtn /* 新增议程按钮 */
   margin-left: 55px
-
+  background: transparent
+  color: white
+.addBtn:hover
+  color: black
+  background: #f2f2f2
 #navBar
   .el-col-3
     width: 100%
