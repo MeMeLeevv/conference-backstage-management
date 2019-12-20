@@ -15,6 +15,7 @@
         <span class="title">背景图：  </span>
         <ImageShow :url="`${display&&display.commonImgBackground ? display.commonImgBackground.imgurl : errorImg}`"></ImageShow>
       </div>
+      <!-- 新增logo图 -->
     </div>
     <div class="hr"></div>
     <div class="editArea">

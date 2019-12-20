@@ -2,7 +2,8 @@
   <div id="app">
       <NavBar v-if="(getHasLogin&&!isIndex) && !isLogin" class="navBar"></NavBar><!-- 已登录且不是首页或者不是登录页的时候显示navbar -->
       <div class="right-side" :style="`width: ${(isIndex||!getHasLogin) || isLogin ? '100%' : '87.5%'}`"><!-- 处于首页或者登录页（getHasLogin=false）时right-sight宽度要处于全屏 -->
-        <HeadBar v-if="getHasLogin && !isLogin" :showAvatar="isIndex" @exitAccount="exitAccount"  :title="getBackStageTitle ? '管理后台 —— '+getBackStageTitle: '大会管理后台'" class="headBar" :manager="getAccount"></HeadBar><!-- 这里需要传props：title来变换大会header的值，
+        <HeadBar v-if="getHasLogin && !isLogin" :showAvatar="isIndex" @exitAccount="exitAccount"  :title="getBackStageTitle ? '管理后台 —— '+getBackStageTitle: '大会管理后台'"
+        class="headBar" :manager="getAccount.username"></HeadBar><!-- 这里需要传props：title来变换大会header的值，
         取值方法是首页的组件监测到用户点击项目后触发传参给父组件，也就是调用这里的title改变 -->
         <router-view class="content" />
       </div>
@@ -72,8 +73,8 @@ export default {
       return index === '/';
     },
     checkLogin () { // 检查登录状态
-      this.$axios.get('/api/logingetState').then((res) => {
-        let data = JSON.parse(res.data);
+      this.$axios.get('/api/user/logingetState').then((res) => {
+        let data = res.data;
         console.log(data, 'logingetState');
         let state = data.code;
         if (state === '1') { // 已登录，继续保留当前页面
@@ -81,7 +82,11 @@ export default {
           this.setAccount(data.data);// 设置用户账号
 
           let oldRouter = getLocalData(['oldRouter'])
-          if (oldRouter) {
+          console.log(oldRouter, 'oldRouter')
+          // 如果上一个路径是登录或者没有，则默认返回首页
+          if (oldRouter === '/login' || !oldRouter) {
+            this.$router.push('/')
+          } else {
             this.$router.push(oldRouter[0])
           }
         } else {
@@ -93,7 +98,7 @@ export default {
       });
     },
     login () { /* 测试自用函数：先询问登录状态，如果显示已经登录就不需要发登录请求了 */
-      this.$axios.get('/api/loginCheck?user=admin2&password=admin').then((res) => {
+      this.$axios.get('/api/loginCheck?user=admin&password=admin').then((res) => {
         // console.log(JSON.parse(res.data))
       }).catch((err) => {
         console.log(err);

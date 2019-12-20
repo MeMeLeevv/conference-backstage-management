@@ -17,24 +17,8 @@ export default new Vuex.Store({
     backStageTitle: '',
     account: '', // 管理者的账户信息
     columnMsg: {}, /* 保存当前被点击时候的栏目id */
-    temporaryAgenda: {/* 保存本地临时 */
-      id: '',/* 最好跟temporaryAgenda的index挂钩，这样可以很方便的查找到数据 */
-      title: '请输入议程名称',
-      date: '请输入议程名称',
-      address: '请输入议程地址',
-      contents: [
-        {
-          time: '',
-          plate: '',
-          content: {
-            title: '',
-            host: '',
-            guests: ''
-          },
-          editable: false
-        }
-      ]
-    }
+    temporaryAgenda: {},/* 保存本地临时 */
+    agendaBtnDisabled: false /* 新增议程按钮的可编辑状态 */
   },
   getters: {// 来实时监听state值的变化(最新状态)
     getDeviceWidth (state) {
@@ -57,6 +41,12 @@ export default new Vuex.Store({
     },
     getColumnMsg (state) {
       return state.columnMsg;
+    },
+    getTemporaryAgenda (state) {
+      return state.temporaryAgenda
+    },
+    getAgendaBtnDisabled (state) {
+      return state.agendaBtnDisabled
     }
   },
   mutations: {// 一个对像可以放改变state初始值的方法，也可以进行改变state里的值
@@ -74,7 +64,13 @@ export default new Vuex.Store({
     },
     setColumnMsg (state, msg) {
       state.columnMsg = msg;
-    }
+    },
+    setTemporaryAgenda (state, data) {
+      state.temporaryAgenda = data
+     },
+     setaAgendaBtnDisabled (state, data) {
+      state.agendaBtnDisabled = data
+     }
   },
   actions: {// 这个actions也是个对象变量，最大的作用就是里面的action方法 可以包含任意多个异步操作
     activityTab (context) { // 一个函数连续触发多个mutation的函数

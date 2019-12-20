@@ -39,37 +39,37 @@ export default new Router({
           component: ConferenceMsg
         },
         {
-          path: 'columnConfig/column0', /* 这里不能填 /columnConfig/headImage ,第一个“/”会被认为是根目录，而这里应该是继承上一级的id目录 */
+          path: 'columnConfig/headImage/:cid', /* 这里不能填 /columnConfig/headImage ,第一个“/”会被认为是根目录，而这里应该是继承上一级的id目录 */
           component: HeadImage
 
         },
         {
-          path: 'columnConfig/column1', /* 这里不能填 /columnConfig/headImage ,第一个“/”会被认为是根目录，而这里应该是继承上一级的id目录 */
+          path: 'columnConfig/background/:cid', /* 这里不能填 /columnConfig/headImage ,第一个“/”会被认为是根目录，而这里应该是继承上一级的id目录 */
           component: Background
 
         },
         {
-          path: 'columnConfig/column2',
+          path: 'columnConfig/highlight/:cid',
           name: 'highlight',
           component: Highlight
         },
         {
-          path: 'columnConfig/column5',
+          path: 'columnConfig/guests/:cid',
           name: 'guests',
           component: Guests
         },
         {
-          path: 'columnConfig/column9',
+          path: 'columnConfig/partners/:cid',
           name: 'partners',
           component: Partners
         },
         {
-          path: 'columnConfig/column10',
+          path: 'columnConfig/cooperativeMedia/:cid',
           name: 'cooperativeMedia',
           component: CooperativeMedia
         },
         {
-          path: 'agendaManage_*',
+          path: 'agendaManage/:sid',
           name: 'agendaManage',
           component: AgendaManage
         }

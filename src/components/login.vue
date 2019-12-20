@@ -77,8 +77,8 @@ export default {
           background: 'rgba(255, 255, 255, 0.7)'
         });
         if (valid) {
-          this.$axios.get(`/api/loginCheck?user=${this.form.user}&password=${this.form.password}`).then((res) => { // 提交登录数据
-            let data = JSON.parse(res.data);
+          this.$axios.get(`/api/user/login?user=${this.form.user}&password=${this.form.password}`).then((res) => { // 提交登录数据
+            let data = res.data;
             if (data.code === '1') {
               this.setAccount(data.data); // 设置用户账号
               if (this.getOriginPage) { // 跳转到原来的页面

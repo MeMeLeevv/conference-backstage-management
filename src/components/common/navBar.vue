@@ -42,6 +42,35 @@
                 </div>
               </el-menu-item>
             </div>
+            <el-button class="addBtn" @click="dialogFormVisible = true" >新增栏目</el-button>
+            <el-dialog title="栏目信息" :visible.sync="dialogFormVisible">
+              <el-form :model="form" :rules="rules" ref="form">
+                <el-form-item label="栏目名称" :label-width="formLabelWidth" prop="name">
+                  <el-input v-model="form.name" autocomplete="off" placeholder="请输入栏目名称"></el-input>
+                </el-form-item>
+                <el-form-item label="栏目类型" :label-width="formLabelWidth">
+                  <el-select v-model="form.type" placeholder="请选择栏目类型">
+                    <el-option value="0" label="headImage"></el-option>
+                    <el-option value="1" label="background"></el-option>
+                    <el-option value="2" label="highlight"></el-option>
+                    <el-option value="3" label="scale"></el-option>
+                    <el-option value="4" label="excellenceAward"></el-option>
+                    <el-option value="5" label="guests"></el-option>
+                    <el-option value="6" label="agenda"></el-option>
+                    <el-option value="7" label="news"></el-option>
+                    <el-option value="8" label="registration"></el-option>
+                    <el-option value="9" label="partners"></el-option>
+                    <el-option value="10" label="cooperativeMedia"></el-option>
+                    <el-option value="11" label="address"></el-option>
+                    <el-option value="12" label="contact"></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-form>
+              <div slot="footer" class="dialog-footer">
+                <el-button @click="dialogFormVisible = false">取 消</el-button>
+                <el-button type="primary" @click="addNewColumn('form')">确 定</el-button>
+              </div>
+            </el-dialog>
           </el-menu-item-group>
         </el-submenu>
         <!-- 议程管理模块，这里打算不用input直接更改title的值，标题太长了 -->
@@ -60,7 +89,7 @@
                 </el-menu-item>
               </div>
             </div>
-            <el-button class="addBtn" @click="addNewAgenda">新增议程</el-button>
+            <el-button class="addBtn" @click="addNewAgenda" :disabled="getAgendaBtnDisabled">新增议程</el-button>
           </el-menu-item-group>
         </el-submenu>
       </div>
@@ -72,13 +101,44 @@
 <script>
 import { axiosGet } from '../../assets/js/axios';
 import { storeLocalData } from '../../assets/js/base';
+import { mapMutations, mapGetters } from 'vuex'
+
+/* 现在栏目navbar的需求是，1、能新增，新增时候可编辑name和type（必填,type给select框）确定后给后台，后台返回栏目id，新增之后相同type排序,同时button隐藏，出现确定和取消来确定用户想要的位置，此时可拖动？
+注意同type的url要归为一类；2、能拖动 */
 
 export default {
   name: 'navBar',
-  data () {
+  data () { /* 排序字段跟他的index挂钩！！！ */
     var id = this.$route.params.id; //   /117/columnConfig/headImage
     var openColumn = id.substr(0, id.lastIndexOf('/')); // 获取/117/columnConfig，来自动展开激活的那一栏
     return {
+      rules: {
+        name: [
+          { required: true, message: '请输入栏目名称', trigger: 'blur' },
+          { min: 1, max: 5, message: '长度在 1 到 5 个字符', trigger: 'blur' }
+        ]
+      },
+      dialogFormVisible: false,
+      form: {
+        name: '',
+        type: '0'
+      },
+      formLabelWidth: '120px',
+      typeMap: {
+        0: 'headImage',
+        1: 'background',
+        2: 'highlight',
+        3: 'scale',
+        4: 'excellenceAward',
+        5: 'guests',
+        6: 'agenda',
+        7: 'news',
+        8: 'registration',
+        9: 'partners',
+        10: 'cooperativeMedia',
+        11: 'address',
+        12: 'contact'
+      },
       navMsg: [
         {
           name: '首页',
@@ -108,8 +168,12 @@ export default {
           needAddBtn: true,
           subTitle: [
             { id: '333',
-              url: '/789/agendaManage_333',
+              url: `/${id}/agendaManage/temp1`,
               name: '123'
+            },
+            { id: '555',
+              url: `/${id}/agendaManage/temp2`,
+              name: '456'
             }
           ]
         },
@@ -175,8 +239,13 @@ export default {
       openColumn: [openColumn]
     };
   },
+  computed: {
+    ...mapGetters([
+      'getAgendaBtnDisabled'
+    ])
+  },
   created () {
-    /* 获取子栏目列表,初始化子栏目
+    /* 获取子栏目列表,初始化子栏目 ，同样的我们先获取议程列表，然后新增的时候往subTitle里push进初始化的议程列表对象，id也要，否则销毁的时候无法及时成功
     subTitle: [{
             name: '大会头图',
             url: `/${id}/columnConfig/headImage`,
@@ -191,7 +260,7 @@ export default {
       if (data.code === '1') {
         let subTitle = data.data;
         subTitle.map(item => { /* 新增栏目同一type的url都一样，如此一来都可以请求到同一个组件中，然后根据栏目id来拉取不同的数据 */
-          item.url = `/${item.cid}/columnConfig/column${item.type}`; // 这里加入栏目id也可以
+          item.url = `/${item.cid}/columnConfig/${this.typeMap[item.type]}/column${item.id}`; // 这里加入栏目id也可以
           item.showEditIcon = false /* 是否显示编辑图标 */
           item.showInput = false /* 是否显示编辑input */
         });
@@ -214,13 +283,61 @@ export default {
     })
   },
   components: {},
-  methods: {
-    addNewAgenda () { /* 一次只能新增一次议程，！！！！新增议程的时候先往subTitle那里push临时的议程路由对象路径/xxx/agendaManage/:index，index（栏目id）最好与store的temporaryAgenda挂钩，
+  methods: { /* 关于鼠标直接拖拽排序的，navbar列表改变后直接将排序后的数据发请求给后台，下次再次请求时发送更换后的数据即可 */
+    ...mapMutations([
+      'setTemporaryAgenda',
+      'setaAgendaBtnDisabled'
+    ]),
+    addNewColumn (formName) { /* 发送新增栏目请求给后台 */
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          alert('submit!');
+          this.dialogFormVisible = false
+          console.log(this.form, '发送新增栏目请求给后台，后台返回栏目id，然后push进栏目的subTitle中')
+        } else {
+          console.log('error submit!!');
+          return false;
+        }
+      });
+    },
+    addNewAgenda () { /* 一次只能新增一次议程，！！！！新增议程的时候先往subTitle那里push临时的议程路由对象路径/cid/agendaManage/:index，index（议程id）最好与store的temporaryAgenda挂钩，
     利用agenda来区分本地保存的和后台请求的数据，只要新建就在store文件里保存id = index 并初始化所有数据为空，保存按钮便更新store数据，但页面需要格式检查。保存时候不摧毁，但是仍然要发送请求，只要一发布议程，便摧毁后台的对应数据。
     只要在store中找到agenda，就不在后台中查找，否则去后台查找。
-    刚加载页面时全部去后台取数据，不需要本地去找
+    刚加载页面时全部去后台取数据，不需要本地去找，只要进入新增议程页面后离开就提示请保存否则数据将不会被保存，然后销毁store的temporaryAgenda数据
     */
-
+      /*
+    12-5
+    获需在新增的时候就发送请求要求返回一个议程id，然后去用议程id去编辑url，与发布版的议程列表数据类似（这里可能存在都加载一个组件发生不刷新的状况）并在created的时候去拉取议程数据，没有的话就展示初始状态
+    新增的字段再增加temp = true
+    */
+      // let id = Math.random().toString(36).substr(2).slice(0, 5) // 生成3-32位长度的字母数字组合的随机字符串
+      this.setTemporaryAgenda({ /* 每次新增都初始化store的temporaryAgenda数据 */
+        // id: id, /* 随机 ,对应后台的议程id */
+        name: '请输入议程名称',
+        date: '',
+        address: '',
+        contents: [
+          {
+            startTime: '',
+            endTime: '',
+            plate: '',
+            content: {
+              title: '',
+              host: '',
+              guests: ''
+            },
+            editable: false
+          }
+        ]
+      })
+      this.navMsg[3].subTitle.push({
+        // id: id, /* 随机 ,对应后台的议程id */
+        temp: true, // 标知临时数据
+        name: '请输入议程名称',
+        url: `/${this.$route.params.id}/agendaManage/temp`
+      })
+      /* 还要将按钮设为不可编辑状态 */
+      this.setaAgendaBtnDisabled(true)
     },
     submit (id, name) { /* 这里需要栏目id和title的更改值然后传到数据库 */
       console.log(id, 'id', name, 'name')

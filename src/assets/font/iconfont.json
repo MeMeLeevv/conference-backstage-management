@@ -48,6 +48,13 @@
       "unicode_decimal": 58983
     },
     {
+      "icon_id": "1025557",
+      "name": "编辑",
+      "font_class": "bianji",
+      "unicode": "e61e",
+      "unicode_decimal": 58910
+    },
+    {
       "icon_id": "1185453",
       "name": "edit",
       "font_class": "edit",
