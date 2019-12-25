@@ -223,11 +223,6 @@ export default {/* 信息如果都已经验证成功，则用formData结合上�
     isImage (ext) {
       return ['png', 'jpg', 'jpeg', 'bmp', 'gif', 'webp', 'psd', 'svg', 'tiff', 'image/jpeg', 'image/png', 'image/gif'].indexOf(ext) !== -1;
     }
-    /* isImage (url) {
-      let index = url.lastIndexOf('.')
-      let ext = url.substr(index + 1)
-      return ['png', 'jpg', 'jpeg', 'bmp', 'gif', 'webp', 'psd', 'svg', 'tiff'].indexOf(ext.toLowerCase()) !== -1
-    } */
   }
 };
 </script>

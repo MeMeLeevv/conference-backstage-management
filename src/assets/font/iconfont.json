@@ -27,6 +27,13 @@
       "unicode_decimal": 58906
     },
     {
+      "icon_id": "883901",
+      "name": "灯泡",
+      "font_class": "dengpao",
+      "unicode": "e60e",
+      "unicode_decimal": 58894
+    },
+    {
       "icon_id": "970791",
       "name": "首页",
       "font_class": "-index",

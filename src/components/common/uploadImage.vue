@@ -3,7 +3,7 @@
     <el-upload
       :action="action"
       list-type="picture-card"
-      name="img"
+      name="file"
       :show-file-list="showFileList"
       :before-upload="beforeAvatarUpload"
       :on-success="uploadSuccess"
@@ -26,12 +26,12 @@
 
 <script>
 export default {
-  /* 信息如果都已经验证成功，则用formData结合上传后台，触发父元素刷新表格 */
+  // 信息如果都已经验证成功，则用formData结合上传后台，触发父元素刷新表格
   name: 'uploadImage',
   props: {
     action: {
       type: String,
-      default: '/api/filesaveImg'
+      default: '/api/common/uploadImg'
     },
     limit: {
       type: Number,
@@ -60,10 +60,11 @@ export default {
     };
   },
   methods: {
-    uploadSuccess (response, file, fileList) { /* 上传成功 */
+    uploadSuccess (response, file, fileList) {
       // let path = JSON.parse(response).data
       if (!this.multiple) {
-        let path = [];
+        console.log(response, file, fileList)
+        /* let path = [];
         // console.log(fileList, 'fileLsit');
         fileList.forEach(item => {
           // console.log(JSON.parse(item.response), 'item');
@@ -72,7 +73,7 @@ export default {
         });
         // console.log(path, 'path');
         this.multiple = Number(this.limit) > 1;
-        this.$emit('getImgPath', this.inputName, path, this.limit > 1)
+        this.$emit('getImgPath', this.inputName, path, this.limit > 1) */
       }
     },
     handleRemove (file, fileList) {

@@ -12,6 +12,7 @@
         active-text-color="#ffd04b"
         router
       >
+      <!-- 头像 -->
       <div class="avatar">
         <img src="../../assets/images/avatar.jpg" alt="Your Avatar">
       </div>
@@ -27,7 +28,7 @@
            <span>{{nav.name}}</span>
           </template>
           <el-menu-item-group>
-            <div v-for="sub in nav.subTitle" @click="saveColumnMsg(sub)" @mouseenter="sub.showEditIcon=true" @mouseleave="sub.showEditIcon=false" :key="sub.id">
+            <!-- <div v-for="sub in nav.subTitle" @click="saveColumnMsg(sub)" @mouseenter="sub.showEditIcon=true" @mouseleave="sub.showEditIcon=false" :key="sub.c_id">
               <el-menu-item :index="sub.url" >
                 <div v-if="!sub.showInput">
                   {{sub.name}}
@@ -36,12 +37,45 @@
                 <div @click.stop v-else class="inputArea">
                   <input placeholder="请输入标题" v-model="sub.name" />
                   <span class="icon">
-                    <span title="确定" @click="(sub.showInput=false)&&submit(sub.id,sub.name)" class="iconfont icongou"></span>
+                    <span title="确定" @click="(sub.showInput=false)&&submit(sub.c_id,sub.name)" class="iconfont icongou"></span>
                     <span title="取消" @click="(sub.name=sub.oldTitle)&&(sub.showInput=false)" class="iconfont iconquxiao"></span>
                   </span>
                 </div>
               </el-menu-item>
-            </div>
+            </div> -->
+
+            <draggable
+              :list="nav.subTitle"
+              :disabled="!enabled"
+              class="list-group"
+              ghost-class="ghost"
+              :move="checkMove"
+              @start="dragging = true"
+              @end="dropColumn"
+            >
+              <div
+                class="list-group-item"
+                v-for="(element) in nav.subTitle"
+                :key="element.c_id"
+                @click="saveColumnMsg(element)"
+                @mouseenter="element.showEditIcon=true" @mouseleave="element.showEditIcon=false"
+              >
+              <el-menu-item :index="element.url" >
+                <div v-if="!element.showInput">
+                  {{element.name}}
+                  <i v-if="element.showEditIcon" class="iconfont iconedit" @click="(element.showInput=true) && (element.oldTitle=element.name)"></i>
+                </div>
+                <div @click.stop v-else class="inputArea">
+                  <input placeholder="请输入标题" v-model="element.name" />
+                  <span class="icon">
+                    <span title="确定" @click="(element.showInput=false)&&submit(element.c_id,element.name)" class="iconfont icongou"></span>
+                    <span title="取消" @click="(element.name=element.oldTitle)&&(element.showInput=false)" class="iconfont iconquxiao"></span>
+                  </span>
+                </div>
+                </el-menu-item>
+              </div>
+            </draggable>
+
             <el-button class="addBtn" @click="dialogFormVisible = true" >新增栏目</el-button>
             <el-dialog title="栏目信息" :visible.sync="dialogFormVisible">
               <el-form :model="form" :rules="rules" ref="form">
@@ -102,6 +136,7 @@
 import { axiosGet } from '../../assets/js/axios';
 import { storeLocalData } from '../../assets/js/base';
 import { mapMutations, mapGetters } from 'vuex'
+import draggable from 'vuedraggable'
 
 /* 现在栏目navbar的需求是，1、能新增，新增时候可编辑name和type（必填,type给select框）确定后给后台，后台返回栏目id，新增之后相同type排序,同时button隐藏，出现确定和取消来确定用户想要的位置，此时可拖动？
 注意同type的url要归为一类；2、能拖动 */
@@ -112,6 +147,8 @@ export default {
     var id = this.$route.params.id; //   /117/columnConfig/headImage
     var openColumn = id.substr(0, id.lastIndexOf('/')); // 获取/117/columnConfig，来自动展开激活的那一栏
     return {
+      enabled: true,
+      dragging: false,
       rules: {
         name: [
           { required: true, message: '请输入栏目名称', trigger: 'blur' },
@@ -125,19 +162,19 @@ export default {
       },
       formLabelWidth: '120px',
       typeMap: {
-        0: 'headImage',
-        1: 'background',
-        2: 'highlight',
-        3: 'scale',
-        4: 'excellenceAward',
-        5: 'guests',
-        6: 'agenda',
-        7: 'news',
-        8: 'registration',
-        9: 'partners',
-        10: 'cooperativeMedia',
-        11: 'address',
-        12: 'contact'
+        1: 'headImage',
+        2: 'background',
+        3: 'highlight',
+        4: 'scale',
+        5: 'excellenceAward',
+        6: 'guests',
+        7: 'agenda',
+        8: 'news',
+        9: 'registration',
+        10: 'partners',
+        11: 'cooperativeMedia',
+        12: 'address',
+        13: 'contact'
       },
       navMsg: [
         {
@@ -253,24 +290,26 @@ export default {
             id: ''
           }],
     */
-    axiosGet('/api/conferencegetColumnListByCid', {
-      projectid: this.$route.params.id
+    let that = this
+    axiosGet('/api/column/getColumnList', {
+      p_id: this.$route.params.id
     }, (res) => {
-      let data = JSON.parse(res.data);
+      let data = res.data
       if (data.code === '1') {
         let subTitle = data.data;
-        subTitle.map(item => { /* 新增栏目同一type的url都一样，如此一来都可以请求到同一个组件中，然后根据栏目id来拉取不同的数据 */
-          item.url = `/${item.cid}/columnConfig/${this.typeMap[item.type]}/column${item.id}`; // 这里加入栏目id也可以
-          item.showEditIcon = false /* 是否显示编辑图标 */
-          item.showInput = false /* 是否显示编辑input */
+        console.log(subTitle, 'subTitle')
+        subTitle.map(item => { // 新增栏目同一type的url都一样，如此一来都可以请求到同一个组件中，然后根据栏目id来拉取不同的数据
+          item.url = `/${item.p_id}/columnConfig/${this.typeMap[item.type]}/column${item.c_id}`; // 这里加入栏目id也可以
+          item.showEditIcon = false // 是否显示编辑图标
+          item.showInput = false // 是否显示编辑input
         });
         this.navMsg[2].subTitle = subTitle;
         console.log(this.navMsg[2], '查找列表成功');
       } else {
-        console.log('请求成功！但是查找列表失败');
+        that.$message.error(data.msg);
       }
     }, (err) => {
-      console.log(err, '查找列表失败');
+      that.$message.error(err);
     });
   },
   mounted () {
@@ -282,7 +321,9 @@ export default {
       }) */
     })
   },
-  components: {},
+  components: {
+    draggable
+  },
   methods: { /* 关于鼠标直接拖拽排序的，navbar列表改变后直接将排序后的数据发请求给后台，下次再次请求时发送更换后的数据即可 */
     ...mapMutations([
       'setTemporaryAgenda',
@@ -299,6 +340,21 @@ export default {
           return false;
         }
       });
+    },
+    checkMove: function (e) {
+      // console.log(e, 'emove')
+      // console.log(this.navMsg[2].subTitle, 'subTitle')
+      // console.log(this.navMsg[2].subTitle)
+      window.console.log('Future index: ' + e.draggedContext.futureIndex);
+    },
+    dropColumn () { /* 新增的时候将sort = this.navMsg[2].subTitle.length */
+      this.dragging = false
+      /* 这里改变subTitle的sort值 */
+      this.navMsg[2].subTitle = this.navMsg[2].subTitle.map((item, index) => {
+        item.sort = index
+        return item
+      })
+      console.log(this.navMsg[2].subTitle, 'this.navMsg[2].subTitle')
     },
     addNewAgenda () { /* 一次只能新增一次议程，！！！！新增议程的时候先往subTitle那里push临时的议程路由对象路径/cid/agendaManage/:index，index（议程id）最好与store的temporaryAgenda挂钩，
     利用agenda来区分本地保存的和后台请求的数据，只要新建就在store文件里保存id = index 并初始化所有数据为空，保存按钮便更新store数据，但页面需要格式检查。保存时候不摧毁，但是仍然要发送请求，只要一发布议程，便摧毁后台的对应数据。

@@ -15,6 +15,7 @@ import NavBar from './components/common/navBar';
 import HeadBar from './components/common/headBar';
 import { mapGetters, mapMutations } from 'vuex';
 import { storeLocalData, getLocalData } from './assets/js/base'
+import { axiosPost } from './assets/js/axios';
 
 export default {
   name: 'app',
@@ -26,32 +27,29 @@ export default {
       isLogin: true
     };
   },
-  created () { /* 第一次加载或者刷新的时候判断路由 */
-    this.checkLogin();
+  created () { // 第一次加载或者刷新的时候判断路由
+    this.checkLogin(); // 判断登录状态
     this.isLogin = this.$route.path === '/login'; // 如果是登录页面 ，不显示navbar
-    this.isIndex = this.$route.path === '/'; /* 如果是首页，则不显示navbar */
-    // console.log(this.isLogin, 'isLogin')
+    this.isIndex = this.$route.path === '/'; // 如果是首页，则不显示navbar
   },
   mounted () {
-    let _this = this/* 保存this指向，在window.onbeforeunload可以成功找到route的path */
-    window.onbeforeunload = function (e) { /* 页面卸载的时候保留之前的路由值，例如刷新的时候可以保留之前的页面 */
+    let _this = this// 保存this指向，在window.onbeforeunload可以成功找到route的path
+    window.onbeforeunload = function (e) { // 页面卸载的时候保留之前的路由值，例如刷新的时候可以保留之前的页面
       e.preventDefault()
       e.returnValue = 'hello1';
       storeLocalData([['oldRouter', _this.$route.path]])
     }
   },
   watch: {
-    '$route' (to, from) { /* 记录路由的来源和去路 */
+    '$route' (to, from) { // 记录路由的来源和去路
       this.from = from.path;
       this.to = to.path;
-      // console.log(from, 'from')
-      // console.log(to, 'to') // 此处的from需要赋值给login登陆成功后返回的原始页面，如果没有则默认返回首页
       this.isIndex = to.path === '/';
       this.isLogin = to.path === '/login';
       if (this.isIndex) { // 如果是首页需要把大会标题初始化
         this.setBackStageTitle('');
       }
-      if (this.from !== '/' && this.to.search(/(\/\d+)$/) !== -1) { /* 如果要返回首页，页面会停留在http://localhost:8000/#/117，要需要加以判断 */
+      if (this.from !== '/' && this.to.search(/(\/\d+)$/) !== -1) { // 如果要返回首页，页面会停留在http://localhost:8000/#/117，此时页面会出现空白，要需要加以判断
         this.$router.push('/'); // 返回首页
       }
     }
@@ -60,29 +58,28 @@ export default {
     ...mapGetters(['getOriginPage', 'getHasLogin', 'getBackStageTitle', 'getAccount'])
   },
   methods: {
-    // 映射
     ...mapMutations([
       'setOriginPage',
       'setHasLogin',
       'setAccount',
       'setBackStageTitle'
     ]),
-    getDevice () {
-    },
-    setIsIndex (index) {
-      return index === '/';
-    },
-    checkLogin () { // 检查登录状态
-      this.$axios.get('/api/user/logingetState').then((res) => {
+
+    /*
+    作用：检查登录状态,并作出处理
+    @return null
+    */
+    checkLogin () {
+      let that = this
+      // 查询大会信息并展示在预览区，如果没有值要有初始化
+      axiosPost('/api/user/logingetState', null, (res) => {
         let data = res.data;
-        console.log(data, 'logingetState');
-        let state = data.code;
-        if (state === '1') { // 已登录，继续保留当前页面
+        // eslint-disable-next-line eqeqeq
+        if (data.code == 1) {
           this.setHasLogin(true); // 设置登录状态
           this.setAccount(data.data);// 设置用户账号
 
-          let oldRouter = getLocalData(['oldRouter'])
-          console.log(oldRouter, 'oldRouter')
+          let oldRouter = getLocalData(['oldRouter']) // 获取跳转到登录页面前的路径
           // 如果上一个路径是登录或者没有，则默认返回首页
           if (oldRouter === '/login' || !oldRouter) {
             this.$router.push('/')
@@ -90,44 +87,54 @@ export default {
             this.$router.push(oldRouter[0])
           }
         } else {
+          that.$message({
+            message: data.msg,
+            type: 'warning'
+          });
           this.setHasLogin(false);
           this.setOriginPage(this.from); // 先保存之前的页面链接
-          console.log(this.getHasLogin, 'this.getHasLogin');
           this.$router.push('/login'); // 去往登录页面
         }
+      }, (err) => {
+        that.$message.error('加载大会列表失败！建议重新加载页面！' + err);
       });
     },
-    login () { /* 测试自用函数：先询问登录状态，如果显示已经登录就不需要发登录请求了 */
-      this.$axios.get('/api/loginCheck?user=admin&password=admin').then((res) => {
-        // console.log(JSON.parse(res.data))
-      }).catch((err) => {
-        console.log(err);
-      }).finally(() => {
-        // console.log('done')
-      });
-    },
-    exitAccount () { /* 处理退出登录 */
-      this.$axios.get('/api/loginoutLog').then(res => { // 退出成功，全局数据需要初始化
+    /*
+    作用：处理退出登录，返回登录页面
+    @return null
+    */
+    exitAccount () {
+      axiosPost('/api/user/loginout', null, (res) => {
+        let data = res.data;
+        console.log(data, 'logindata')
+        // eslint-disable-next-line eqeqeq
+        if (data.code == 1) {
+          this.$message({
+            message: data.msg,
+            type: 'success',
+            duration: '1000',
+            onClose: () => {
+              this.setAccount('');
+              this.setHasLogin(false);
+              this.setOriginPage('');
+              this.$router.push('/login');
+            }
+          });
+        } else {
+          this.$message({
+            message: data.msg,
+            type: 'error',
+            duration: '1000'
+          });
+        }
+      }, (err) => {
         this.$message({
-          message: '退出成功！',
-          type: 'success',
-          duration: '1000',
-          onClose: () => {
-            this.setAccount('');
-            this.setHasLogin(false);
-            this.setOriginPage('');
-            this.$router.push('/login');
-          }
+          message: '退出登陆失败,请重试！' + err,
+          type: 'error',
+          duration: '1000'
         });
-      }).catch(err => {
-        console.log(err, '退出登录出错');
       });
     }
-  },
-  beforeDestroy () {
-  },
-  destroyed () {
-    window.onbeforeunload = null
   },
   components: {
     NavBar,

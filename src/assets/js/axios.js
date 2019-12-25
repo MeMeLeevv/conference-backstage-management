@@ -5,7 +5,11 @@ export function axiosGet (url, data, successFn, failFn, finallyFn) {
   axios({
     method: 'get',
     url: url,
-    params: data
+    params: data,
+    headers: {
+      'x-requested-with': 'XMLHttpRequest',
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
   }).then(successFn).catch(failFn).finally(finallyFn);
 }
 
@@ -14,13 +18,14 @@ export function axiosPost (url, data, successFn, failFn, finallyFn, qs) {
     method: 'post',
     url: url,
     data: qs ? Qs.stringify(data) : data,
-    /*     transformRequest: [
+    transformRequest: [
       function (data) {
         return Qs.stringify(data)
       }
-    ], */
-    headers: {
+    ]
+    /* headers: {
+      'x-requested-with': 'XMLHttpRequest',
       'Content-Type': 'application/x-www-form-urlencoded'
-    }
+    } */
   }).then(successFn).catch(failFn).finally(finallyFn);
 }
