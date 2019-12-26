@@ -47,7 +47,7 @@
       <div class="area">预览</div>
       <div class="block">
         <span class="title">内容图： </span>
-        <ImageShow url="display.commonImgColumn.imgurl"></ImageShow>
+        <ImageShow url="display"></ImageShow>
       </div>
     </div>
     <div class="hr"></div>
@@ -67,7 +67,7 @@
 <script>
 import ImageShow from '../common/imageShow';
 import UploadImage from '../common/uploadImage';
-import { axiosGet, axiosPost } from '../../assets/js/axios';
+import { axiosPost } from '../../assets/js/axios';
 import { getLocalData, getherMSg } from '../../assets/js/base';
 
 export default {
@@ -89,123 +89,50 @@ export default {
     };
   },
   created () {
-    /* 请求返回的参数如下：
-    id  栏目id
-    cid 所属大会id
-    name 栏目名称（标题）
-    type 栏目类型
-    commonImgColumn.imgurl 栏目图片路径
-    display 显示状态 0:不显示  1:显示
-    createTime 创建时间
-
-    commonImgTitle.imgurl 栏目标题图片路径
-      commonImgTitle.link 栏目标题图片跳转链接
-    commonImgBackground.imgurl 栏目背景图片路径
-      commonImgBackground.link 栏目背景图片跳转链接
-    column_describe 栏目描述
-      commonImgColumn.link 栏目图片跳转链接
-    content_sorting 栏目内容的排序
-    structure 页面排版结构
-    proportion 页面排版比例
-    max_contents 最大内容数量
-    extend1 扩展列1
-    extend2 扩展列2
-    extend3 扩展列3
-    */
-    // let that = this;
-    let id = getLocalData(['columnMsg']);
-    /* 返回格式为：
-    [{…}]
-        0:
-        cid: 789 大会id
-        id: 166  栏目id
-        name: "大会头图"
-        type: "0"
-        url: "/789/columnConfig/column0"
-        __proto__: Object
-        length: 1
-        __proto__: Array(0) */
-    this.id = id[0].id;
-    this.cid = id[0].cid;
-    axiosGet(
-      '/api/conferencegetColumnByColumnid',
-      { columnId: id[0].id },
+    /// let that = this;
+    let cData = getLocalData(['columnMsg']);
+    console.log(cData, 'columnMsg')
+    this.c_id = cData[0].c_id;
+    this.p_id = cData[0].p_id;
+    /* axiosGet('/api/column/getColumnList',
+      { c_id: cData[0].c_id },
       res => {
-        /* 查询大会信息并展示在预览区，如果没有值要有初始化 */
-        let data = JSON.parse(res.data);
+        // 查询大会信息并展示在预览区，如果没有值要有初始化
+        let data = res.data
         if (data.code === '1') {
-          this.display = data.data;
+          this.display = data.data[0];
           console.log(this.display, 'display');
-          /* 大会头图请求现在所必须的数据 */
-          this.data = [
-            'column.id',
-            `${this.display.id}`,
-            'column.cid',
-            `${this.display.cid}`,
-            'column.name',
-            `${this.display.name}`,
-            'column.type',
-            `${this.display.type}`,
-            'columnImg',
-            `${this.display.commonImgColumn && this.display.commonImgColumn.imgurl}`,
-            'column.display',
-            `${this.display.display}`
-          ];
         } else {
-          console.log('请求成功！但是根据栏目id查找大会头图失败');
+          that.$message.error(data.msg);
         }
       },
       err => {
-        console.log(err, '根据栏目id查找大会头图失败');
+        that.$message.error(err)
       }
-    );
+    ); */
+    /* this.$axios.get('/api/column/getColumnList', { params: { c_id: cData[0].c_id } }).then(res => {
+      console.log(res, 'res')
+    }) */
+    let p1 = this.$axios.get('/api/column/getColumnList', { params: { c_id: cData[0].c_id } }) // axiosGet('/api/column/getColumnList', { c_id: cData[0].c_id })
+    let p2 = this.$axios.get('/api/columnObjgroup/getColumnObjGroupList', { params: { c_id: cData[0].c_id } })// axiosGet('/api/columnObjgroup/getColumnObjGroupList', { c_id: cData[0].c_id })
+    // let showData = {}
+    Promise.all([p1, p2]).then(([ColumnList, ColumnObjGroupList]) => {
+      return {
+        ColumnList: ColumnList.data, ColumnObjGroupList: ColumnObjGroupList.data
+      }
+    }).then((showData) => {
+      console.log(showData, 'showData')
+      if (showData.ColumnList.code !== 1) {
+        this.$message.error(showData.ColumnList.msg);
+      }
+      if (showData.ColumnObjGroupList.code !== 1) {
+        this.$message.error(showData.ColumnObjGroupList.msg);
+      }
+    }).catch(function (err) {
+      this.$message.error(err);
+    })
   },
   methods: {
-    /* 请求参数：
-    column.id 栏目的id
-    column.cid 所属大会的id
-    column.name 栏目名称
-    column.type 栏目类型
-    columnImg 栏目图片
-    column.display 显示状态 0:不显示  1:显示
-
-    titleImg 栏目标题图片
-    titleImgLink 栏目标题图片的跳转链接
-    backgroundImg 栏目背景图片
-    backgroundImgLink 栏目背景图片的跳转链接
-    column.columnDescribe 栏目描述
-    columnImgLink 栏目图片的跳转链接
-    column.contentSorting 栏目内容排序 (字符串 格式为“内容id3,内容id1,内容id2,……”)
-    column.structure 页面排版结构
-    column.proportion 页面排版比例
-    column.maxContents 最大内容数量
-    column.extend1 扩展列1
-    column.extend2 扩展列2
-    column.extend3 扩展列3
-
-    返回参数为：
-    id 栏目id
-    cid 所属大会的id
-    name 栏目名称（标题）
-    type 栏目类型
-    commonImgColumn.imgurl 栏目图片路径
-    display 显示状态 0:不显示  1:显示
-    createTime 创建时间
-
-    commonImgTitle.imgurl 栏目标题图片路径
-    commonImgTitle.link 栏目标题图片跳转链接
-    commonImgBackground.imgurl 栏目背景图片路径
-    commonImgBackground.link 栏目背景图片跳转链接
-    columnDescribe 栏目描述
-    commonImgColumn.link 栏目图片跳转链接
-    contentSorting 栏目内容的排序
-    structure 页面排版结构
-    proportion 页面排版比例
-    maxContents 最大内容数量
-    extend1 扩展列1
-    extend2 扩展列2
-    extend3 扩展列3
-    */
     getImgPath (name, path) {
       /* 在这里仅修改栏目内容图的路径 */
       this.form[name] = path;

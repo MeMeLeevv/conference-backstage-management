@@ -34,7 +34,7 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click.stop="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click.stop="isAddNewC ? addNewColumn('ruleForm') : editColumn('ruleForm')"
+        <el-button type="primary" @click.stop="addNewColumn('ruleForm')"
           >确 定</el-button
         >
       </div>
@@ -83,28 +83,48 @@
               >
                 <div
                   class="list-group-item"
-                  v-for="(item, index) in nav.subTitle"
+                  v-for="item in nav.subTitle"
                   :key="item.c_id"
-                  :data-index="index"
+                  :data-jump_url="item.jump_url"
                   @click.stop="saveColumnMsg(item)"
                   @mouseenter="item.showEditIcon = true"
                   @mouseleave="item.showEditIcon = false"
                 >
-                  <el-menu-item :index="item.jump_url" class="router" :class="item.active ? 'activeColor' : ''">
-                    <div>
+                  <el-menu-item :index="item.jump_url" class="router">
+                    <div v-if="!item.showInput">
                       {{ item.name }}
                       <i
                         v-if="item.showEditIcon"
                         class="iconfont iconedit"
                         title="编辑栏目名称"
-                        @click="clickEditC(item, index)"
+                        @click="
+                          (item.showInput = true) && (item.oldTitle = item.name)
+                        "
                       ></i>
+                    </div>
+                    <div @click.stop v-else class="inputArea">
+                      <input placeholder="请输入标题" v-model="item.name" />
+                      <span class="icon">
+                        <span
+                          title="确定"
+                          @click.stop="submit(item)"
+                          class="iconfont icongou"
+                        ></span>
+                        <span
+                          title="取消"
+                          @click.stop="
+                            (item.name = item.oldTitle) &&
+                              (item.showInput = false)
+                          "
+                          class="iconfont iconquxiao"
+                        ></span>
+                      </span>
                     </div>
                   </el-menu-item>
                 </div>
               </draggable>
 
-              <el-button class="addBtn" @click.stop="clickAddC"
+              <el-button class="addBtn" @click.stop="dialogFormVisible = true"
                 >新增栏目</el-button
               >
             </el-menu-item-group>
@@ -164,9 +184,6 @@ export default {
     return {
       enabled: true,
       dragging: false,
-      isAddNewC: true,
-      editIndex: 0,
-      p_id: id,
       rules: {
         name: [
           { required: true, message: '请输入栏目名称', trigger: 'blur' },
@@ -294,19 +311,6 @@ export default {
       openColumn: [openColumn]
     };
   },
-  watch: {
-    '$route' (to, from) { // 记录路由的来源和去路
-      this.from = from.path
-      this.to = to.path
-      // 在修改栏目信息之后，再次点击无法高亮！，但是页面有正确跳转，所以这里手动赋予color
-      if (to.path.indexOf('columnConfig') === -1) {
-        return
-      }
-      for (let i = 0; i < this.navMsg[2].subTitle.length; i++) {
-        this.navMsg[2].subTitle[i].active = this.navMsg[2].subTitle[i].jump_url === to.path
-      }
-    }
-  },
   computed: {
     ...mapGetters(['getAgendaBtnDisabled'])
   },
@@ -325,6 +329,7 @@ export default {
           subTitle.map(item => {
             item.jump_url = `/${item.p_id}/columnConfig/${this.typeMap[item.type]}/column${item.c_id}`; // 根据大会id、栏目类型、栏目id拼接对应的jump_url，同一type的jump_url跳转到同一样式组件
             item.showEditIcon = false; // 是否显示编辑图标
+            item.showInput = false; // 是否显示编辑input
           });
           this.navMsg[2].subTitle = subTitle;
           console.log(subTitle, '查找列表成功');
@@ -343,31 +348,6 @@ export default {
   methods: {
     /* 关于鼠标直接拖拽排序的，navbar列表改变后直接将排序后的数据发请求给后台，下次再次请求时发送更换后的数据即可 */
     ...mapMutations(['setTemporaryAgenda', 'setaAgendaBtnDisabled']),
-    /*
-    作用：点击新增栏目btn
-    @return void
-    */
-    clickAddC () {
-      this.form = { // 初始化栏目信息
-        p_id: this.p_id,
-        name: '',
-        type: 1
-      }
-      this.isAddNewC = true
-      this.dialogFormVisible = true
-    },
-
-    /*
-    作用：点击编辑栏目图标
-    @item: Object 对应新增表单的ref
-    @return void
-    */
-    clickEditC (item, index) {
-      this.form = item // 保留栏目信息
-      this.isAddNewC = false
-      this.editIndex = index
-      this.dialogFormVisible = true
-    },
     /*
     作用：发送新增栏目请求给后台
     @formName: String 对应新增表单的ref
@@ -397,52 +377,8 @@ export default {
                 // 初始化栏目信息
                 result.jump_url = `/${result.p_id}/columnConfig/${this.typeMap[result.type]}/column${result.c_id}`; // 根据大会id、栏目类型、栏目id拼接对应的jump_url，同一type的jump_url跳转到同一样式组件
                 result.showEditIcon = false; // 是否显示编辑图标
+                result.showInput = false; // 是否显示编辑input
                 this.navMsg[2].subTitle.push(result)
-              } else {
-                this.$message.error(data.msg);
-              }
-            },
-            err => {
-              console.log(err);
-              this.$message.error('新增栏目失败，请重试！' + err);
-            }
-          );
-        } else {
-          this.$message.error('请正确填写信息！');
-        }
-      });
-    },
-
-    /*
-    作用：发送新增栏目请求给后台
-    @formName: String 对应新增表单的ref
-    @return void
-    */
-    editColumn (formName) {
-      let that = this;
-      this.$refs[formName].validate(valid => {
-        if (valid) {
-          this.dialogFormVisible = false;
-          console.log(
-            this.form,
-            '发送新增栏目请求给后台，后台返回栏目id，然后push进栏目的subTitle中'
-          );
-          axiosPost(
-            '/api/column/updateColumn',
-            this.form,
-            res => {
-              let data = res.data;
-              console.log(data, '编辑信息');
-              if (data.code === '1') {
-                that.$message({
-                  message: data.msg,
-                  type: 'success'
-                });
-                // 初始化栏目信息
-                this.form.jump_url = `/${this.form.p_id}/columnConfig/${this.typeMap[this.form.type]}/column${this.form.c_id}`; // 根据大会id、栏目类型、栏目id拼接对应的jump_url，同一type的jump_url跳转到同一样式组件
-                this.form.showEditIcon = false; // 是否显示编辑图标
-                this.navMsg[2].subTitle.splice(this.editIndex, 1, this.form) // 替换该栏目信息
-                this.$router.push(this.form.jump_url)
               } else {
                 this.$message.error(data.msg);
               }
@@ -499,10 +435,6 @@ export default {
         }
       );
     },
-    /*
-    作用：新增议程
-    @return void
-    */
     addNewAgenda () {
       /* 一次只能新增一次议程，！！！！新增议程的时候先往subTitle那里push临时的议程路由对象路径/cid/agendaManage/:index，index（议程id）最好与store的temporaryAgenda挂钩，
     利用agenda来区分本地保存的和后台请求的数据，只要新建就在store文件里保存id = index 并初始化所有数据为空，保存按钮便更新store数据，但页面需要格式检查。保存时候不摧毁，但是仍然要发送请求，只要一发布议程，便摧毁后台的对应数据。
@@ -544,19 +476,44 @@ export default {
       /* 还要将按钮设为不可编辑状态 */
       this.setaAgendaBtnDisabled(true);
     },
+    submit (item) {
+      /* 这里需要栏目id和title的更改值然后传到数据库 */
+      item.showInput = false;
+      let that = this;
+      // 更新栏目名称信息
+      axiosPost(
+        '/api/column/updateColumn',
+        {
+          c_id: item.c_id,
+          name: item.name
+        },
+        res => {
+          //
+          let data = res.data;
+          console.log(data, '栏目信息');
+          if (data.code === '1') {
+            that.$message({
+              message: data.msg,
+              type: 'success'
+            });
+          } else {
+            this.$message.error(data.msg);
+          }
+        },
+        err => {
+          console.log(err);
+          this.$message.error('跟新栏目信息失败，请重试！' + err);
+        }
+      );
+    },
     handleOpen (key, keyPath) {
       // console.log(key, keyPath, 'open')
     },
     handleClose (key, keyPath) {
       // console.log(key, keyPath, 'close')
     },
-    /*
-    作用：navbar被点击后在localStorage中储存栏目信息,以便在每次跳转到对应栏目的页面时可以及时获取到对应的栏目id去拉取数据或者是用户取消修改栏目名称时可以恢复原来的名称
-    @msg: String 对应栏目信息
-    @return void
-    */
     saveColumnMsg (msg) {
-      storeLocalData([['columnMsg', msg]]);
+      storeLocalData([['columnMsg', msg]]); // navbar被点击后在localStorage中储存栏目信息,以便在每次跳转到对应栏目的页面时可以及时获取到对应的栏目id去拉取数据或者是用户取消修改栏目名称时可以恢复原来的名称
       this.$router.push(msg.jump_url);
     }
   },
@@ -569,8 +526,6 @@ export default {
 <style lang="sass" scoped>
 *
   box-sizing: border-box
-.activeColor
-  color: #ffd04b !important
 .center
   text-align: center
 .addBtn /* 新增议程按钮 */

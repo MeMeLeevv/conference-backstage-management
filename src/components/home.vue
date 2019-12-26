@@ -122,7 +122,7 @@ export default {
     ...mapMutations(['setBackStageTitle']),
     /*
     作用：点击添加大会按钮，初始化form对象
-    @return null
+    @return void
     */
     clickAdd () {
       this.dialogFormVisible = true
@@ -139,7 +139,7 @@ export default {
     @id: String 对应大会id
     @index: String 对应大会在meetingData里的索引
     @title: String 对应大会title
-    @return null
+    @return void
     */
     doTheConference (e, id, index, title) {
       let className = e.target.className
@@ -158,7 +158,7 @@ export default {
     作用：确认编辑大会信息
     @formName: String 对应form标签的ref="form"
     @id: String 对应大会id
-    @return null
+    @return void
     请求需传参数：
     p_id 项目id (必传)
     name 项目名字
@@ -203,7 +203,7 @@ export default {
     /*
     作用：确认添加大会
     @formName: String 对应form标签的ref="form"
-    @return null
+    @return void
     请求需传参数：
     name 项目名字 (必传)
     project_type 1：大会 2：奖项 (必传)
@@ -238,6 +238,7 @@ export default {
                 message: data.msg,
                 type: 'success'
               });
+              console.log(data.data)
               this.meetingData.unshift(data.data);// 网页并发状态较低时可以采取这种形式，否则需要再次请求所有大会项目（刷新）
             } else {
               that.$message.error(data.msg);
