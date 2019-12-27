@@ -4,16 +4,27 @@
       <div class="area">预览</div>
       <div class="swatch">
         <span class="title">主色调： </span>
-        <span class="colorShow" :style="`background: ${display ? display.mainColor : 'white'}`">
+        <span class="colorShow" :style="`background: ${display ? display.main_color : 'white'}`">
+          <span v-if="display.main_color" style="padding-top: 7px;width: 200px;position: relative;top: 100%;color: gray; font-size: 14px">{{display.main_color}}</span>
         </span>
       </div>
       <div class="block">
-        <span class="title">内容图：  </span>
-        <ImageShow :url="`${display&&display.commonImg ? display.commonImg.imgurl : errorImg}`"></ImageShow>
+        <span class="title">logo图： </span>
+        <ImageShow :url="display.logo_img" :imgW="display.logo_img_width" :imgH="display.logo_img_height"></ImageShow>
+      </div>
+      <div class="block">
+        <span class="title">小图： </span>
+        <ImageShow :url="display.small_picture_img" :imgW="display.small_picture_img_width" :imgH="display.small_picture_img_height"></ImageShow>
       </div>
       <div class="block">
         <span class="title">背景图：  </span>
-        <ImageShow :url="`${display&&display.commonImgBackground ? display.commonImgBackground.imgurl : errorImg}`"></ImageShow>
+        <ImageShow :url="`${display.background_url_img}`" :imgW="display.background_url_img_width" :imgH="display.background_url_img_height"></ImageShow>
+      </div>
+      <div class="swatch">
+        <span class="title">大会名称： {{display.name}}</span>
+      </div>
+      <div class="swatch">
+        <span class="title">大会类型： {{display.project_type === '1' ? '大会' : '奖项'}}</span>
       </div>
       <!-- 新增logo图 -->
     </div>
@@ -21,21 +32,39 @@
     <div class="editArea">
       <div class="area">编辑</div>
       <div class="swatch">
-        <span class="title">主色调： </span>
-        <span class="colorShow" @click.stop="showColor = true" :style="`background: rgba(${form.colors.rgba.r},${form.colors.rgba.g},${form.colors.rgba.b},${form.colors.rgba.a})`">
-          <transition name="fade">
-            <sketch-picker v-if="showColor" @input="updateColor" v-model="form.colors" /><!-- 提交时候可能需要摘掉一些数据，只留rgba -->
-          </transition>
-        </span>
+        <span class="title" style="line-height: 40px">主色调： </span>
+            <el-color-picker
+              v-model="form.main_color"
+              show-alpha
+              :predefine="predefineColors">
+            </el-color-picker>
       </div>
       <div class="block">
-        <span class="title">内容图：  </span>
-        <UploadImage inputName="projectImg" @getImgPath="getImgPath"></UploadImage>
+        <span class="title">logo图：  </span>
+        <UploadImage inputName="logo_img" @getImgMsg="getImgMsg"></UploadImage>
+      </div>
+      <div class="block">
+        <span class="title">小图：  </span>
+        <UploadImage inputName="small_picture_img" @getImgMsg="getImgMsg"></UploadImage>
       </div>
       <div class="block">
         <span class="title">背景图：  </span>
-        <UploadImage inputName="backgroundImg" @getImgPath="getImgPath"></UploadImage>
+        <UploadImage inputName="background_url_img" @getImgMsg="getImgMsg" addMsg="只能上传一张图片"></UploadImage>
       </div>
+      <el-form :model="form" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+        <el-form-item label="大会名称" prop="name">
+          <el-input v-model="form.name"></el-input>
+        </el-form-item>
+        <el-form-item label="大会类型" prop="project_type">
+          <el-select v-model="form.project_type" placeholder="请选择大会类型">
+            <el-option label="大会" :value="1"></el-option>
+            <el-option label="奖项" :value="2"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="submitForm('ruleForm')">保存</el-button>
+        </el-form-item>
+      </el-form>
     </div>
   </div>
 </template>
@@ -44,75 +73,97 @@
 import { mapGetters, mapMutations } from 'vuex';
 import UploadImage from './common/uploadImage';
 import ImageShow from './common/imageShow';
-import { Sketch } from 'vue-color';
 import { axiosGet, axiosPost } from '../assets/js/axios';
-import { getherMSg } from '../assets/js/base';
+import { deepCopy } from '../assets/js/base';
 
 export default {
   name: 'conferenceMsg',
   data () {
-    var defaultProps = {
-      hex: '#194d33',
-      hsl: {
-        h: 150,
-        s: 0.5,
-        l: 0.2,
-        a: 1
-      },
-      hsv: {
-        h: 150,
-        s: 0.66,
-        v: 0.30,
-        a: 1
-      },
-      rgba: {
-        r: 25,
-        g: 77,
-        b: 51,
-        a: 1
-      },
-      a: 1
-    };
     return {
       errorImg: 'https://cube.elemecdn.com/e/fd/0fc7d20532fdaf769a25683617711png.png',
       showColor: false,
+      predefineColors: [
+        '#ff4500',
+        '#ff8c00',
+        '#ffd700',
+        '#90ee90',
+        '#00ced1',
+        '#1e90ff',
+        '#c71585',
+        'rgba(255, 69, 0, 0.68)',
+        'rgb(255, 120, 0)',
+        'hsv(51, 100, 98)',
+        'hsva(120, 40, 94, 0.5)',
+        'hsl(181, 100%, 37%)',
+        'hsla(209, 100%, 56%, 0.73)',
+        '#c7158577'
+      ],
+      rules: {
+        name: [
+          { required: true, message: '请输入大会名称', trigger: 'blur' },
+          { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
+        ],
+        project_type: [
+          { required: true, message: '请选择大会类型', trigger: 'change' }
+        ]
+      },
       display: {/* 预览区的数据 */
-        mainColor: '', /* 返回rgba格式的字符串 rgba(*,*,*,*) */
-        commonImg: {
-          imgurl: ''
-        },
-        commonImgBackground: {
-          imgurl: ''
-        }
+        background_url_img: '',
+        background_url_img_height: 0,
+        background_url_img_id: '',
+        background_url_img_jumpurl: '',
+        background_url_img_width: 0,
+        logo_img: '',
+        logo_img_height: 0,
+        logo_img_id: '',
+        logo_img_jumpurl: '',
+        logo_img_width: 0,
+        main_color: '', // 返回rgba格式的字符串 rgba(*,*,*,*)
+        name: '',
+        p_id: this.$route.params.id,
+        project_type: 1,
+        small_picture_img: '',
+        small_picture_img_height: 0,
+        small_picture_img_id: '',
+        small_picture_img_jumpurl: '',
+        small_picture_img_width: 0,
+        status: 1
       },
       form: {
-        colors: defaultProps
-      },
-      data: []
+        background_url_img: '',
+        background_url_img_height: 0,
+        background_url_img_id: '',
+        background_url_img_jumpurl: '',
+        background_url_img_width: 0,
+        logo_img: '',
+        logo_img_height: 0,
+        logo_img_id: '',
+        logo_img_jumpurl: '',
+        logo_img_width: 0,
+        main_color: '', // 返回rgba格式的字符串 rgba(*,*,*,*)
+        name: '',
+        p_id: this.$route.params.id,
+        project_type: 1,
+        small_picture_img: '',
+        small_picture_img_height: 0,
+        small_picture_img_id: '',
+        small_picture_img_jumpurl: '',
+        small_picture_img_width: 0
+      }
     };
   },
   created () {
-    /*
-    返回参数：
-    id
-    projectName
-    projectType
-    status
-    mainColor
-    commonImg.imgurl
-    commonImgBackground.imgurl
-     */
-    axiosGet('/api/conferencegetProjectById', { projectid: this.$route.params.id }, (res) => { /* 查询大会信息并展示在预览区，如果没有值要有初始化 */
-      let data = JSON.parse(res.data);
+    axiosGet('/api/project/getBaseProjectByPid', { p_id: this.$route.params.id }, (res) => { /* 查询大会信息并展示在预览区，如果没有值要有初始化 */
+      let data = res.data
       if (data.code === '1') {
         this.display = data.data;
-        this.data = [/* 大会信息请求必须的数据 */
-          'project.mainColor', `${this.display.mainColor}`, 'project.id', `${this.display.id}`, 'project.projectName', `${this.display.projectName}`,
-          'project.projectType', `${this.display.projectType}`, 'project.status', `${this.display.projectType}`, 'projectImg', `${this.display.commonImg && this.display.commonImg.imgurl}`, 'backgroundImg', `${this.display.commonImgBackground && this.display.commonImgBackground.imgurl}`];
+        this.form = deepCopy(this.display)
+        console.log(this.display, 'display')
       } else {
-        console.log('请求成功！但是根据大会id查找大会信息失败');
+        this.$message.error(data.msg)
       }
     }, (err) => {
+      this.$message.error(err)
       console.log(err, '根据大会id查找大会信息失败');
     });
   },
@@ -123,76 +174,51 @@ export default {
     ...mapMutations([
       'setHasLogin', 'setAccount'
     ]),
-    updateColor () { /* 注意节流！！ */
-      // console.log('updateColor')
-      let color = `rgba(${this.form.colors.rgba.r},${this.form.colors.rgba.g},${this.form.colors.rgba.b},${this.form.colors.rgba.a})`;
-      /*
-      请求的参数network上需要以下形式，可以模仿input标签上的name = project.id来提交数据
-      Form Data
-      project.id: 118
-      project.mainColor: rgb(25, 77, 51)
-      如果使用qs，数据参数提交形式会变成project[id]或者 'project': {'id': '117','mainColor': 'rgba(*, *, *, *)'}
-      这些都不能提交到数据库
-      */
-      let data = getherMSg(this.data, [['project.mainColor', `${color}`]]); /* 取得更新值之后的参数序列化 */
-      axiosPost('/api/filesaveProject', data, (res) => {
-        let data = JSON.parse(res.data);
-        if (data.code === '1') {
-          this.display.mainColor = color;
-          console.log(data.data, '修改大会主色调成功！');
-        } else {
-          console.log('请求成功！但是修改大会主色调失败');
-        }
-      }, (err) => {
-        console.log(err, '修改大会主色调失败');
-      }, {}, false);
+    getImgMsg (name, imgMsgArr) {
+      if (imgMsgArr.length === 1) {
+        this.form[name] = imgMsgArr[0].img_url
+        this.form[`${name}_jumpurl`] = imgMsgArr[0].jump_url
+        this.form[`${name}_width`] = imgMsgArr[0].width
+        this.form[`${name}_height`] = imgMsgArr[0].height
+        this.form[`${name}_id`] = imgMsgArr[0].img_id
+      }
     },
-    /* 获取到image的name值和value值并赋值给form，以便提交表单
-    添加或者修改大会项目：
-    请求参数：
-    project.projectName
-    project.projectType
-    project.status
-    project.id
-    projectImg
-    backgroundImg
-    project.mainColor
-    返回：
-    id
-    projectName
-    projectType
-    status
-    mainColor
-    commonImg.imgurl
-    commonImgBackground.imgurl
-    */
-    getImgPath (name, path) {
-      this.form[name] = path;
-      /* 获取到地址链接后立即更新数据库 */
-      let data = getherMSg(this.data, [[`${name}`, `${path}`]]);
-      axiosPost('/api/filesaveProject', data, (res) => {
-        console.log(path, 'path');
-        let data = JSON.parse(res.data);
-        if (data.code === '1') {
-          this.display = data.data;
-          console.log('修改成功！');
+    submitForm (formName) {
+      let that = this
+      console.log(this.form, 'this.form')
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          axiosPost('/api/project/updateProject', this.form,
+            res => {
+              let data = res.data;
+              if (data.code === '1') {
+                console.log(data.data, 'result')
+                this.display = deepCopy(this.form)
+                that.$message({
+                  message: data.msg,
+                  type: 'success'
+                });
+              } else {
+                that.$message.error(data.msg);
+              }
+            },
+            err => {
+              this.$message.error('更新大会失败，请重试！' + err);
+            });
         } else {
-          console.log('请求成功！但是修改失败');
+          this.$message.error('信息输入有误！请正确填写信息！');
         }
-      }, (err) => {
-        console.log(err, '修改失败');
-      }, {}, false);
+      })
     }
   },
   components: {
     UploadImage,
-    ImageShow,
-    'sketch-picker': Sketch
+    ImageShow
   }
 };
 </script>
 <style lang="sass" scoped>
-$colorShow: 20px
+$colorShow: 30px
 .title
   vertical-align: top
   color: gray
@@ -221,6 +247,8 @@ $colorShow: 20px
   .editArea,.previewArea
     .swatch
       margin: 30px 30px 30px 0
+      .title
+        line-height: $colorShow
       .colorShow:hover
         cursor: pointer
       .colorShow

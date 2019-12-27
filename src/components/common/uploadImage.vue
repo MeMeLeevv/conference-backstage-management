@@ -15,6 +15,9 @@
       :on-exceed="imgExceed"
     >
       <i class="el-icon-plus"></i>
+      <div slot="tip" class="showMsg el-upload__tip" v-if="imgList.length !== 0">
+        <span class="msgItem" v-for="(item) in imgList" :key="item.id">{{`( ${item.width} * ${item.height} )`}}</span>
+      </div>
       <div slot="tip" class="el-upload__tip">{{ addMsg }}</div>
     </el-upload>
     <el-dialog :visible.sync="dialogVisible"
@@ -45,7 +48,7 @@ export default {
       type: Boolean,
       default: true
     },
-    inputName: {/* 图片地址对应的name值，方便整合成form一起提交到数据库 */
+    inputName: {/* 图片信息对应的key值，方便在父组件里整合成form一起提交到数据库 */
       type: String,
       default: ''
     }
@@ -53,6 +56,7 @@ export default {
   data () {
     /* 新发现！ */
     return {
+      imgList: [],
       dialogImageUrl: '',
       dialogVisible: false,
       fileList: [],
@@ -60,23 +64,28 @@ export default {
     };
   },
   methods: {
+    /*
+    作用：上传成功后触发父组件的getImgMsg方法
+    @response: Object 上传的响应结果
+    @file: Object  该次请求结果返回的文件和响应信息
+    @fileList: Array  请求结果返回的所有文件和响应信息
+    @return void
+    */
     uploadSuccess (response, file, fileList) {
-      // let path = JSON.parse(response).data
       if (!this.multiple) {
-        console.log(response, file, fileList)
-        /* let path = [];
-        // console.log(fileList, 'fileLsit');
-        fileList.forEach(item => {
-          // console.log(JSON.parse(item.response), 'item');
-          let data = JSON.parse(item.response);
-          path.push(data.data);
-        });
-        // console.log(path, 'path');
+        console.log(response, file, fileList, 'response, file, fileList')
         this.multiple = Number(this.limit) > 1;
-        this.$emit('getImgPath', this.inputName, path, this.limit > 1) */
+        for (let i = 0; i < fileList.length; i++) {
+          if (fileList[i].response.code === '1') {
+            this.imgList.push(fileList[i].response.data)
+          } else {
+            this.$message.error(fileList[i].response.msg)
+          }
+        }
+        this.$emit('getImgMsg', this.inputName, this.imgList)
       }
     },
-    handleRemove (file, fileList) {
+    handleRemove (file, fileList) { // 只要用户remove，图片信息换成原来的！
       console.log(file, fileList);
     },
     handlePictureCardPreview (file) { /* 预览的时候 */
@@ -123,4 +132,12 @@ export default {
 };
 </script>
 
-<style lang="sass" scoped></style>
+<style lang="sass" scoped>
+.showMsg
+  color: gray
+  font-size: 14px
+  .msgItem
+    width: 146px
+    height: 18px
+    text-align: center
+</style>

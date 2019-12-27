@@ -14,7 +14,6 @@
     "express": "^4.17.1",
     "vue": "^2.6.10",
     "vue-axios": "^2.1.4",
-    "vue-color": "^2.7.0",
     "vue-quill-editor": "^3.0.6",
     "vue-router": "^3.0.7",
     "vuedraggable": "^2.23.2",

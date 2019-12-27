@@ -35,3 +35,67 @@ export function getherMSg (data, needChangeArr) { /* [[key, value]]  收集所�
   });
   return concatDataStr(data);
 }
+
+/*
+    作用：浅拷贝
+    @obj: Object/Array
+    @return Object/Array
+    */
+export function shadowCopy (obj) {
+  let result
+  if (obj instanceof Object) {
+    result = {}
+  } else if (obj instanceof Array) {
+    result = []
+  } else {
+    return obj
+  }
+  for (let i in obj) { // 以任意顺序遍历一个对象的除Symbol以外的可枚举属性
+    if (obj.hasOwnProperty(i)) { // 这个方法可以用来检测一个对象是否含有特定的自身属性；和 in 运算符不同，该方法会忽略掉那些从原型链上继承到的属性。
+      result[i] = obj[i]
+    }
+  }
+  return result
+}
+/*
+  作用：深拷贝外壳，识别obj的类型，传参给真正的深拷贝函数
+  @obj: Object/Array
+  @return Object/Array
+  */
+export function deepCopy (obj) {
+  let result
+  if (obj instanceof Object) {
+    result = {}
+  } else if (obj instanceof Array) {
+    result = []
+  } else {
+    return obj
+  }
+  return trueDeepCopy(result, obj)
+}
+/*
+  作用：深拷贝
+  @obj: Object
+  @return Object
+  var obj1 = {
+    'name': 'zhangsan',
+    'age': '18',
+    'language': [1, [2, 3], [4, 5]]
+  };
+  */
+function trueDeepCopy (result, source) {
+  for (let i in source) {
+    if (source.hasOwnProperty(i)) {
+      if (source[i] instanceof Object) {
+        result[i] = {}
+        this.trueDeepCopy(result[i], source[i])
+      } else if (source[i] instanceof Array) {
+        result[i] = []
+        this.trueDeepCopy(result[i], source[i])
+      } else {
+        result[i] = source[i]
+      }
+    }
+  }
+  return result
+}

@@ -46,15 +46,26 @@
     <div class="previewArea">
       <div class="area">预览</div>
       <div class="block">
-        <span class="title">内容图： </span>
-        <ImageShow url="display"></ImageShow>
+        <span class="title">logo图： </span>
+        <ImageShow :url="display.logo_img" :imgW="display.logo_img_width" :imgH="display.logo_img_height"></ImageShow>
+      </div>
+      <div class="block">
+        <span class="title">小图： </span>
+        <ImageShow :url="display.small_picture_img" :imgW="small_picture_img_width" :imgH="small_picture_img_height"></ImageShow>
       </div>
     </div>
     <div class="hr"></div>
     <div class="editArea">
       <div class="area">编辑</div>
       <div class="block">
-        <span class="title">内容图： </span>
+        <span class="title">logo图： </span>
+        <UploadImage
+          inputName="columnImg"
+          @getImgPath="getImgPath"
+        ></UploadImage>
+      </div>
+      <div class="block">
+        <span class="title">小图： </span>
         <UploadImage
           inputName="columnImg"
           @getImgPath="getImgPath"
@@ -80,7 +91,7 @@ export default {
     var id = this.$route.params.id;
     return {
       display: {
-        /* 预览区 */
+
       },
       data: [],
       form: {},
@@ -91,43 +102,26 @@ export default {
   created () {
     /// let that = this;
     let cData = getLocalData(['columnMsg']);
-    console.log(cData, 'columnMsg')
     this.c_id = cData[0].c_id;
     this.p_id = cData[0].p_id;
-    /* axiosGet('/api/column/getColumnList',
-      { c_id: cData[0].c_id },
-      res => {
-        // 查询大会信息并展示在预览区，如果没有值要有初始化
-        let data = res.data
-        if (data.code === '1') {
-          this.display = data.data[0];
-          console.log(this.display, 'display');
-        } else {
-          that.$message.error(data.msg);
-        }
-      },
-      err => {
-        that.$message.error(err)
-      }
-    ); */
-    /* this.$axios.get('/api/column/getColumnList', { params: { c_id: cData[0].c_id } }).then(res => {
-      console.log(res, 'res')
-    }) */
-    let p1 = this.$axios.get('/api/column/getColumnList', { params: { c_id: cData[0].c_id } }) // axiosGet('/api/column/getColumnList', { c_id: cData[0].c_id })
-    let p2 = this.$axios.get('/api/columnObjgroup/getColumnObjGroupList', { params: { c_id: cData[0].c_id } })// axiosGet('/api/columnObjgroup/getColumnObjGroupList', { c_id: cData[0].c_id })
+    let p1 = this.$axios.get('/api/column/getColumnList', { params: { c_id: cData[0].c_id } })
+    let p2 = this.$axios.get('/api/columnObjgroup/getColumnObjGroupList', { params: { c_id: cData[0].c_id } })
     // let showData = {}
     Promise.all([p1, p2]).then(([ColumnList, ColumnObjGroupList]) => {
       return {
         ColumnList: ColumnList.data, ColumnObjGroupList: ColumnObjGroupList.data
       }
     }).then((showData) => {
-      console.log(showData, 'showData')
-      if (showData.ColumnList.code !== 1) {
-        this.$message.error(showData.ColumnList.msg);
+      if (showData.ColumnList.code !== '1' || showData.ColumnObjGroupList.code !== '1') {
+        this.$message.error('请求错误，请刷新！');
+        return
       }
-      if (showData.ColumnObjGroupList.code !== 1) {
-        this.$message.error(showData.ColumnObjGroupList.msg);
+      this.display.columnList = showData.ColumnList.data[0]
+      this.display.columnGList = showData.ColumnObjGroupList.data
+      if (this.display.columnGList.length !== 0) { // 根据组id去查找组内容
+
       }
+      console.log(this.display, 'this.display')
     }).catch(function (err) {
       this.$message.error(err);
     })

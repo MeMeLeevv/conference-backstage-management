@@ -70,7 +70,8 @@
           >
             <template slot="title">
               <i :class="nav.icon + ' iconfont'"></i>
-              <span>{{ nav.name }}</span>
+              <span :class="columnTitleActive ? 'activeColor' : ''">{{ nav.name }}</span>
+            <i class="iconfont iconwenhao" title="栏目可拖动以调整网页展示顺序"></i>
             </template>
             <el-menu-item-group>
               <draggable
@@ -163,6 +164,7 @@ export default {
     var openColumn = id.substr(0, id.lastIndexOf('/')); // 获取/117/columnConfig，来自动展开激活的那一栏
     return {
       enabled: true,
+      columnTitleActive: false, // 栏目配置是否高亮，ElementUI默认不高亮
       dragging: false,
       isAddNewC: true,
       editIndex: 0,
@@ -298,9 +300,11 @@ export default {
     '$route' (to, from) { // 记录路由的来源和去路
       this.from = from.path
       this.to = to.path
-      // 在修改栏目信息之后，再次点击无法高亮！，但是页面有正确跳转，所以这里手动赋予color
+      // 在修改栏目信息之后，再次点击无法高亮！，但是页面有正确跳转，所以这里手动赋予color，并更改栏目配置的路由使其高亮
       if (to.path.indexOf('columnConfig') === -1) {
-        return
+        this.columnTitleActive = false
+      } else {
+        this.columnTitleActive = true
       }
       for (let i = 0; i < this.navMsg[2].subTitle.length; i++) {
         this.navMsg[2].subTitle[i].active = this.navMsg[2].subTitle[i].jump_url === to.path
@@ -312,6 +316,7 @@ export default {
   },
   created () {
     let that = this;
+    this.columnTitleActive = this.$route.path.indexOf('/columnConfig') !== -1 // 刷新网页监测路由以是否高亮栏目配置
     // 根据大会id获取栏目列表
     axiosGet(
       '/api/column/getColumnList',

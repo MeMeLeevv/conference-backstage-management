@@ -137,6 +137,13 @@
       "font_class": "quxiao",
       "unicode": "e668",
       "unicode_decimal": 58984
+    },
+    {
+      "icon_id": "12095315",
+      "name": "问号",
+      "font_class": "wenhao",
+      "unicode": "e65e",
+      "unicode_decimal": 58974
     }
   ]
 }
