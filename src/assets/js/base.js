@@ -99,3 +99,21 @@ function trueDeepCopy (result, source) {
   }
   return result
 }
+
+/*
+    作用：批量修改图片字段信息，基于后台字段统一，如果不统一反而会更麻烦，需要一个一个赋值
+    @name: String 图片url字段，其他字段都是在这个基础上加上_xxx
+    @imgMsgArr: Array 图片信息
+    @return object
+    */
+export function getImgMsg (name, imgMsgArr) {
+  if (imgMsgArr.length === 1) {
+    let img = {}
+    img[name] = imgMsgArr[0].img_url
+    img[`${name}_jumpurl`] = imgMsgArr[0].jump_url
+    img[`${name}_width`] = imgMsgArr[0].width
+    img[`${name}_height`] = imgMsgArr[0].height
+    img[`${name}_id`] = imgMsgArr[0].img_id
+    return img
+  }
+}

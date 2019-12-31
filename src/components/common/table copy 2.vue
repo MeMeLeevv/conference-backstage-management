@@ -26,23 +26,21 @@
               <td class="checkbox">
                 <el-checkbox v-model="item.hasChecked" @change="handleCheckedChange(item)"></el-checkbox>
               </td>
-              <!-- 显示数量id -->
-              <td scope="row">{{ index }}</td>
+              <td scope="row">{{ item.id }}</td>
               <!-- 由于draggable插件的限制，这里的整体for循环的数据要绑定formData，这样一来再使用for循环来init表格内容样式就不太行，暂时想到用一下这种将表格所需的全部样式列出来，
               用if来判断那个来显示 -->
               <!-- 如果是名称 -->
-              <td v-if="item.title !== undefined" :style="`width: ${item.widthPercent - (-0.07) * clientWidth}px`">
+              <td v-if="item.name !== undefined" :style="`width: ${item.widthPercent - (-0.07) * clientWidth}px`">
                 <el-input
                   v-if="multipleSelection.length !== 0 && item.edit"
-                  v-model="form.title"
+                  v-model="item.name"
                 >
                 </el-input>
-                <div  v-else class="ellipsis" :style="`width: ${item.widthPercent * clientWidth}px`" :title="item.name">{{ item.title }}</div>
+                <div  v-else class="ellipsis" :style="`width: ${item.widthPercent * clientWidth}px`" :title="item.name">{{ item.name }}</div>
               </td>
 
               <!-- 图片类 -->
-              <!-- 背景 -->
-              <td v-if="item.background_url_img !== undefined" :style="`width: ${item.widthPercent * clientWidth}px`">
+              <td v-if="item.thumbnail !== undefined" :style="`width: ${item.widthPercent * clientWidth}px`">
                 <div class="relativePos" :style="`height:${item.widthPercent * clientWidth * 0.5}px`">
                   <el-upload
                    v-if="item.edit"
@@ -62,42 +60,9 @@
                   </el-upload>
                   <el-image
                     :style="`width:${item.widthPercent * clientWidth}px;height:${item.widthPercent * clientWidth * 0.5}px; position:relative`"
-                    :src="item.edit ? display.background_url_img : item.background_url_img"
+                    :src="item.thumbnail"
                     fit="contain"
-                    class="thumbnail" @click="showDialog(item.background_url_img)"
-                  >
-                    <div slot="error" class="image-slot" style="position: absolute;top: 50%;left: 50% ;transform: translate(-50%,-50%)">
-                      <i class="el-icon-picture-outline"></i>
-                    </div>
-                  </el-image>
-
-                  <!-- <img class="thumbnail" @click="showDialog(item.thumbnail)" :src="item.thumbnail" alt="" :style="`display: inline-block;height:${item.widthPercent * clientWidth * 0.5}px`"> -->
-                </div>
-              </td>
-              <!-- 标题图 -->
-              <td v-if="item.title_img !== undefined" :style="`width: ${item.widthPercent * clientWidth}px`">
-                <div class="relativePos" :style="`height:${item.widthPercent * clientWidth * 0.5}px`">
-                  <el-upload
-                   v-if="item.edit"
-                    class="upload-demo hidden fileInput"
-                    action="/api/common/uploadImg"
-                    :on-preview="handlePreview"
-                    :on-success="uploadSuccess.bind(this,index, item)">
-                      <!-- <el-input
-                        v-if="item.edit"
-                        type="file"
-                        class="hidden fileInput"
-                        v-model="item.thumbnail"
-                        title="请选择本地图片"
-                      >
-                      </el-input> -->
-                      <el-button :style="`width: ${item.widthPercent * clientWidth}px;height:${item.widthPercent * clientWidth * 0.5}px`" size="medium" type="primary">点击上传</el-button>
-                  </el-upload>
-                  <el-image
-                    :style="`width:${item.widthPercent * clientWidth}px;height:${item.widthPercent * clientWidth * 0.5}px; position:relative`"
-                    :src="isEdit ? display.title_img : item.title_img"
-                    fit="contain"
-                    class="thumbnail" @click="showDialog(item.title_img)"
+                    class="thumbnail" @click="showDialog(item.thumbnail)"
                   >
                     <div slot="error" class="image-slot" style="position: absolute;top: 50%;left: 50% ;transform: translate(-50%,-50%)">
                       <i class="el-icon-picture-outline"></i>
@@ -111,7 +76,7 @@
               <td v-if="item.desc !== undefined" :style="`width: ${item.widthPercent - (-0.07) * clientWidth}px`">
                 <el-input
                   v-if="multipleSelection.length !== 0 && item.edit"
-                  v-model="display.desc"
+                  v-model="item.desc"
                 >
                 </el-input>
                 <span v-else class="ellipsis" :style="`width: ${item.widthPercent * clientWidth}px`" :title="item.desc">{{ item.desc }}</span>
@@ -121,7 +86,7 @@
               <td v-if="item.state !== undefined" :style="`width: ${item.widthPercent * clientWidth}px`">
                 <el-select
                   v-if="multipleSelection.length !== 0 && item.edit"
-                  v-model="display.state"
+                  v-model="item.state"
                   style="width: 50%"
                 >
                   <el-option
@@ -185,6 +150,7 @@
 
 <script>
 import draggable from 'vuedraggable';
+const tableOptions = [0, 1, 2, 3]
 
 export default {
   name: 'flexTable',
@@ -282,6 +248,8 @@ export default {
       dialogUrl: '',
       dialogVisible: false,
       checkAll: false,
+      checkedtableItems: [0, 1],
+      tableItems: tableOptions,
       enabled: true,
       dragging: false,
       batch: false, // 批量
@@ -442,11 +410,10 @@ export default {
     },
     editClick (row) {
       // 点击编辑
-      /* for (let rr in row) {
+      for (let rr in row) {
         // 编辑前先保存旧值
         row[`old${rr}`] = row[rr];
-      } */
-      this.form = row // 编辑前先保存旧值
+      }
       // console.log(row, 'editRow')
       this.clearEdit(); /// 先清除掉之前的编辑态
       this.toggleSelection([row]);

@@ -1,7 +1,8 @@
 <template>
   <div id="headBar" class="clearify">
     <div v-if="showAvatar" class="avatar"><!-- 用户退出登录后清除相应记录 -->
-      <el-avatar :size="30" style="vertical-align:middle" src="https://mir-s3-cdn-cf.behance.net/project_modules/max_1200/da132c85978729.5d8bbe537d947.gif" @error="errorHandler">
+      <el-avatar :size="30" style="vertical-align:middle" src="https://mir-s3-cdn-cf.behance.net/project_modules/max_1200/da132c85978729.5d8bbe537d947.gif"
+      @error="errorHandler">
       <img src="https://cube.elemecdn.com/e/fd/0fc7d20532fdaf769a25683617711png.png"/>
     </el-avatar>
     </div>

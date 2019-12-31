@@ -1,70 +1,49 @@
 <template>
   <div id="conferenceMsg" @click.stop="showColor = false"><!-- 内容图(contentImg、主色调(mainColor、背景图(commonImg.imgurl) -->
     <div class="previewArea">
-      <div class="area">预览</div>
       <div class="swatch">
         <span class="title">主色调： </span>
-        <span class="colorShow" :style="`background: ${display ? display.main_color : 'white'}`">
+        <span v-if="!isEdit" class="colorShow" :style="`background: ${display ? display.main_color : 'white'}`">
           <span v-if="display.main_color" style="padding-top: 7px;width: 200px;position: relative;top: 100%;color: gray; font-size: 14px">{{display.main_color}}</span>
         </span>
+        <el-color-picker
+          v-else
+          v-model="form.main_color"
+          show-alpha
+          :predefine="predefineColors">
+        </el-color-picker>
       </div>
       <div class="block">
         <span class="title">logo图： </span>
         <ImageShow :url="display.logo_img" :imgW="display.logo_img_width" :imgH="display.logo_img_height"></ImageShow>
+          <UploadImage v-if="isEdit" inputName="logo_img" @getImgMsg="getImgMsg"></UploadImage>
       </div>
-      <div class="block">
-        <span class="title">小图： </span>
-        <ImageShow :url="display.small_picture_img" :imgW="display.small_picture_img_width" :imgH="display.small_picture_img_height"></ImageShow>
-      </div>
-      <div class="block">
-        <span class="title">背景图：  </span>
-        <ImageShow :url="`${display.background_url_img}`" :imgW="display.background_url_img_width" :imgH="display.background_url_img_height"></ImageShow>
-      </div>
-      <div class="swatch">
-        <span class="title">大会名称： {{display.name}}</span>
-      </div>
-      <div class="swatch">
-        <span class="title">大会类型： {{display.project_type === '1' ? '大会' : '奖项'}}</span>
-      </div>
-      <!-- 新增logo图 -->
-    </div>
-    <div class="hr"></div>
-    <div class="editArea">
-      <div class="area">编辑</div>
-      <div class="swatch">
-        <span class="title" style="line-height: 40px">主色调： </span>
-            <el-color-picker
-              v-model="form.main_color"
-              show-alpha
-              :predefine="predefineColors">
-            </el-color-picker>
-      </div>
-      <div class="block">
-        <span class="title">logo图：  </span>
-        <UploadImage inputName="logo_img" @getImgMsg="getImgMsg"></UploadImage>
-      </div>
-      <div class="block">
-        <span class="title">小图：  </span>
-        <UploadImage inputName="small_picture_img" @getImgMsg="getImgMsg"></UploadImage>
+      <div class="block" :style="isEdit? 'display: block' : ''">
+        <span class="title">小  图： </span>
+        <ImageShow  :url="display.small_picture_img" :imgW="display.small_picture_img_width" :imgH="display.small_picture_img_height"></ImageShow>
+          <UploadImage v-if="isEdit" inputName="small_picture_img" @getImgMsg="getImgMsg"></UploadImage>
       </div>
       <div class="block">
         <span class="title">背景图：  </span>
-        <UploadImage inputName="background_url_img" @getImgMsg="getImgMsg" addMsg="只能上传一张图片"></UploadImage>
+        <ImageShow  :url="`${display.background_url_img}`" :imgW="display.background_url_img_width" :imgH="display.background_url_img_height"></ImageShow>
+          <UploadImage v-if="isEdit" inputName="background_url_img" @getImgMsg="getImgMsg" addMsg="只能上传一张图片"></UploadImage>
       </div>
-      <el-form :model="form" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
-        <el-form-item label="大会名称" prop="name">
-          <el-input v-model="form.name"></el-input>
-        </el-form-item>
-        <el-form-item label="大会类型" prop="project_type">
-          <el-select v-model="form.project_type" placeholder="请选择大会类型">
+      <div class="swatch">
+        <span class="title">大会名称：  </span>
+        <span v-if="!isEdit" class="titledis">{{display.name}}</span>
+        <el-input style="width: 60%" v-else v-model="form.name"></el-input>
+      </div>
+      <div class="swatch">
+        <span class="title">大会类型：  </span>
+        <span v-if="!isEdit" class="titledis">{{display.project_type === 1 ? '大会' : '奖项'}}</span>
+        <el-select v-else v-model="form.project_type" placeholder="请选择大会类型">
             <el-option label="大会" :value="1"></el-option>
             <el-option label="奖项" :value="2"></el-option>
           </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="submitForm('ruleForm')">保存</el-button>
-        </el-form-item>
-      </el-form>
+      </div>
+      <el-button type="primary" @click="isEdit? submitForm('ruleForm') : isEdit = true">{{isEdit ? '保存':'编辑'}}</el-button>
+      <el-button v-if="isEdit" type="primary" @click="isEdit = false">取消</el-button>
+      <!-- 新增logo图 -->
     </div>
   </div>
 </template>
@@ -80,6 +59,7 @@ export default {
   name: 'conferenceMsg',
   data () {
     return {
+      isEdit: false,
       errorImg: 'https://cube.elemecdn.com/e/fd/0fc7d20532fdaf769a25683617711png.png',
       showColor: false,
       predefineColors: [
@@ -108,11 +88,11 @@ export default {
         ]
       },
       display: {/* 预览区的数据 */
-        background_url_img: '',
-        background_url_img_height: 0,
-        background_url_img_id: '',
-        background_url_img_jumpurl: '',
-        background_url_img_width: 0,
+        background_img: '',
+        background_img_height: 0,
+        background_img_id: '',
+        background_img_jumpurl: '',
+        background_img_width: 0,
         logo_img: '',
         logo_img_height: 0,
         logo_img_id: '',
@@ -130,11 +110,11 @@ export default {
         status: 1
       },
       form: {
-        background_url_img: '',
-        background_url_img_height: 0,
-        background_url_img_id: '',
-        background_url_img_jumpurl: '',
-        background_url_img_width: 0,
+        background_img: '',
+        background_img_height: 0,
+        background_img_id: '',
+        background_img_jumpurl: '',
+        background_img_width: 0,
         logo_img: '',
         logo_img_height: 0,
         logo_img_id: '',
@@ -158,7 +138,7 @@ export default {
       if (data.code === '1') {
         this.display = data.data;
         this.form = deepCopy(this.display)
-        console.log(this.display, 'display')
+        console.log(this.form, 'form')
       } else {
         this.$message.error(data.msg)
       }
@@ -172,8 +152,14 @@ export default {
   },
   methods: {
     ...mapMutations([
-      'setHasLogin', 'setAccount'
+      'setHasLogin', 'setAccount', 'setBackStageTitle'
     ]),
+    /*
+    作用：批量修改图片字段信息，基于后台字段统一，如果不统一反而会更麻烦，需要一个一个赋值
+    @name: String 图片url字段，其他字段都是在这个基础上加上_xxx
+    @imgMsgArr: Array 图片信息
+    @return void
+    */
     getImgMsg (name, imgMsgArr) {
       if (imgMsgArr.length === 1) {
         this.form[name] = imgMsgArr[0].img_url
@@ -183,32 +169,32 @@ export default {
         this.form[`${name}_id`] = imgMsgArr[0].img_id
       }
     },
-    submitForm (formName) {
+    /*
+    作用：更新大会数据
+    @return void
+    */
+    submitForm () {
       let that = this
-      console.log(this.form, 'this.form')
-      this.$refs[formName].validate((valid) => {
-        if (valid) {
-          axiosPost('/api/project/updateProject', this.form,
-            res => {
-              let data = res.data;
-              if (data.code === '1') {
-                console.log(data.data, 'result')
-                this.display = deepCopy(this.form)
-                that.$message({
-                  message: data.msg,
-                  type: 'success'
-                });
-              } else {
-                that.$message.error(data.msg);
-              }
-            },
-            err => {
-              this.$message.error('更新大会失败，请重试！' + err);
+      // console.log(this.form, 'this.form')
+      axiosPost('/api/project/updateProject', this.form,
+        res => {
+          let data = res.data;
+          if (data.code === '1') {
+            this.display = deepCopy(this.form)
+            this.isEdit = false
+            // console.log(this.display, 'result')
+            this.setBackStageTitle(this.form.name)
+            that.$message({
+              message: data.msg,
+              type: 'success'
             });
-        } else {
-          this.$message.error('信息输入有误！请正确填写信息！');
-        }
-      })
+          } else {
+            that.$message.error(data.msg);
+          }
+        },
+        err => {
+          this.$message.error('更新大会失败，请重试！' + err);
+        });
     }
   },
   components: {
@@ -219,10 +205,15 @@ export default {
 </script>
 <style lang="sass" scoped>
 $colorShow: 30px
-.title
+.title,.titledis
+  width: 80px
+  line-height: 40px
   vertical-align: top
   color: gray
   font-weight: 700
+.titledis
+  width: 80%
+  line-height: 40px
 .fade-enter-active, .fade-leave-active
   transition: opacity .3s
 
@@ -248,10 +239,11 @@ $colorShow: 30px
     .swatch
       margin: 30px 30px 30px 0
       .title
-        line-height: $colorShow
+        line-height: 40px
       .colorShow:hover
         cursor: pointer
       .colorShow
+        margin: 7px 5px
         position: relative
         width: $colorShow
         height: $colorShow
@@ -264,8 +256,9 @@ $colorShow: 30px
           z-index: 1
     .block
       vertical-align: top
-      margin: 30px 30px 30px 0
       display: inline-block
+      margin: 10px 0
       #uploadImage
         display: inline-block
+        vertical-align: top
 </style>

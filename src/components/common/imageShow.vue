@@ -67,6 +67,7 @@ export default {
     -webkit-font-smoothing:antialiased
     -moz-osx-font-smoothing:grayscale
   .showMsg
+    margin-top:4px
     padding-top: 7px
     text-align: center
     color: gray
