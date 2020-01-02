@@ -138,7 +138,7 @@ export default {
       if (data.code === '1') {
         this.display = data.data;
         this.form = deepCopy(this.display)
-        console.log(this.form, 'form')
+        /// console.log(this.form, 'form')
       } else {
         this.$message.error(data.msg)
       }

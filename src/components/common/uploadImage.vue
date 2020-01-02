@@ -134,6 +134,7 @@ export default {
 
 <style lang="sass" scoped>
 .showMsg
+  line-height: 20px
   color: gray
   font-size: 14px
   .msgItem

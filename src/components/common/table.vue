@@ -62,7 +62,7 @@
                   </el-upload>
                   <el-image
                     :style="`width:${item.widthPercent * clientWidth}px;height:${item.widthPercent * clientWidth * 0.5}px; position:relative`"
-                    :src="item.edit ? display.background_url_img : item.background_url_img"
+                    :src="item.edit ? form.background_url_img : item.background_url_img"
                     fit="contain"
                     class="thumbnail" @click="showDialog(item.background_url_img)"
                   >
@@ -95,7 +95,7 @@
                   </el-upload>
                   <el-image
                     :style="`width:${item.widthPercent * clientWidth}px;height:${item.widthPercent * clientWidth * 0.5}px; position:relative`"
-                    :src="isEdit ? display.title_img : item.title_img"
+                    :src="item.edit ? form.title_img : item.title_img"
                     fit="contain"
                     class="thumbnail" @click="showDialog(item.title_img)"
                   >
@@ -111,7 +111,7 @@
               <td v-if="item.desc !== undefined" :style="`width: ${item.widthPercent - (-0.07) * clientWidth}px`">
                 <el-input
                   v-if="multipleSelection.length !== 0 && item.edit"
-                  v-model="display.desc"
+                  v-model="form.desc"
                 >
                 </el-input>
                 <span v-else class="ellipsis" :style="`width: ${item.widthPercent * clientWidth}px`" :title="item.desc">{{ item.desc }}</span>
@@ -121,7 +121,7 @@
               <td v-if="item.state !== undefined" :style="`width: ${item.widthPercent * clientWidth}px`">
                 <el-select
                   v-if="multipleSelection.length !== 0 && item.edit"
-                  v-model="display.state"
+                  v-model="form.state"
                   style="width: 50%"
                 >
                   <el-option
@@ -416,10 +416,10 @@ export default {
         type: 'warning'
       })
         .then(() => {
-          for (let rr in row) {
+          /* for (let rr in row) {
             // 恢复旧值
             row[rr] = row[`old${rr}`];
-          }
+          } */
           this.toggleSelection();
           row.edit = false;
           that.$message({
@@ -566,7 +566,6 @@ export default {
   opacity: 0
 #table
   .table
-    box-shadow: 0 0 10px #A8A8A8
     .thead-dark
       background: #545c64
       color: white

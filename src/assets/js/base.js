@@ -50,10 +50,15 @@ export function shadowCopy (obj) {
   } else {
     return obj
   }
-  for (let i in obj) { // 以任意顺序遍历一个对象的除Symbol以外的可枚举属性
+  /* for (let i in obj) { // 以任意顺序遍历一个对象的除Symbol以外的可枚举属性
     if (obj.hasOwnProperty(i)) { // 这个方法可以用来检测一个对象是否含有特定的自身属性；和 in 运算符不同，该方法会忽略掉那些从原型链上继承到的属性。
       result[i] = obj[i]
     }
+  } */
+  // 总的来说，操作中引入继承的属性会让问题复杂化，大多数时候，我们只关心对象自身的属性。所以，尽量不要用for...in循环，而用Object.keys()代替。
+  let keys = Object.keys(obj) // Object.keys返回一个数组，包括对象自身的（不含继承的）所有可枚举属性（不含 Symbol 属性）的键名。
+  for (let i = 0; i < keys.length; i++) {
+    result[keys[i]] = obj[keys[i]]
   }
   return result
 }
@@ -84,7 +89,7 @@ export function deepCopy (obj) {
   };
   */
 function trueDeepCopy (result, source) {
-  for (let i in source) {
+  /* for (let i in source) {
     if (source.hasOwnProperty(i)) {
       if (source[i] instanceof Object) {
         result[i] = {}
@@ -96,7 +101,22 @@ function trueDeepCopy (result, source) {
         result[i] = source[i]
       }
     }
+  } */
+  // 使用Object.keys
+  let keys = Object.keys(source)
+  for (let i = 0; i < keys.length; i++) {
+    let key = keys[i] // 取得键名
+    if (source[key] instanceof Object) {
+      result[key] = {}
+      this.trueDeepCopy(result[key], source[key])
+    } else if (source[key] instanceof Array) {
+      result[key] = []
+      this.trueDeepCopy(result[key], source[key])
+    } else {
+      result[key] = source[key]
+    }
   }
+
   return result
 }
 
