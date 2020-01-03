@@ -18,7 +18,7 @@
           </tr>
         </thead>
 
-        <draggable v-if="formData.length !== 0" v-model="formData" tag="tbody">
+        <draggable v-if="formData.length !== 0" v-model="formData" tag="tbody" @end="dropColumn">
           <!-- tr的高度根据图片的高度0.12来调整 -->
           <tr v-for="(item, index) in formData" :ref="`row${index}`" :key="item.id" class="row" @mouseenter="putBg(`row${index}`)" @mouseleave="moveBg(`row${index}`)" :style="`height:${0.12 * clientWidth * 0.5 + 10}px`">
 
@@ -42,14 +42,13 @@
 
               <!-- 图片类 -->
               <!-- 背景 -->
-              <td v-if="item.background_url_img !== undefined" :style="`width: ${item.widthPercent * clientWidth}px`">
+              <td v-if="item.background_img !== undefined" :style="`width: ${item.widthPercent * clientWidth}px`">
                 <div class="relativePos" :style="`height:${item.widthPercent * clientWidth * 0.5}px`">
                   <el-upload
                    v-if="item.edit"
                     class="upload-demo hidden fileInput"
                     action="/api/common/uploadImg"
-                    :on-preview="handlePreview"
-                    :on-success="uploadSuccess.bind(this,index, item)">
+                    :on-success="uploadSuccess.bind(null, 'background_img')">
                       <!-- <el-input
                         v-if="item.edit"
                         type="file"
@@ -62,9 +61,9 @@
                   </el-upload>
                   <el-image
                     :style="`width:${item.widthPercent * clientWidth}px;height:${item.widthPercent * clientWidth * 0.5}px; position:relative`"
-                    :src="item.edit ? form.background_url_img : item.background_url_img"
+                    :src="item.edit ? form.background_img : item.background_img"
                     fit="contain"
-                    class="thumbnail" @click="showDialog(item.background_url_img)"
+                    class="thumbnail" @click="showDialog(item.background_img)"
                   >
                     <div slot="error" class="image-slot" style="position: absolute;top: 50%;left: 50% ;transform: translate(-50%,-50%)">
                       <i class="el-icon-picture-outline"></i>
@@ -81,8 +80,7 @@
                    v-if="item.edit"
                     class="upload-demo hidden fileInput"
                     action="/api/common/uploadImg"
-                    :on-preview="handlePreview"
-                    :on-success="uploadSuccess.bind(this,index, item)">
+                    :on-success="uploadSuccess.bind(null, 'title_img')">
                       <!-- <el-input
                         v-if="item.edit"
                         type="file"
@@ -108,20 +106,20 @@
                 </div>
               </td>
               <!-- 如果是描述,描述的宽度比平均长一些 -->
-              <td v-if="item.desc !== undefined" :style="`width: ${item.widthPercent - (-0.07) * clientWidth}px`">
+              <td v-if="item.content !== undefined" :style="`width: ${item.widthPercent - (-0.07) * clientWidth}px`">
                 <el-input
                   v-if="multipleSelection.length !== 0 && item.edit"
-                  v-model="form.desc"
+                  v-model="form.content"
                 >
                 </el-input>
-                <span v-else class="ellipsis" :style="`width: ${item.widthPercent * clientWidth}px`" :title="item.desc">{{ item.desc }}</span>
+                <span v-else class="ellipsis" :style="`width: ${item.widthPercent * clientWidth}px`" :title="item.content">{{ item.content }}</span>
               </td>
 
                 <!-- 下拉选择状态 -->
-              <td v-if="item.state !== undefined" :style="`width: ${item.widthPercent * clientWidth}px`">
+              <td v-if="item.status !== undefined" :style="`width: ${item.widthPercent * clientWidth}px`">
                 <el-select
                   v-if="multipleSelection.length !== 0 && item.edit"
-                  v-model="form.state"
+                  v-model="form.status"
                   style="width: 50%"
                 >
                   <el-option
@@ -132,13 +130,13 @@
                   >
                   </el-option>
                 </el-select>
-                <span v-else>{{ item.state ? "显示" : "隐藏" }}</span>
+                <span v-else>{{ item.status ? "显示" : "隐藏" }}</span>
               </td>
               <td>
                 <div v-if="item.edit">
                   <el-button
                     class="greenColor"
-                    @click.stop="setNewValue(item)"
+                    @click.stop="setNewValue(item, index)"
                     type="text"
                     size="medium "
                     >确定</el-button
@@ -159,13 +157,13 @@
                     size="medium "
                     >编辑</el-button
                   >
-                  <el-button
+                  <!-- <el-button
                     class="redColor"
                     @click.stop="deleteThis(item)"
                     type="text"
                     size="medium "
                     >删除</el-button
-                  >
+                  > -->
                 </div>
               </td>
           </tr>
@@ -173,18 +171,28 @@
       </table>
     </div>
     <el-button
-      @click="batchDelete"
+      @click="batchHide"
       :disabled="multipleSelection.length ? false : true"
       class="batch"
       type="danger"
       round
-      >批量删除</el-button
+      >批量隐藏</el-button
+    >
+    <el-button
+      @click="batchShow"
+      :disabled="multipleSelection.length ? false : true"
+      class="batch"
+      type="danger"
+      round
+      >批量显示</el-button
     >
   </div>
 </template>
 
 <script>
 import draggable from 'vuedraggable';
+import { deepCopy, getImgMsg } from '../../assets/js/base';
+import { axiosPost } from '../../assets/js/axios';
 
 export default {
   name: 'flexTable',
@@ -198,7 +206,7 @@ export default {
             label: '显示状态', // 表头名
             widthPercent: 0.12, // 表头占父类长度百分比
             type: 'select', // 表头input类型
-            key: 'state' // 他对应表格数据tableData对象里的key值
+            key: 'status' // 他对应表格数据tableData对象里的key值
           },
           {
             label: '', // 迷之位置。。。。
@@ -239,7 +247,7 @@ export default {
             name: '234233333333333333333333333333333333333333',
             link: '23423777777777777777777777777777777777',
             edit: false,
-            state: true
+            status: true
           },
           {
             id: 1,
@@ -247,7 +255,7 @@ export default {
             name: 'rew',
             link: 'werw',
             edit: false,
-            state: true
+            status: true
           },
           {
             id: 2,
@@ -255,7 +263,7 @@ export default {
             name: 'werw',
             link: 'werwer',
             edit: false,
-            state: true
+            status: true
           },
           {
             id: 3,
@@ -263,7 +271,7 @@ export default {
             name: 'werw',
             link: 'werw',
             edit: false,
-            state: true
+            status: true
           },
           {
             id: 4,
@@ -271,7 +279,7 @@ export default {
             name: 'wer',
             edit: false,
             link: 'wer',
-            state: true
+            status: true
           } */
         ];
       }
@@ -291,17 +299,17 @@ export default {
         'http://img.iimedia.cn/00001228e00fdffb513251e96027c50ff3fd18040576eed1660299eeb278938ef42d8',
       options: [
         {
-          value: true,
+          value: 1,
           label: '显示'
         },
         {
-          value: false,
+          value: 0,
           label: '隐藏'
         }
       ],
       form: {}, // 编辑时保留提交的数据
       formData: [],
-      multipleSelection: []/* 保存所选项的id */
+      multipleSelection: []/* 保存所选项的obj_id */
     };
   },
   computed: {
@@ -317,6 +325,7 @@ export default {
     // this.setTableWidth()
     this.clientWidth = document.body.clientWidth
     this.formData = this.tableData
+    // console.log(this.tableData, 'this.tableData')
   },
   methods: {
     showDialog (url) {
@@ -329,19 +338,12 @@ export default {
     moveBg (ref) {
       this.$refs[ref][0].style.background = 'white'
     },
-    uploadSuccess (index, item, response, file, fileList) { /* success之后将url付给 */
-      console.log(index, item, response, file, fileList)
+    uploadSuccess (name, response, file, fileList) { /* success之后将url付给 */
       if (response.code === '1') {
-        this.$set(item, 'thumbnail', response.data.imgurl)
-        // this.formData[index].thumbnail = response.data.imgurl
-        // item.thumbnail = response.data.imgurl
+        Object.assign(this.form, getImgMsg(name, [fileList[0].response.data])); // Object.assign(target, ...sources)合并图片对象
+      } else {
+        this.$message.error(response.msg)
       }
-      // console.log(this.formData, this.$set)
-    },
-    handlePreview (file) {
-      console.log(file.url, 'file.url'); /* blob的临时对象 */
-      this.dialogImageUrl = file.url;
-      this.dialogVisible = true;
     },
     handleCheckAllChange (val) { /* 全选按钮 */
       // console.log(this.checkAll)
@@ -351,7 +353,7 @@ export default {
       } else {
         let allId = []
         for (let i = 0; i < this.formData.length; i++) {
-          allId.push(this.formData[i].id)
+          allId.push(this.formData[i].obj_id)
           this.formData[i].hasChecked = true
         }
         this.multipleSelection = allId
@@ -361,9 +363,9 @@ export default {
     },
     handleCheckedChange (item) { /* 将id push进multipleSelection */
       if (!item.hasChecked) { /* fasle ，表示取消checked，需要将已经在multipleSelection的数据删除 */
-        this.multipleSelection.splice(this.multipleSelection.indexOf(item.id), 1)
+        this.multipleSelection.splice(this.multipleSelection.indexOf(item.obj_id), 1)
       } else {
-        this.multipleSelection.push(item.id)
+        this.multipleSelection.push(item.obj_id)
       }
       this.checkAll = (this.formData.length !== 0) && (this.multipleSelection.length === this.formData.length)
 
@@ -383,7 +385,13 @@ export default {
       this.longInput = window.deviceWidth * 0.17
       // console.log(this.shortInput)
     }, */
-    setNewValue (row) {
+    /*
+    作用：确认修改表格数据，请求后台更新，以及调用父组件本地更新
+    @params row 修改的该行数据
+    @params index 该行的索引index
+    @return void
+    */
+    setNewValue (row, index) {
       // 确定更改新值
       let that = this;
       this.$confirm('是否确定修改所选行信息？', '提示', {
@@ -392,12 +400,33 @@ export default {
         type: 'warning'
       })
         .then(() => {
-          this.toggleSelection(); // 取消所有选择状态，让model的值于data的tableData的值同步更新
-          row.edit = false; // 清除所有编辑状态
-          that.$message({
-            type: 'success',
-            message: '修改成功!'
-          });
+          // 请求后台更新栏目内容
+          axiosPost(
+            'api/columnObj/updateColumnObj',
+            this.form,
+            res => {
+              let data = res.data;
+              if (data.code === '1') {
+                // 本地更新
+                this.$emit('updateColumnObj', this.form, index)
+                this.toggleSelection(); // 取消所有选择状态，让model的值于data的tableData的值同步更新
+                row.edit = false; // 清除所有编辑状态
+                that.$message({
+                  type: 'success',
+                  message: '修改成功!'
+                });
+                that.$message({
+                  message: data.msg,
+                  type: 'success'
+                });
+              } else {
+                that.$message.error(data.msg);
+              }
+            },
+            err => {
+              this.$message.error('更新大会头图失败，请重试！' + err);
+            }
+          );
         })
         .catch(() => {
           this.clearSelection() // 清除checked状态
@@ -407,6 +436,11 @@ export default {
           });
         });
     },
+    /*
+    作用：取消更改
+    @params row 修改的该行数据
+    @return void
+    */
     keepOldValue (row) {
       // 取消更改
       let that = this;
@@ -416,10 +450,6 @@ export default {
         type: 'warning'
       })
         .then(() => {
-          /* for (let rr in row) {
-            // 恢复旧值
-            row[rr] = row[`old${rr}`];
-          } */
           this.toggleSelection();
           row.edit = false;
           that.$message({
@@ -435,72 +465,132 @@ export default {
           });
         });
     },
+    /*
+    作用：清除checked状态
+    @params row 修改的该行数据
+    @return void
+    */
     clearSelection () {
       for (let i = 0; i < this.formData.length; i++) {
         this.formData[i].hasChecked = false
       }
     },
+    /*
+    作用：点击编辑
+    @return void
+    */
     editClick (row) {
       // 点击编辑
-      /* for (let rr in row) {
-        // 编辑前先保存旧值
-        row[`old${rr}`] = row[rr];
-      } */
-      this.form = row // 编辑前先保存旧值
-      // console.log(row, 'editRow')
+      this.form = deepCopy(row) // 编辑前先保存旧值
       this.clearEdit(); /// 先清除掉之前的编辑态
       this.toggleSelection([row]);
       row.edit = true;
     },
-    deleteThis (row) {
+    /*     deleteThis (row) {
       // 点击删除
       this.clearEdit();
       this.toggleSelection([row]);
       console.log(this.multipleSelection, 'multipleSelection')
-      this.batchDelete();
-    },
+      this.batchHide();
+    }, */
+    /*
+    作用：清除所有编辑状态
+    @return void
+    */
     clearEdit () {
-      // 清除所有编辑状态
       for (let i = 0; i < this.formData.length; i++) {
-        if (this.formData[i].edit) {
-          // 查询之前编辑的那个状态，如果点击编辑且修改后不做任何处理又跳转到另一行编辑，保留之前的值
-          for (let j in this.formData[i]) {
-            this.formData[i][j] = this.formData[i][`old${j}`];
-          }
-          this.formData[i].edit = false;
-        }
+        this.formData[i].edit = false;
       }
     },
-    batchDelete () {
-      // 点击批量删除
+    /*
+    作用：点击批量隐藏
+    @return void
+    */
+    batchHide () {
       let that = this;
-      this.$confirm('是否确定删除所选行信息？', '提示', {
+      this.$confirm('是否确定隐藏所选行信息？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
+      }).then(() => {
+        this.isBatchHide = true
+        this.batchHS(this.multipleSelection)
+      }).catch(() => {
+        that.$message({
+          type: 'info',
+          message: '已取消隐藏'
+        });
+      }).finally(() => {
+        this.multipleSelection = []
+        this.clearSelection() // 清除checked状态
       })
-        .then(() => {
-          that.multipleSelection.forEach(items => {
-            // 寻找对应的id号然后删除
-            let findIndex = this.formData.findIndex(item => (item.id) === items);
-            that.formData.splice(findIndex, 1);
-          });
-          that.$message({
-            type: 'success',
-            message: '删除成功!'
-          });
-          this.checkAll = (this.formData.length !== 0) && (this.multipleSelection.length === this.formData.length)
-        })
-        .catch(() => {
-          this.clearSelection() // 清除checked状态
-          that.$message({
-            type: 'info',
-            message: '已取消删除'
-          });
-        }).finally(() => {
-          this.multipleSelection = []
-        })
     },
+    /*
+    作用：点击批量显示
+    @return void
+    */
+    batchShow () {
+      let that = this;
+      this.$confirm('是否确定隐显示所选行信息？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.isBatchHide = false
+        this.batchHS(this.multipleSelection)
+        this.multipleSelection = []
+      }).catch(() => {
+        that.$message({
+          type: 'info',
+          message: '已取消显示'
+        });
+      }).finally(() => {
+        this.multipleSelection = []
+        this.clearSelection() // 清除checked状态
+      })
+    },
+    /*
+    作用：批量显示或隐藏操作
+    @return void
+    */
+    batchHS (multipleSelection) {
+      let that = this
+      let ids = multipleSelection
+      let status
+      if (this.isBatchHide) {
+        status = 0
+      } else {
+        status = 1
+      }
+      axiosPost(
+        'api/columnObj/batUpdateStatus',
+        {
+          updateData: JSON.stringify(multipleSelection), // 数组传入后台都要字符串化
+          status
+        },
+        res => {
+          let data = res.data;
+          if (data.code === '1') {
+            // 本地更新
+            this.$emit('batchHS', ids, status)
+            this.checkAll = (this.formData.length !== 0) && (this.multipleSelection.length === this.formData.length)
+            that.$message({
+              message: data.msg,
+              type: 'success'
+            });
+          } else {
+            that.$message.error(data.msg);
+          }
+        },
+        err => {
+          this.$message.error('更新，请重试！' + err);
+        }
+      )
+    },
+    /*
+    作用：批量显示或隐藏操作
+    @return void
+    */
     toggleSelection (rows) {
       this.clearSelection() // 清除checked状态
       this.multipleSelection = []
@@ -517,12 +607,17 @@ export default {
       this.multipleSelection = val;
       // console.log(val, 'val')
     },
-    dropColumn () {
-      /* 新增的时候将sort = this.navMsg[2].subTitle.length */
-      this.dragging = false
-    },
     checkMove: function (e) {
       window.console.log('Future index: ' + e.draggedContext.futureIndex);
+    },
+    /*
+    作用：发送更新栏目内容顺序sort请求给后台
+    @formName: String 对应新增表单的ref
+    @return void
+    */
+    dropColumn () {
+      this.dragging = false;
+      this.$emit('dropColumn', this.formData)
     }
   },
   components: {

@@ -5,7 +5,7 @@
         <i class="iconfont icon-delete"></i>
         删除{{title}}
         </span>
-      <span v-if="needInnerDialog" class="button" @click="$emit(addGroupDetail)">
+      <span v-if="needInnerDialog" class="button" @click="$emit('addGroupContent')">
         <i class="iconfont icon-plus"></i>
         新增{{title}}
         </span>

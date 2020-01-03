@@ -126,7 +126,7 @@ export default {
     submitForm (formName) {
       /* 触发父组件的addMsg方法 */
       this.dialogFormVisible = false;
-      this.$emit('addMsg', this.form);
+      this.$emit('addbackStageMsg', this.form);
     }
   },
   components: {

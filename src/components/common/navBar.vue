@@ -343,7 +343,7 @@ export default {
     );
   },
   mounted () {
-    this.$nextTick(() => {});
+    this.$nextTick(() => {})
   },
   methods: {
     /* 关于鼠标直接拖拽排序的，navbar列表改变后直接将排序后的数据发请求给后台，下次再次请求时发送更换后的数据即可 */
@@ -477,7 +477,6 @@ export default {
         sortData.push(item.c_id);
         return item;
       });
-      console.log(sortData, 'sortData');
       // 更新栏目排序
       axiosPost(
         '/api/column/sortColumn',
@@ -488,7 +487,6 @@ export default {
         res => {
           //
           let data = res.data;
-          console.log(data, '排序信息');
           if (data.code === '1') {
             that.$message({
               message: data.msg,
@@ -499,7 +497,6 @@ export default {
           }
         },
         err => {
-          console.log(err);
           this.$message.error('排序栏目失败，请重试！' + err);
         }
       );
