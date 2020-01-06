@@ -32,6 +32,11 @@ export default {
       default: '管理员XXX'
     }
   },
+  data () {
+    return {
+      url: '123'
+    }
+  },
   methods: {
     errorHandler () { /* 头像加载失败 */
       return true;

@@ -49,7 +49,6 @@
         background-color="#545c64"
         text-color="#fff"
         active-text-color="#ffd04b"
-        router
       >
         <!-- 头像 -->
         <div class="avatar">
@@ -59,6 +58,7 @@
           <el-menu-item
             v-if="nav.subTitle.length === 0 && !nav.needAddBtn"
             :index="nav.jump_url"
+            @click="$router.push(nav.jump_url)"
           >
             <i :class="nav.icon + ' iconfont'"></i>
             <span>{{ nav.name }}</span>
@@ -154,7 +154,9 @@ import { mapMutations, mapGetters } from 'vuex';
 import draggable from 'vuedraggable';
 
 /* 现在栏目navbar的需求是，1、能新增，新增时候可编辑name和type（必填,type给select框）确定后给后台，后台返回栏目id,同时button隐藏，出现确定和取消来确定用户想要的位置，此时可拖动？
-注意同type的jump_url要归为一类；2、能拖动 */
+注意同type的jump_url要归为一类；2、能拖动
+这里的elementUI的memu组件省略了router属性，由于我们需要保存每个navbar点击后的msg，然后再跳转页面，如果加上router，执行顺序会相反
+*/
 
 export default {
   name: 'navBar',
@@ -558,6 +560,7 @@ export default {
     @return void
     */
     saveColumnMsg (msg) {
+      console.log(msg, 'navBar -msg')
       storeLocalData([['columnMsg', msg]]);
       this.$router.push(msg.jump_url);
     }

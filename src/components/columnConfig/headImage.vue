@@ -29,7 +29,7 @@
 import ImageShow from '../common/imageShow';
 import UploadImage from '../common/uploadImage';
 import { axiosPost, axiosGet } from '../../assets/js/axios';
-import { getLocalData, deepCopy } from '../../assets/js/base';
+import { getLocalData, deepCopy, getImgMsg } from '../../assets/js/base';
 
 export default {
   name: 'headImage',
@@ -37,8 +37,10 @@ export default {
     ImageShow,
     UploadImage
   },
-  data: function () {
+  data () {
     return {
+      c_id: '',
+      p_id: '',
       isEdit: false,
       display: {
 
@@ -57,7 +59,6 @@ export default {
       if (data.code === '1') {
         this.display = data.data[0];
         this.form = deepCopy(this.display)
-        // console.log(this.form, 'form')
       } else {
         this.$message.error(data.msg)
       }
@@ -97,13 +98,7 @@ export default {
     @return void
     */
     getImgMsg (name, imgMsgArr) {
-      if (imgMsgArr.length === 1) {
-        this.form[name] = imgMsgArr[0].img_url
-        this.form[`${name}_jumpurl`] = imgMsgArr[0].jump_url
-        this.form[`${name}_width`] = imgMsgArr[0].width
-        this.form[`${name}_height`] = imgMsgArr[0].height
-        this.form[`${name}_id`] = imgMsgArr[0].img_id
-      }
+      Object.assign(this.form, getImgMsg(name, imgMsgArr)); // Object.assign(target, ...sources)合并图片对象
     },
     /*
     作用：更新栏目数据

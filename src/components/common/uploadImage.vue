@@ -54,7 +54,6 @@ export default {
     }
   },
   data () {
-    /* 新发现！ */
     return {
       imgList: [],
       dialogImageUrl: '',
@@ -62,6 +61,11 @@ export default {
       fileList: [],
       multiple: false
     };
+  },
+  created () {
+    this.fileList = []
+    this.imgList = []
+    console.log(this.imgList, 'fileLsit')
   },
   methods: {
     /*
@@ -72,12 +76,14 @@ export default {
     @return void
     */
     uploadSuccess (response, file, fileList) {
+      console.log(response, file, fileList);
       if (!this.multiple) {
-        console.log(response, file, fileList, 'response, file, fileList')
         this.multiple = Number(this.limit) > 1;
         for (let i = 0; i < fileList.length; i++) {
           if (fileList[i].response.code === '1') {
-            this.imgList.push(fileList[i].response.data)
+            let data = fileList[i].response.data
+            data.uid = fileList[i].uid
+            this.imgList.push(data)
           } else {
             this.$message.error(fileList[i].response.msg)
           }
@@ -85,8 +91,10 @@ export default {
         this.$emit('getImgMsg', this.inputName, this.imgList)
       }
     },
-    handleRemove (file, fileList) { // 只要用户remove，图片信息换成原来的！
+    handleRemove (file, fileList) { //
       console.log(file, fileList);
+      let index = this.imgList.findIndex((item, index) => item.uid === file.uid)
+      this.imgList.splice(index, 1)
     },
     handlePictureCardPreview (file) { /* 预览的时候 */
       console.log(file.url, 'file.url'); /* blob的临时对象 */

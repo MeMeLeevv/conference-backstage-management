@@ -1,8 +1,23 @@
 <template>
   <div id="background">
+    <div class="previewArea">
+      <div class="block">
+        <span class="title">标题图：  </span>
+        <ImageShow title="标题图和标题只需提供一项即可"  :url="display.title_img" :imgW="display.title_img_width"
+        :imgH="display.title_img_height"></ImageShow>
+          <UploadImage v-if="isEdit" inputName="title_img" @getImgMsg="getImgMsg"></UploadImage>
+      </div>
+      <div class="swatch">
+        <span class="title">标题：  </span>
+        <span v-if="!isEdit" class="titledis">{{display.title}}</span>
+        <el-input style="width: 60%" v-else v-model="form.title"></el-input>
+      </div>
+
+      <!-- 新增logo图 -->
+    </div>
     <!-- 大会背景集合 claim: 标题图/标题文字/内容文字-->
-    <ConfigHeader class="headTitle" title="内容详情" :needDialog="false"></ConfigHeader>
-    <quill-editor :content="form.columnContent.contentText"
+    <ConfigHeader class="headTitle" title="背景描述" :needDialog="false" :needInnerDialog="false"></ConfigHeader>
+    <quill-editor :content="isEdit? form.desc_content : display.desc_content"
                 :options="editorOption"
                 @blur="onEditorBlur($event)"
                 @focus="onEditorFocus($event)"
@@ -10,25 +25,8 @@
                 @change="onEditorChange($event)">
     </quill-editor>
     <div class="submit">
-      <el-button class="save" @click="submit">保存</el-button>
-      <el-button class="cancel" @click="cancel">取消</el-button>
-    </div>
-    <div class="attach">
-      <!-- <div class="input">
-        <el-input
-          placeholder="请输入标题，或者选择上传标题图"
-          v-model="form.columnContent.title"
-          clearable>
-        </el-input>
-      </div> -->
-      <div class="img">
-        <span class="title">标题图 : </span>
-        <uploadImage @getImgPath="getImgPath" inputName="titleImg" class="upload" :limit="1" :showFileList="true" addMsg="标题文字可由标题图替代，小于200k，非必选"></uploadImage>
-      </div>
-      <div class="img">
-        <span class="title">配置图 : </span>
-        <uploadImage @getImgPath="getImgPath" inputName="columnImg" class="upload" :limit="2" :showFileList="true" addMsg="如有需要，可多张配置图片，小于200k，非必选"></uploadImage>
-      </div>
+      <el-button type="primary" @click="isEdit? submitForm() : (isEdit = true)">{{isEdit ? '保存':'编辑'}}</el-button>
+      <el-button v-if="isEdit" type="primary" @click="isEdit = false">取消</el-button>
     </div>
   </div>
 </template>
@@ -36,22 +34,22 @@
 <script>
 import ConfigHeader from '../common/configHeader';
 import UploadImage from '../common/uploadImage';
-import Qs from 'qs';
 import { axiosPost, axiosGet } from '../../assets/js/axios';
 import { mapGetters } from 'vuex';
-import { getLocalData, getherMSg, concatDataStr } from '../../assets/js/base';
+import { getImgMsg, getLocalData, deepCopy } from '../../assets/js/base';
+import ImageShow from '../common/imageShow';
 
 export default {
   name: 'guests',
   data () {
     return {/* 只要所属数据跟栏目的关系不是一对一，就放在栏目内容那里，否则放在栏目信息那里 */
-      form: { /* 要提交给后台的数据，属于一对一，提交到栏目信息那里 */
-        columnContent: {
-          title: '',
-          contentText: '<h2>I am Example</h2>'
-        },
-        titleImg: ''
+      c_id: '',
+      p_id: '',
+      isEdit: false,
+      display: {
+        desc_content: ''
       },
+      form: {},
       hideEditorPanel: true, // 是否隐藏编辑面板
       editorOption: {
         // some quill options
@@ -68,47 +66,22 @@ export default {
   },
   created () {
     /* 取得当前栏目的信息 */
-    /*
-    修改所需参数
-    column.id
-    column.cid
-    column.name
-    column.type
-    titleImg
-    column.columnDescribe
-    columnImg: '.jpg'
-    column.maxContents
-    column.display
-    */
-    /*
-    返回数据：
-    ·id
-    ·cid
-    ·name
-    ·type
-    ·max_contents
-    column_describe
-    commonImgTitle.imgurl
-    commonImgColumn.imgurl
-    content_sorting
-    ·display
-    ·createTime
-    */
-    this.columnMsg = getLocalData(['columnMsg'])
-    axiosGet('/api/conferencegetColumnByColumnid', { columnId: this.columnMsg.id }, (res) => { /* 查询大会信息并展示在预览区，如果没有值要有初始化 */
-      let data = JSON.parse(res.data);
+    /// let that = this;
+    let cData = getLocalData(['columnMsg']); // 取出点击保存在本地后的栏目信息
+    this.c_id = cData[0].c_id
+    this.p_id = cData[0].p_id
+    axiosGet('/api/column/getColumnList', { c_id: this.c_id }, (res) => {
+      let data = res.data
       if (data.code === '1') {
-        this.columnMsg = data.data;
-        this.data = [/* 大会背景所需的数据集合 */
-          'column.id', `${this.columnMsg.id}`, 'column.cid', `${this.columnMsg.cid}`, 'column.name', `${this.columnMsg.name}`,
-          'column.type', `${this.columnMsg.type}`, 'titleImg', `${this.columnMsg.commonImgTitle && this.columnMsg.commonImgTitle.imgurl}`, 'column.columnDescribe', `${this.columnMsg.column_describe}`,
-          'columnImg', `${this.columnMsg.commonImgColumn && this.columnMsg.commonImgColumn.imgurl}`, 'column.maxContents', `${this.columnMsg.max_contents}`, 'column.display', `${this.columnMsg.display}`];
-        console.log(this.data, 'bgMsg');
+        this.display = data.data[0];
+        console.log(this.display, 'display')
+        this.form = deepCopy(this.display)
       } else {
-        console.log('请求成功！但是根据大会id查找大会信息失败');
+        this.$message.error(data.msg)
       }
     }, (err) => {
-      console.log(err, '根据大会id查找大会信息失败');
+      this.$message.error(err)
+      console.log(err, '根据栏目id查找栏目信息失败');
     });
   },
   computed: {
@@ -133,89 +106,64 @@ export default {
     });
   },
   methods: {/* 增加数据，由子组件触发 */
+    /*
+    作用：批量修改图片字段信息，基于后台字段统一，如果不统一反而会更麻烦，需要一个一个赋值
+    @name: String 图片url字段，其他字段都是在这个基础上加上_xxx
+    @imgMsgArr: Array 图片信息
+    @return void
+    */
+    getImgMsg (name, imgMsgArr) {
+      Object.assign(this.form, getImgMsg(name, imgMsgArr)); // Object.assign(target, ...sources)合并图片对象
+    },
     initStyle (dom, styleArr) { // 更改编辑器默认样式
       for (let item in styleArr) {
         dom.style[item] = styleArr[item];
       }
     },
-    submit () { /* 提交富文本数据，一加载先在后台抓取初始文本数据并保留在一个临时数据中，提交后就直接传数据到后台并覆盖原来的文本信息，取消的话就直接将临时数据再次覆盖当前文本信息 */
-      console.log(this.form, 'form');
-      this.$axios({/* 提交栏目信息 */
-        method: 'post',
-        url: '/api/filesaveColumnContent',
-        data: this.form,
-        transformRequest: [
-          function (data) {
-            return Qs.stringify(data);
-          }
-        ],
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
-
-      }).catch(err => {
-        console.log(err);
-      }).finally();
-    },
-    cancel () {
-
-    },
     /*
-    column.id
-    column.cid
-    column.name
-    column.type
-    titleImg
+    作用：更新栏目数据
+    @return void
     */
-    getImgPath (name, value, multiple) { /* 获取图片链接，赋值给form */
-      this.form[name] = value;
-      console.log(this.columnMsg, 'this.columnMsg')
-      if (multiple) {
-        let data1 = concatDataStr(['columnContent.columnId', `${this.columnMsg.id}`, 'contentMore', `${value}`])
-        axiosPost('/api/saveContentMore', data1, (res) => { /* 查询大会信息并展示在预览区，如果没有值要有初始化 */
-          let data = JSON.parse(res.data);
+    submitForm (formName) {
+      let that = this
+      axiosPost('/api/column/updateColumn', this.form,
+        res => {
+          let data = res.data;
           if (data.code === '1') {
-            this.columnMsg = data.data;
-            console.log(data.data, '更新完毕');
+            this.display = deepCopy(this.form)
+            this.isEdit = false
+            // console.log(this.display, 'result')
+            that.$message({
+              message: data.msg,
+              type: 'success'
+            });
           } else {
-            console.log('请求成功！但是根据大会id查找大会信息失败');
+            that.$message.error(data.msg);
           }
-        }, (err) => {
-          console.log(err, '根据大会id查找大会信息失败');
+        },
+        err => {
+          this.$message.error('更新大会头图失败，请重试！' + err);
         });
-      } else {
-        let data = getherMSg(this.data, [[`${name}`, `${value}`]]); /// * 取得更新值之后的参数序列化 */
-        axiosPost('/api/filesaveColumnContent', data, (res) => { /* 查询大会信息并展示在预览区，如果没有值要有初始化 */
-          let data = JSON.parse(res.data);
-          if (data.code === '1') {
-            this.columnMsg = data.data;
-            console.log(data.data, '更新完毕');
-          } else {
-            console.log('请求成功！但是根据大会id查找大会信息失败');
-          }
-        }, (err) => {
-          console.log(err, '根据大会id查找大会信息失败');
-        });
-      }
     },
     onEditorBlur (editor) {
-      console.log('editor blur!', editor);
     },
     onEditorFocus (editor) {
-      console.log('editor focus!', editor);
+      if (!this.isEdit) { // 如果不是编辑状态，编辑器默认不可编辑
+        editor.enable(false)
+      } else {
+        editor.enable(true)
+      }
     },
     onEditorReady (editor) {
-      console.log('editor ready!', editor);
     },
     onEditorChange ({ editor, html, text }) {
-      console.log('editor change!', editor, html, text);
-      this.form.columnContent.contentText = html;
+      this.form.desc_content = html;
     }
   },
   components: {
     ConfigHeader,
-    UploadImage
+    UploadImage,
+    ImageShow
   }
 };
 </script>
@@ -225,20 +173,6 @@ export default {
   width: 90%
   .headTitle
     margin-bottom: 10px
-  .attach
-    margin-top: 50px
-    .img
-      margin: 20px 0
-    .input
-      width: 40%
-      margin: 30px 0
-    span.title
-      vertical-align: top
-      margin-right: 20px
-      margin: 5px 0
-      color: gray
-    .upload
-      columnMsg: inline-block
   .submit
     float: right
     margin-top: 20px
@@ -248,4 +182,44 @@ export default {
     .cancel
       background: #DDDDDD
       color: black
+
+$colorShow: 30px
+.title,.titledis
+  width: 80px
+  line-height: 40px
+  vertical-align: top
+  color: gray
+  font-weight: 700
+.titledis
+  width: 80%
+  line-height: 40px
+.fade-enter-active, .fade-leave-active
+  transition: opacity .3s
+
+.fade-enter, .fade-leave-to
+  opacity: 0
+
+.previewArea
+  #imageShow
+    display: inline-block
+    margin-right: 65px
+  .swatch
+    margin: 30px 30px 30px 0
+    .title
+      line-height: 40px
+    .colorShow:hover
+      cursor: pointer
+    .colorShow
+      margin: 7px 5px
+      position: relative
+      width: $colorShow
+      height: $colorShow
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .15), inset 0 0 4px rgba(0, 0, 0, .25)
+      border-radius: 3px
+  .block
+    vertical-align: top
+    margin: 10px 0
+    #uploadImage
+      display: inline-block
+      vertical-align: top
 </style>

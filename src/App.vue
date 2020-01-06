@@ -55,14 +55,15 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['getOriginPage', 'getHasLogin', 'getBackStageTitle', 'getAccount'])
+    ...mapGetters(['getOriginPage', 'getHasLogin', 'getBackStageTitle', 'getAccount', 'getColumnMsg'])
   },
   methods: {
     ...mapMutations([
       'setOriginPage',
       'setHasLogin',
       'setAccount',
-      'setBackStageTitle'
+      'setBackStageTitle',
+      'setColumnMsg'
     ]),
 
     /*

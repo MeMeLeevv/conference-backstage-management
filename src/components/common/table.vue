@@ -373,18 +373,6 @@ export default {
       this.checkAll = checkedCount === this.tableItems.length;
       this.isIndeterminate = checkedCount > 0 && checkedCount < this.tableItems.length; */
     },
-    init () {
-      // 先把input的border删除掉
-    },
-    /*     getDevice () {
-      window.deviceWidth = document.body.clientWidth
-      window.deviceHeight = document.body.clientHeight
-    }, */
-    /*     setTableWidth () {
-      this.shortInput = window.deviceWidth * 0.12 // 使用百分比会报错 expression missing
-      this.longInput = window.deviceWidth * 0.17
-      // console.log(this.shortInput)
-    }, */
     /*
     作用：确认修改表格数据，请求后台更新，以及调用父组件本地更新
     @params row 修改的该行数据

@@ -69,7 +69,7 @@
           v-model="activeName"
           type="card"
           closable
-          @tab-remove="removeTab(activeName)"
+          @tab-remove="removeTab"
         >
         <!-- 表格 -->
           <el-tab-pane
@@ -126,7 +126,7 @@
               ></ConfigHeader>
               <!-- <Table class="flexTable" :initTable="initTable" :tableData="tableData"></Table> -->
               <Table
-                v-if="item.tableData&&item.tableData.length !== 0"
+                v-if="item.tableData"
                 class="flexTable"
                 :initTable="initTable"
                 :tableData="item.tableData"
@@ -155,6 +155,8 @@ export default {
   name: 'highlight',
   data () {
     return {
+      c_id: '',
+      p_id: '',
       isEditColumn: false, // 此时是否在编辑栏目信息
       isEditGroup: false, // 此时是否在编辑组
       needDialog: false, // 是否需要dialog
@@ -209,8 +211,7 @@ export default {
           widthPercent: 0.1,
           key: 'operating'
         }
-      ],
-      tableData: [] // 表格具体信息
+      ]
     };
   },
   created () {
@@ -219,6 +220,8 @@ export default {
     let cData = getLocalData(['columnMsg']); // 取出点击保存在本地后的栏目信息
     this.c_id = cData[0].c_id;
     this.p_id = cData[0].p_id;
+    console.log(this.c_id, 'c-Id')
+
     /* axiosGet('/api/column/getcolumnListShow', { c_id: this.c_id }, (res) => {
       let data = res.data
       if (data.code === '1') {
@@ -260,7 +263,8 @@ export default {
         if (this.columnGListShow.length === 0) {
           // tableData初始化，新建组内容
           this.groupDetailEmpty = true
-          this.columnGListShow[this.activeName].tableData = []
+          /*  this.columnGListShow[this.activeName] = {} /// 这两行不可省略，否则当用户新建栏目内容的时候此时表格tableData没有初始化为[]的话之后往tableData添加数据时视图无法得到相应
+          this.columnGListShow[this.activeName].tableData = [] */
         } else {
           // 初始化栏目内容组数据，
           /* 表格格式为：{
@@ -287,22 +291,21 @@ export default {
                     this.columnGListShow[i].tableData[j].edit = false // 是否是编辑状态
                     this.columnGListShow[i].tableData[j].hasChecked = false // checkbox状态是否勾选
                   }
-                  // console.log(this.columnGListShow, 'this.columnGListShow');
-                  // console.log(this.columnGListShow[i].tableData, 'this.columnGListShow[i].tableData');
                 } else {
-                  this.$message.error(data.msg);
+                  // this.$message.error(data.msg);
                 }
               },
               err => {
+                console.log(err, '根据栏目id查找栏目信息失败');
                 this.$message.error(err);
-                // console.log(err, '根据栏目id查找栏目信息失败');
               }
             );
           }
+          console.log(this.columnGListShow, 'this.columnGListShow');
         }
-        // console.log(this.columnGListShow, 'this');
       })
       .catch(function (err) {
+        console.log(err, '根据栏目id查找栏目信息失败');
         that.$message.error(err);
       });
   },
@@ -318,6 +321,7 @@ export default {
     */
     addGroupMsg () {
       this.addGroup = true;
+      this.addGDetail = false;
       this.needDialog = true;
       this.dialogTitle = '栏目内容数据';
       this.initDialog = [
@@ -338,6 +342,7 @@ export default {
     @return void
     */
     addGroupContent () {
+      this.addGroup = false;
       this.needDialog = true;
       this.addGDetail = true;
       this.initDialog = [
@@ -404,12 +409,13 @@ export default {
               message: data.msg,
               type: 'success'
             });
-            if (this.addGroup) {
+            if (this.addGroup) { // 新建栏目内容
               this.columnGListShow.push(data.data[0]);
               let newTabName = this.columnGListShow.length - 1 + '';
               this.activeName = newTabName;
               this.addGroup = false
-            } else if (this.addGDetail) { // 先初始化表格数据
+              this.columnGListShow[this.activeName].tableData = [] // 初始化tableData的值
+            } else if (this.addGDetail) { // 新建表格内容，先初始化表格数据
               data.data[0].widthPercent = 0.12 // 控制表格tb的宽度
               data.data[0].edit = false // 是否是编辑状态
               data.data[0].hasChecked = false // checkbox状态是否勾选
@@ -417,6 +423,7 @@ export default {
                 this.columnGListShow[this.activeName].tableData = []
               }
               this.columnGListShow[this.activeName].tableData.push(data.data[0])
+
               this.addGDetail = false
             }
           } else {
@@ -429,10 +436,44 @@ export default {
       );
     },
     /*
+    作用：编辑栏目信息
+    @return void
+    */
+    editColumn () {
+      this.isEditColumn = true;
+      this.form = {}
+      this.form = deepCopy(this.columnListShow);
+    },
+    /*
+    作用：编辑栏目内容组信息
+    @params item Object 要修改的数据
+    @return void
+    */
+    editGroup (item) {
+      this.form = {}
+      this.isEditGroup = true;
+      this.form = deepCopy(item);
+    },
+    /*
+    作用：子组件触发，本地批量显示或隐藏数据
+    @params ids Array 要修改的数据obj_id
+    @return void !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    */
+    batchHS (ids, status) {
+      console.log(ids, status, 'batchHS')
+      for (let i = 0; i < ids.length; i++) {
+        this.columnGListShow[this.activeName].tableData.forEach(item => {
+          if (item.obj_id === ids[i]) {
+            item.status = status
+          }
+        })
+      }
+    },
+    /*
     作用：更新栏目数据
     @return void
     */
-    submitForm (formName) {
+    submitForm () {
       let that = this;
       // console.log(this.form, 'this.form')
       let url;
@@ -444,7 +485,7 @@ export default {
         // 更新栏目内容组信息
         url = '/api/columnObjgroup/updateColumnObjGroup';
       }
-      // console.log(this.form, 'submitForm.form');
+      console.log(this.form, 'submitForm.form');
 
       axiosPost(
         url,
@@ -474,50 +515,21 @@ export default {
       );
     },
     /*
-    作用：编辑栏目信息
-    @return void
-    */
-    editColumn () {
-      this.isEditColumn = true;
-      this.form = deepCopy(this.columnListShow);
-    },
-    /*
-    作用：编辑栏目内容组信息
-    @params item Object 要修改的数据
-    @return void
-    */
-    editGroup (item) {
-      this.isEditGroup = true;
-      this.form = deepCopy(item);
-    },
-    /*
-    作用：子组件触发，本地批量显示或隐藏数据
-    @params ids Array 要修改的数据obj_id
-    @return void
-    */
-    batchHS (ids, status) {
-      console.log(ids, status, 'batchHS')
-      for (let i = 0; i < ids.length; i++) {
-        this.columnGListShow[this.activeName].tableData.forEach(item => {
-          if (item.obj_id === ids[i]) {
-            item.status = status
-          }
-        })
-      }
-    },
-    /*
     作用：删除特定栏目内容组信息，即需要将status更新为0，即为隐藏，后台变不会返回status为0的数据
-    @params targetName String 传入的当前active的columnGListShow的index
+    @params targetName String 当前删除的tab的index
     @return void
     */
     removeTab (targetName) {
       let index = targetName - 0
       let tabs = this.columnGListShow
       let that = this
-      if (tabs[index + 1]) {
-        this.activeName = index + 1 + ''
-      } else if (tabs[index - 1]) {
-        this.activeName = index - 1 + ''
+      // 这里需要考虑if(this.activeName !== targetName),否则this.targetName不需要变
+      if (this.activeName === targetName) {
+        if (tabs[index + 1]) {
+          this.activeName = index + 1 + ''
+        } else if (tabs[index - 1]) {
+          this.activeName = index - 1 + ''
+        }
       }
       this.columnGListShow[index].status = 0
       axiosPost(

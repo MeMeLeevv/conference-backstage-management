@@ -37,16 +37,16 @@ export function getherMSg (data, needChangeArr) { /* [[key, value]]  收集所�
 }
 
 /*
-    作用：浅拷贝
+    作用：浅拷贝 这里需要注意 [] instanceof Object === true !!!,所以判断数组的条件要在前面
     @obj: Object/Array
     @return Object/Array
     */
 export function shadowCopy (obj) {
   let result
-  if (obj instanceof Object) {
-    result = {}
-  } else if (obj instanceof Array) {
+  if (obj instanceof Array) {
     result = []
+  } else if (obj instanceof Object) {
+    result = {}
   } else {
     return obj
   }
@@ -69,10 +69,10 @@ export function shadowCopy (obj) {
   */
 export function deepCopy (obj) {
   let result
-  if (obj instanceof Object) {
-    result = {}
-  } else if (obj instanceof Array) {
+  if (obj instanceof Array) {
     result = []
+  } else if (obj instanceof Object) {
+    result = {}
   } else {
     return obj
   }
@@ -106,12 +106,12 @@ function trueDeepCopy (result, source) {
   let keys = Object.keys(source)
   for (let i = 0; i < keys.length; i++) {
     let key = keys[i] // 取得键名
-    if (source[key] instanceof Object) {
-      result[key] = {}
-      this.trueDeepCopy(result[key], source[key])
-    } else if (source[key] instanceof Array) {
+    if (source[key] instanceof Array) {
       result[key] = []
-      this.trueDeepCopy(result[key], source[key])
+      trueDeepCopy(result[key], source[key])
+    } else if (source[key] instanceof Object) {
+      result[key] = {}
+      trueDeepCopy(result[key], source[key])
     } else {
       result[key] = source[key]
     }

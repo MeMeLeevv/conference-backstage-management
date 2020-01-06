@@ -2,6 +2,7 @@
   <div id="dislog">
     <!-- 弹窗 -->
     <el-dialog
+      v-if="needDialog"
       :title="`请编辑${title}信息`"
       center
       :visible.sync="dialogFormVisible"
@@ -89,28 +90,13 @@ export default {
   watch: {
     needDialog (newV) {
       this.dialogFormVisible = newV
+      this.form = {
+        status: 0
+      }
     }
   },
   data () {
-    /* 新发现！ */
-    /* var validateName = (rule, value, callback) => {
-      if (!value) {
-        return callback(new Error('内容不能为空！'));
-      }
-    };
-    var validateImage = (rule, value, callback) => {
-      // 检测图片地址，除了要是图片，而且还应该检测是否为合格的存在的可以展示的图片
-      console.log(value, 'value');
-      if (!value) {
-        return callback(new Error('请选择一张图片'));
-      }
-      if (!this.isImage(value)) {
-        return callback(new Error('文件格式需要是图片！请重新选择'));
-      }
-    }; */
     return {
-      url:
-        'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg',
       dialogFormVisible: false,
       formLabelWidth: '100px',
       dialogVisible: false,
