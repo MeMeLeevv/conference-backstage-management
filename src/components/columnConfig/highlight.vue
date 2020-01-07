@@ -236,10 +236,10 @@ export default {
       console.log(err, '根据栏目id查找栏目信息失败');
     }); */
     // let showData = {}
-    let p1 = this.$axios.get('/api/column/getColumnList', {
+    let p1 = this.$axios.get('/api/column/getColumnList', { // 查询栏目信息
       params: { c_id: cData[0].c_id }
     });
-    let p2 = this.$axios.get('/api/columnObjgroup/getColumnObjGroupList', {
+    let p2 = this.$axios.get('/api/columnObjgroup/getColumnObjGroupList', { // 查询栏目组信息
       params: { c_id: cData[0].c_id }
     });
     // 同时请求栏目信息和栏目内容组信息

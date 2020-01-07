@@ -30,19 +30,28 @@
               <td scope="row">{{ index }}</td>
               <!-- 由于draggable插件的限制，这里的整体for循环的数据要绑定formData，这样一来再使用for循环来init表格内容样式就不太行，暂时想到用一下这种将表格所需的全部样式列出来，
               用if来判断那个来显示 -->
-              <!-- 如果是名称 -->
-              <td v-if="item.title !== undefined" :style="`width: ${item.widthPercent - (-0.07) * clientWidth}px`">
+              <!-- 如果是标题 -->
+              <td v-if="hasTableTd.title" :style="`width: ${item.widthPercent - (-0.07) * clientWidth}px`">
                 <el-input
                   v-if="multipleSelection.length !== 0 && item.edit"
                   v-model="form.title"
                 >
                 </el-input>
-                <div  v-else class="ellipsis" :style="`width: ${item.widthPercent * clientWidth}px`" :title="item.name">{{ item.title }}</div>
+                <div  v-else class="ellipsis" :style="`width: ${item.widthPercent * clientWidth}px`" :title="item.title">{{ item.title }}</div>
+              </td>
+              <!-- 如果是名称 -->
+              <td v-if="hasTableTd.name" :style="`width: ${item.widthPercent - (-0.07) * clientWidth}px`">
+                <el-input
+                  v-if="multipleSelection.length !== 0 && item.edit"
+                  v-model="form.name"
+                >
+                </el-input>
+                <div  v-else class="ellipsis" :style="`width: ${item.widthPercent * clientWidth}px`" :title="item.name">{{ item.name }}</div>
               </td>
 
               <!-- 图片类 -->
               <!-- 背景 -->
-              <td v-if="item.background_img !== undefined" :style="`width: ${item.widthPercent * clientWidth}px`">
+              <td v-if="hasTableTd.background_img" :style="`width: ${item.widthPercent * clientWidth}px`">
                 <div class="relativePos" :style="`height:${item.widthPercent * clientWidth * 0.5}px`">
                   <el-upload
                    v-if="item.edit"
@@ -74,7 +83,7 @@
                 </div>
               </td>
               <!-- 标题图 -->
-              <td v-if="item.title_img !== undefined" :style="`width: ${item.widthPercent * clientWidth}px`">
+              <td v-if="hasTableTd.title_img" :style="`width: ${item.widthPercent * clientWidth}px`">
                 <div class="relativePos" :style="`height:${item.widthPercent * clientWidth * 0.5}px`">
                   <el-upload
                    v-if="item.edit"
@@ -105,8 +114,32 @@
                   <!-- <img class="thumbnail" @click="showDialog(item.thumbnail)" :src="item.thumbnail" alt="" :style="`display: inline-block;height:${item.widthPercent * clientWidth * 0.5}px`"> -->
                 </div>
               </td>
+
+              <!-- 主图 -->
+              <td v-if="hasTableTd.main_img" :style="`width: ${item.widthPercent * clientWidth}px`">
+                <div class="relativePos" :style="`height:${item.widthPercent * clientWidth * 0.5}px`">
+                  <el-upload
+                   v-if="item.edit"
+                    class="upload-demo hidden fileInput"
+                    action="/api/common/uploadImg"
+                    :on-success="uploadSuccess.bind(null, 'main_img')">
+                      <el-button :style="`width: ${item.widthPercent * clientWidth}px;height:${item.widthPercent * clientWidth * 0.5}px`" size="medium" type="primary">点击上传</el-button>
+                  </el-upload>
+                  <el-image
+                    :style="`width:${item.widthPercent * clientWidth}px;height:${item.widthPercent * clientWidth * 0.5}px; position:relative`"
+                    :src="item.edit ? form.main_img : item.main_img"
+                    fit="contain"
+                    class="thumbnail" @click="showDialog(item.main_img)"
+                  >
+                    <div slot="error" class="image-slot" style="position: absolute;top: 50%;left: 50% ;transform: translate(-50%,-50%)">
+                      <i class="el-icon-picture-outline"></i>
+                    </div>
+                  </el-image>
+
+                </div>
+              </td>
               <!-- 如果是描述,描述的宽度比平均长一些 -->
-              <td v-if="item.content !== undefined" :style="`width: ${item.widthPercent - (-0.07) * clientWidth}px`">
+              <td v-if="hasTableTd.content" :style="`width: ${item.widthPercent - (-0.07) * clientWidth}px`">
                 <el-input
                   v-if="multipleSelection.length !== 0 && item.edit"
                   v-model="form.content"
@@ -186,6 +219,13 @@
       round
       >批量显示</el-button
     >
+    <el-button
+      @click="batchUploadImg"
+      class="batch"
+      type="danger"
+      round
+      >批量上传图片</el-button
+    >
   </div>
 </template>
 
@@ -239,49 +279,7 @@ export default {
       /* 表格数据 */
       type: Array,
       default: function () {
-        return [
-          // 如果用户编辑成空数据！！！
-          /* {
-            id: 0,
-            thumbnail: '',
-            name: '234233333333333333333333333333333333333333',
-            link: '23423777777777777777777777777777777777',
-            edit: false,
-            status: true
-          },
-          {
-            id: 1,
-            thumbnail: '',
-            name: 'rew',
-            link: 'werw',
-            edit: false,
-            status: true
-          },
-          {
-            id: 2,
-            thumbnail: '',
-            name: 'werw',
-            link: 'werwer',
-            edit: false,
-            status: true
-          },
-          {
-            id: 3,
-            thumbnail: '',
-            name: 'werw',
-            link: 'werw',
-            edit: false,
-            status: true
-          },
-          {
-            id: 4,
-            thumbnail: '',
-            name: 'wer',
-            edit: false,
-            link: 'wer',
-            status: true
-          } */
-        ];
+        return []
       }
     }
   },
@@ -309,7 +307,17 @@ export default {
       ],
       form: {}, // 编辑时保留提交的数据
       formData: [],
-      multipleSelection: []/* 保存所选项的obj_id */
+      multipleSelection: [], /* 保存所选项的obj_id */
+      hasTableTd: { // 表格是否展示这些字段
+        background_img: false,
+        content: false,
+        desc_content: false,
+        main_img: false,
+        name: false,
+        status: false,
+        title: false,
+        title_img: false
+      }
     };
   },
   computed: {
@@ -325,9 +333,21 @@ export default {
     // this.setTableWidth()
     this.clientWidth = document.body.clientWidth
     this.formData = this.tableData
-    // console.log(this.tableData, 'this.tableData')
+    // let keys = []
+    // 判断hasTableTd是否有initTable的key字段，初始化table的td
+    for (let i in this.initTable) {
+      // keys.push(this.initTable[i].key)
+      this.hasTableTd[this.initTable[i].key] = this.hasTableTd.hasOwnProperty(this.initTable[i].key)
+    }
   },
   methods: {
+    /*
+    作用：批量上传图片
+    @return void
+    */
+    batchUploadImg () {
+      this.$emit('batchUploadImg')
+    },
     showDialog (url) {
       this.dialogVisible = true
       this.dialogUrl = url

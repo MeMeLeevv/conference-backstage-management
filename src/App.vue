@@ -5,7 +5,7 @@
         <HeadBar v-if="getHasLogin && !isLogin" :showAvatar="isIndex" @exitAccount="exitAccount"  :title="getBackStageTitle ? '管理后台 —— '+getBackStageTitle: '大会管理后台'"
         class="headBar" :manager="getAccount.username"></HeadBar><!-- 这里需要传props：title来变换大会header的值，
         取值方法是首页的组件监测到用户点击项目后触发传参给父组件，也就是调用这里的title改变 -->
-        <router-view class="content" />
+        <router-view v-if="isRouterAlive" class="content" />
       </div>
   </div>
 </template>
@@ -24,7 +24,8 @@ export default {
       isIndex: true, /* 是否是首页 */
       to: '',
       from: '',
-      isLogin: true
+      isLogin: true,
+      isRouterAlive: true
     };
   },
   created () { // 第一次加载或者刷新的时候判断路由
@@ -51,6 +52,14 @@ export default {
       }
       if (this.from !== '/' && this.to.search(/(\/\d+)$/) !== -1) { // 如果要返回首页，页面会停留在http://localhost:8000/#/117，此时页面会出现空白，要需要加以判断
         this.$router.push('/'); // 返回首页
+      } else {
+        // vue不同路由使用同一组件会造成不刷新的情况，即监测到this.from和this.to使用同一组件时不刷新，所以这里就监测path:columnConfig/***/:c_id,
+        // 如果/c_id之前的路径是相通的则刷新并重新定义路由
+        let toIndex = this.to.lastIndexOf('/')
+        let fromIndex = this.from.lastIndexOf('/')
+        if (this.to.slice(0, toIndex) === this.from.slice(0, fromIndex)) {
+          this.reload(this.to)
+        }
       }
     }
   },
@@ -58,6 +67,18 @@ export default {
     ...mapGetters(['getOriginPage', 'getHasLogin', 'getBackStageTitle', 'getAccount', 'getColumnMsg'])
   },
   methods: {
+    /*
+    作用：刷新并重新定义路由，防止同一组件的不同路由不刷新
+    @params url String 刷新后页面的路由
+    @return null
+    */
+    reload (url) {
+      this.isRouterAlive = false
+      this.$nextTick(function () {
+        this.isRouterAlive = true
+        this.$router.push(url)
+      })
+    },
     ...mapMutations([
       'setOriginPage',
       'setHasLogin',

@@ -41,7 +41,6 @@ export default new Router({
         {
           path: 'columnConfig/headImage/:c_id', /* 这里不能填 /columnConfig/headImage ,第一个“/”会被认为是根目录，而这里应该是继承上一级的id目录 */
           component: HeadImage
-
         },
         {
           path: 'columnConfig/background/:c_id', /* 这里不能填 /columnConfig/headImage ,第一个“/”会被认为是根目录，而这里应该是继承上一级的id目录 */

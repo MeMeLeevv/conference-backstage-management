@@ -14,7 +14,7 @@ export default {
   },
   created () {
     this.id = this.$route.params.id;
-    this.$router.push(`/${this.id}/conferenceMsg`);
+    // this.$router.push(`/${this.id}/conferenceMsg`);
   },
   computed: {
   },

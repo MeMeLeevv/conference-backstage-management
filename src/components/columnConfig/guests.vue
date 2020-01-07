@@ -8,6 +8,11 @@
       :initDialog="initDialog"
       @addbackStageMsg="addbackStageMsg"
       @closeDialog="needDialog = false"
+      :imgLimit="imgLimit"
+      :initTable="initTable"
+      @changeInitTable="changeInitTable"
+      @toggleNewNum="toggleNewNum"
+      :isBatch="isBatch"
     ></Dialog>
 
     <el-tabs v-model="columnActiveName" type="border-card">
@@ -64,7 +69,6 @@
         <div style="margin-top: 20px">
           <ConfigHeader
             title="嘉宾"
-            :initDialog="initDialog"
             @addGroupContent="addGroupContent"
           ></ConfigHeader>
           <!-- <Table class="flexTable" :initTable="initTable" :tableData="tableData"></Table> -->
@@ -76,6 +80,7 @@
             @updateColumnObj="updateColumnObj"
             @batchHS="batchHS"
             @dropColumn="dropColumn"
+            @batchUploadImg="batchUploadImg"
           ></Table>
         </div>
       </el-tab-pane>
@@ -98,6 +103,7 @@ export default {/* 大会嘉宾只有一组内容 */
     return {
       c_id: '',
       p_id: '',
+      imgLimit: 1, // 图片上传限制个数
       isEditColumn: false, // 此时是否在编辑栏目信息
       needDialog: false, // 是否需要dialog
       initDialog: [],
@@ -117,16 +123,16 @@ export default {/* 大会嘉宾只有一组内容 */
           key: 'text' // 他对应表格数据tableData对象里的key值
         },
         {
-          label: '头像',
-          widthPercent: 0.12,
-          type: 'image',
-          key: 'main_img'
-        },
-        {
           label: '姓名',
           widthPercent: 0.12,
           type: 'text',
           key: 'name'
+        },
+        {
+          label: '头像',
+          widthPercent: 0.12,
+          type: 'image',
+          key: 'main_img'
         },
         {
           label: '职务',
@@ -147,7 +153,7 @@ export default {/* 大会嘉宾只有一组内容 */
           key: 'operating'
         }
       ],
-      tableData: []
+      tableData: '' // 表格数据，初始化不要设为[]，否则template里的table组件v-if="tableData"会默认为真，当刚加载时tableData有数据会无法显示
     };
   },
   created () {
@@ -156,29 +162,13 @@ export default {/* 大会嘉宾只有一组内容 */
     let cData = getLocalData(['columnMsg']); // 取出点击保存在本地后的栏目信息
     this.c_id = cData[0].c_id;
     this.p_id = cData[0].p_id;
-    console.log(this.c_id, 'c-Id');
-
-    /* axiosGet('/api/column/getcolumnListShow', { c_id: this.c_id }, (res) => {
-      let data = res.data
-      if (data.code === '1') {
-        this = data.data[0];
-        this.form = deepCopy(this)
-        console.log(this.form, 'form')
-      } else {
-        this.$message.error(data.msg)
-      }
-    }, (err) => {
-      this.$message.error(err)
-      console.log(err, '根据栏目id查找栏目信息失败');
-    }); */
-    // let showData = {}
     let p1 = this.$axios.get('/api/column/getColumnList', {
       params: { c_id: cData[0].c_id }
     });
     let p2 = this.$axios.get('/api/columnObjgroup/getColumnObjGroupList', {
       params: { c_id: cData[0].c_id }
     });
-    // 同时请求栏目信息和栏目内容组信息
+      // 同时请求栏目信息和栏目内容组信息
     Promise.all([p1, p2])
       .then(([columnListShow, ColumnObjGroupList]) => {
         return {
@@ -196,51 +186,41 @@ export default {/* 大会嘉宾只有一组内容 */
         }
         this.columnListShow = showData.columnListShow.data[0]; // 栏目信息展示
         this.columnGListShow = showData.ColumnObjGroupList.data; // 栏目内容组信息展示
+        console.log(this.columnGListShow, 'this.columnGListShow')
         if (this.columnGListShow.length === 0) {
           // tableData初始化，新建组内容
-          this.groupDetailEmpty = true; // 需要自动新建组！！！
+          this.addbackStageMsg({}, true) // 新增栏目组数据
+
           /*  this.columnGListShow[this.activeName] = {} /// 这两行不可省略，否则当用户新建栏目内容的时候此时表格tableData没有初始化为[]的话之后往tableData添加数据时视图无法得到相应
           this.columnGListShow[this.activeName].tableData = [] */
         } else {
           // 初始化栏目内容组数据，
-          /* 表格格式为：{
-          title_img: '',
-          background_img: '',
-          widthPercent: 0.12,
-          title: 'wer',
-          edit: false,
-          content: 'wer',
-          status: 1,
-          hasChecked: false
-        } */
-          this.groupDetailEmpty = false;
+          this.group_id = this.columnGListShow[0].group_id
           axiosGet(
             '/api/columnObj/getColumnObjList',
-            { group_id: this.columnGListShow[0].group_id },
+            { group_id: this.group_id },
             res => {
               let data = res.data;
               if (data.code === '1') {
-                this.columnGListShow[0].tableData = data.data;
-                for (
-                  let j = 0;
-                  j < this.columnGListShow[0].tableData.length;
-                  j++
+                this.tableData = data.data;
+
+                for (let j = 0; j < this.tableData.length; j++
                 ) {
                   // 初始化表格信息
-                  this.columnGListShow[0].tableData[j].widthPercent = 0.12; // 控制表格tb的宽度
-                  this.columnGListShow[0].tableData[j].edit = false; // 是否是编辑状态
-                  this.columnGListShow[0].tableData[j].hasChecked = false; // checkbox状态是否勾选
+                  this.tableData[j].widthPercent = 0.12; // 控制表格tb的宽度
+                  this.tableData[j].edit = false; // 是否是编辑状态
+                  this.tableData[j].hasChecked = false; // checkbox状态是否勾选
                 }
+                console.log(this.tableData, 'this.tableData');
               } else {
-                // this.$message.error(data.msg);
+                this.$message.error(data.msg);
               }
             },
             err => {
               console.log(err, '根据栏目id查找栏目信息失败');
               this.$message.error(err);
             }
-          );
-          console.log(this.columnGListShow, 'this.columnGListShow');
+          )
         }
       })
       .catch(function (err) {
@@ -248,12 +228,76 @@ export default {/* 大会嘉宾只有一组内容 */
         that.$message.error(err);
       });
   },
-  /*   watch: {
-    activeName: function (newV) {
-      this.form.group_id = this.columnGListShow[newV - 1].group_id // watch 监听也行
+  /*   beforeRouteUpdate (to, from, next) {
+    // 在当前路由改变，但是该组件被复用时调用
+    // 举例来说，对于一个带有动态参数的路径 /foo/:id，在 /foo/1 和 /foo/2 之间跳转的时候，
+    // 由于会渲染同样的 Foo 组件，因此组件实例会被复用。而这个钩子就会在这个情况下被调用。
+    // 可以访问组件实例 `this`
+    console.log(to, 'to')
+    if (to.params.c_id) {
+      // this.reload()
+      // this.$router.push(to.path)
     }
   }, */
   methods: {
+    /*
+    作用：根据dialog组件传来的值判断new_num是否应该展示
+    @return void
+    */
+    toggleNewNum () {
+
+    },
+    /*
+    作用：捕捉table子组件传过来的批量上传图片事件
+    @return void
+    */
+    batchUploadImg () { // 批量上传图片可供选择：1、选择哪类图片上传 2、是多对一还是多对多
+      this.needDialog = true
+      /* this.initDialog = [
+        //  初始化新增栏目内容组dialog
+        {
+          label: '图片类型',
+          type: 'which'
+        },
+        {
+          label: '批量方式',
+          type: 'batchSwitch'
+        },
+        {
+          label: '新增个数',
+          type: 'batchNewNum'
+        }
+      ]; */
+      this.imgLimit = 10 // 限制10张图
+      this.isBatch = true
+    },
+    /*
+    作用：由dialog组件触发，更改this.initTable
+    @params opt 被选择的图片对象
+    @return void
+    */
+    changeInitTable (opt) {
+      for (let i = 0; i < this.initDialog.length; i++) {
+        if (this.initDialog.type === 'image') { // 删除原来的图片对象
+          this.initDialog.splice(i, 1)
+        }
+      }
+      this.initDialog.push(opt)
+      console.log(this.initDialog, 'dialog')
+    },
+    /*
+    作用：批量修改图片字段信息，基于后台字段统一，如果不统一反而会更麻烦，需要一个一个赋值
+    @name: String 图片url字段，其他字段都是在这个基础上加上_xxx
+    @imgMsgArr: Array 图片信息
+    @return void
+    */
+    getImgMsg (name, imgMsgArr) {
+      if (imgMsgArr.length === 1) {
+        Object.assign(this.form, getImgMsg(name, imgMsgArr)); // Object.assign(target, ...sources)合并图片对象
+      } else { // 多图上传
+        this.form.files = getImgMsg(name, imgMsgArr)
+      }
+    },
     /*
     作用：新增栏目内容组信息，即表格信息
     @return void
@@ -287,48 +331,67 @@ export default {/* 大会嘉宾只有一组内容 */
           required: true
         }
       ];
+      this.isBatch = false
+      this.imgLimit = 1
     },
     /*
     作用：将新增的数据更新到后台
     @params form: Object
+    @params iscolumnList： Boolean 在created函数中如果监测到栏目组不存在则需要新建一个
     @return void
     */
-    addbackStageMsg (form) {
+    addbackStageMsg (form, isColumnList) {
       let that = this;
       let url;
-      // 新增栏目detail内容信息
-      url = '/api/columnObj/newColumnObj';
-      form.group_id = this.columnGListShow[0].group_id;
-      form.status = form.status ? 1 : 0; // status是Boolean格式，需转成number传给后台
-      axiosPost(
-        url,
-        form,
-        res => {
-          let data = res.data;
-          if (data.code === '1') {
-            console.log(data.data, 'addbackStageMsg.data');
-            that.$message({
-              message: data.msg,
-              type: 'success'
-            });
-            // 新建表格内容，先初始化表格数据
-            data.data[0].widthPercent = 0.12; // 控制表格tb的宽度
-            data.data[0].edit = false; // 是否是编辑状态
-            data.data[0].hasChecked = false; // checkbox状态是否勾选
-            if (!this.columnGListShow[0].tableData) {
-              // 如果一开始新建为空，须先初始化
-              this.columnGListShow[0].tableData = [];
-            }
-            this.columnGListShow[0].tableData.push(
-              data.data[0]
-            );
-          } else {
-            that.$message.error(data.msg);
-          }
-        },
-        err => {
-          this.$message.error('更新大会头图失败，请重试！' + err);
+      if (this.imgLimit > 1) { // 批量上传
+        url = '/api/columnObj/batUploadImgAndNew'
+        form.group_id = this.group_id
+      } else {
+        if (isColumnList) {
+        // 新增栏目组数据
+          url = '/api/columnObjgroup/newColumnObjGroup';
+          form.c_id = this.c_id;
+          form.status = 1; // 默认展示
+        } else {
+        // 新增栏目detail内容信息
+          url = '/api/columnObj/newColumnObj';
+          form.group_id = this.group_id;
+          console.log(form, 'form')
+          form.status = form.status ? 1 : 0; // status是Boolean格式，需转成number传给后台
         }
+      }
+
+      axiosPost(url, form, res => {
+        let data = res.data;
+        if (data.code === '1') {
+          console.log(data.data, 'addbackStageMsg.data');
+          that.$message({
+            message: data.msg,
+            type: 'success'
+          });
+          if (this.imgLimit > 1) {
+
+          } else {
+            if (isColumnList) { // 新建栏目组数据成功
+              this.columnGListShow = data.data
+            } else {
+            // 新建表格内容，先初始化表格数据
+              data.data[0].widthPercent = 0.12; // 控制表格tb的宽度
+              data.data[0].edit = false; // 是否是编辑状态
+              data.data[0].hasChecked = false; // checkbox状态是否勾选
+              this.tableData.push(
+                data.data[0]
+              );
+            }
+          }
+          console.log(this.tableData, 'addTableData')
+        } else {
+          that.$message.error(data.msg);
+        }
+      },
+      err => {
+        this.$message.error('更新大会嘉宾失败，请重试！' + err);
+      }
       );
     },
     /*
@@ -379,6 +442,7 @@ export default {/* 大会嘉宾只有一组内容 */
               message: data.msg,
               type: 'success'
             });
+            this.isEditColumn = false
           } else {
             that.$message.error(data.msg);
           }
@@ -388,15 +452,7 @@ export default {/* 大会嘉宾只有一组内容 */
         }
       );
     },
-    /*
-    作用：批量修改图片字段信息，基于后台字段统一，如果不统一反而会更麻烦，需要一个一个赋值
-    @name: String 图片url字段，其他字段都是在这个基础上加上_xxx
-    @imgMsgArr: Array 图片信息
-    @return void
-    */
-    getImgMsg (name, imgMsgArr) {
-      Object.assign(this.form, getImgMsg(name, imgMsgArr)); // Object.assign(target, ...sources)合并图片对象
-    },
+
     /*
     作用：table后台更新数据后本地更新
     @params row 修改的该行数据
