@@ -8,13 +8,17 @@
           <el-input v-model="agendaTableMsg.name" placeholder="请输入议程名称" :disabled="baseMsgDisabled" :title="agendaTableMsg.name"></el-input>
         </el-form-item>
         <el-form-item label="议程时间" prop="date">
-          <el-select v-model="agendaTableMsg.date" placeholder="请选择议程时间" :title="agendaTableMsg.date" :disabled="baseMsgDisabled">
-            <el-option label="2018/11/02 AM" value="2018/11/02 AM" ></el-option>
-            <el-option label="2018/11/03 AM" value="2018/11/03 AM"></el-option>
-            <el-option label="2018/11/04 AM" value="2018/11/04 AM"></el-option>
-            <el-option label="2018/11/05 AM" value="2018/11/05 AM"></el-option>
-          </el-select>
+          <el-date-picker
+            :title="agendaTableMsg.date"
+            v-model="agendaTableMsg.date"
+            :disabled="baseMsgDisabled"
+            type="date"
+            placeholder="选择日期"
+            format="yyyy 年 MM 月 dd 日"
+            value-format="yyyy-MM-dd">
+          </el-date-picker>
         </el-form-item>
+
         <el-form-item label="议程地点" prop="address" style="width: 500px">
           <el-input placeholder="请输入议程地址" v-model="agendaTableMsg.address" :disabled="baseMsgDisabled" :title="agendaTableMsg.address"></el-input>
         </el-form-item>
@@ -140,7 +144,7 @@ export default {
       baseMsgDisabled: true,
       agendaTableMsg: {
         name: '2018广东互联网大会开幕式',
-        date: '2018/11/02 AM',
+        date: '',
         address: '单行输入',
         contents: [{
           startTime: '',

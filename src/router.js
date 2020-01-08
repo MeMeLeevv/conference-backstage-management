@@ -5,7 +5,12 @@ import HeadImage from './components/columnConfig/headImage';
 import Highlight from './components/columnConfig/highlight';
 import Partners from './components/columnConfig/partners';
 import Guests from './components/columnConfig/guests';
+import Scale from './components/columnConfig/scale';
+import ExcellenceAward from './components/columnConfig/excellenceAward';
 import CooperativeMedia from './components/columnConfig/cooperativeMedia';
+import Agenda from './components/columnConfig/agenda';
+import Registration from './components/columnConfig/registration';
+import News from './components/columnConfig/news';
 import Background from './components/columnConfig/background';
 import Home from './components/home';
 import Login from './components/login';
@@ -56,6 +61,31 @@ export default new Router({
           path: 'columnConfig/guests/:c_id',
           name: 'guests',
           component: Guests
+        },
+        {
+          path: 'columnConfig/scale/:c_id',
+          name: 'scale',
+          component: Scale
+        },
+        {
+          path: 'columnConfig/registration/:c_id',
+          name: 'registration',
+          component: Registration
+        },
+        {
+          path: 'columnConfig/excellenceAward/:c_id',
+          name: 'excellenceAward',
+          component: ExcellenceAward
+        },
+        {
+          path: 'columnConfig/agenda/:c_id',
+          name: 'agenda',
+          component: Agenda
+        },
+        {
+          path: 'columnConfig/news/:c_id',
+          name: 'news',
+          component: News
         },
         {
           path: 'columnConfig/partners/:c_id',

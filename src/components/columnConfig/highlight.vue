@@ -2,13 +2,16 @@
   <div id="highlight">
     <!-- 大会亮点集合 -->
     <!-- 弹窗 -->
-    <Dialog
+    <ddialoog
       :needDialog="needDialog"
       :title="dialogTitle"
       :initDialog="initDialog"
       @addbackStageMsg="addbackStageMsg"
       @closeDialog="needDialog = false"
-    ></Dialog>
+      :isBatch="isBatch"
+      :imgLimit="imgLimit"
+      :initTable="initTable"
+    ></ddialoog>
 
     <el-tabs v-model="columnActiveName" type="border-card">
       <el-tab-pane
@@ -133,6 +136,7 @@
                 @updateColumnObj="updateColumnObj"
                 @batchHS="batchHS"
                 @dropColumn="dropColumn"
+                @batchUploadImg="batchUploadImg"
               ></Table>
             </div>
           </el-tab-pane>
@@ -144,7 +148,7 @@
 
 <script>
 import ConfigHeader from '../common/configHeader';
-import Dialog from '../common/dialog';
+import ddialoog from '../common/dialog';
 import Table from '../common/table';
 import { getImgMsg, getLocalData, deepCopy } from '../../assets/js/base';
 import ImageShow from '../common/imageShow';
@@ -157,6 +161,8 @@ export default {
     return {
       c_id: '',
       p_id: '',
+      imgLimit: 1, // 图片上传限制个数
+      isBatch: false, // 是否批量上传
       isEditColumn: false, // 此时是否在编辑栏目信息
       isEditGroup: false, // 此时是否在编辑组
       needDialog: false, // 是否需要dialog
@@ -211,7 +217,8 @@ export default {
           widthPercent: 0.1,
           key: 'operating'
         }
-      ]
+      ],
+      tableData: '' // 表格数据，初始化不要设为[]，否则template里的table组件v-if="tableData"会默认为真，当刚加载时tableData有数据会无法显示
     };
   },
   created () {
@@ -222,20 +229,6 @@ export default {
     this.p_id = cData[0].p_id;
     console.log(this.c_id, 'c-Id')
 
-    /* axiosGet('/api/column/getcolumnListShow', { c_id: this.c_id }, (res) => {
-      let data = res.data
-      if (data.code === '1') {
-        this = data.data[0];
-        this.form = deepCopy(this)
-        console.log(this.form, 'form')
-      } else {
-        this.$message.error(data.msg)
-      }
-    }, (err) => {
-      this.$message.error(err)
-      console.log(err, '根据栏目id查找栏目信息失败');
-    }); */
-    // let showData = {}
     let p1 = this.$axios.get('/api/column/getColumnList', { // 查询栏目信息
       params: { c_id: cData[0].c_id }
     });
@@ -316,6 +309,29 @@ export default {
   }, */
   methods: {
     /*
+    作用：捕捉table子组件传过来的批量上传图片事件
+    @return void
+    */
+    batchUploadImg () { // 批量上传图片可供选择：1、选择哪类图片上传 2、是多对一还是多对多
+      this.needDialog = true
+      this.imgLimit = 10 // 限制10张图
+      this.dialogTitle = '选择图片'
+      this.isBatch = true // 传给dialog组件，显示批量dialog界面
+    },
+    /*
+    作用：批量修改图片字段信息，基于后台字段统一，如果不统一反而会更麻烦，需要一个一个赋值
+    @name: String 图片url字段，其他字段都是在这个基础上加上_xxx
+    @imgMsgArr: Array 图片信息
+    @return void
+    */
+    getImgMsg (name, imgMsgArr) {
+      if (imgMsgArr.length === 1) {
+        Object.assign(this.form, getImgMsg(name, imgMsgArr)); // Object.assign(target, ...sources)合并图片对象
+      } else { // 多图上传
+        this.form.files = getImgMsg(name, imgMsgArr)
+      }
+    },
+    /*
     作用：初始化数据组dialog数据
     @return void
     */
@@ -336,6 +352,8 @@ export default {
           key: 'background_img'
         }
       ];
+      this.isBatch = false
+      this.imgLimit = 1
     },
     /*
     作用：新增栏目内容组信息，即表格信息
@@ -378,24 +396,34 @@ export default {
           required: true
         }
       ];
+      this.isBatch = false
+      this.imgLimit = 1
     },
     /*
     作用：将新增的数据更新到后台
     @params form: Object
     @return void
     */
-    addbackStageMsg (form) {
+    addbackStageMsg (form, isColumnList) {
       let that = this;
-      let url;
-      if (this.addGroup) {
+      let url, imgNum
+      if (this.imgLimit > 1) { // 批量上传
+        url = '/api/columnObj/batUploadImgAndNew'
+        form.data.group_id = this.columnGListShow[this.activeName].group_id
+        imgNum = form.imgsArr.length
+        form.data = JSON.stringify(form.data)
+        form.imgsArr = JSON.stringify(form.imgsArr)
+      } else {
+        if (this.addGroup) {
         // 新增栏目组数据
-        url = '/api/columnObjgroup/newColumnObjGroup';
-        form.c_id = this.c_id;
-      } else if (this.addGDetail) {
+          url = '/api/columnObjgroup/newColumnObjGroup';
+          form.c_id = this.c_id;
+        } else if (this.addGDetail) {
         // 新增栏目detail内容信息
-        url = '/api/columnObj/newColumnObj';
-        form.group_id = this.columnGListShow[this.activeName].group_id;
-        form.status = form.status ? 1 : 0; // status是Boolean格式，需转成number传给后台
+          url = '/api/columnObj/newColumnObj';
+          form.group_id = this.columnGListShow[this.activeName].group_id;
+          form.status = form.status ? 1 : 0; // status是Boolean格式，需转成number传给后台
+        }
       }
       // console.log(form, 'addbackStageMsg.Form');
       axiosPost(
@@ -409,22 +437,52 @@ export default {
               message: data.msg,
               type: 'success'
             });
-            if (this.addGroup) { // 新建栏目内容
-              this.columnGListShow.push(data.data[0]);
-              let newTabName = this.columnGListShow.length - 1 + '';
-              this.activeName = newTabName;
-              this.addGroup = false
-              this.columnGListShow[this.activeName].tableData = [] // 初始化tableData的值
-            } else if (this.addGDetail) { // 新建表格内容，先初始化表格数据
-              data.data[0].widthPercent = 0.12 // 控制表格tb的宽度
-              data.data[0].edit = false // 是否是编辑状态
-              data.data[0].hasChecked = false // checkbox状态是否勾选
-              if (!this.columnGListShow[this.activeName].tableData) { // 如果一开始新建为空，须先初始化
-                this.columnGListShow[this.activeName].tableData = []
-              }
-              this.columnGListShow[this.activeName].tableData.push(data.data[0])
+            if (this.imgLimit > 1) {
+              axiosGet( // 重新请求table数据
+                '/api/columnObj/getColumnObjList',
+                { group_id: this.columnGListShow[this.activeName].group_id },
+                res => {
+                  let data = res.data;
+                  if (data.code === '1') {
+                    let tableData = data.data;
+                    tableData = tableData.slice(-imgNum) // 请求所有table数据后只取新增的
+                    for (let j = 0; j < tableData.length; j++) {
+                      // 初始化表格信息
+                      tableData[j].widthPercent = 0.12; // 控制表格tb的宽度
+                      tableData[j].edit = false; // 是否是编辑状态
+                      tableData[j].hasChecked = false; // checkbox状态是否勾选
+                      if (!this.columnGListShow[this.activeName].tableData) { // 如果一开始新建为空，须先初始化
+                        this.columnGListShow[this.activeName].tableData = []
+                      }
+                      this.columnGListShow[this.activeName].tableData.push(tableData[j])
+                    }
+                  } else {
+                    this.$message.error(data.msg);
+                  }
+                },
+                err => {
+                  console.log(err, '根据栏目id查找栏目信息失败');
+                  this.$message.error(err);
+                }
+              )
+            } else {
+              if (this.addGroup) { // 新建栏目内容
+                this.columnGListShow.push(data.data[0]);
+                let newTabName = this.columnGListShow.length - 1 + '';
+                this.activeName = newTabName;
+                this.addGroup = false
+                this.columnGListShow[this.activeName].tableData = [] // 初始化tableData的值
+              } else if (this.addGDetail) { // 新建表格内容，先初始化表格数据
+                data.data[0].widthPercent = 0.12 // 控制表格tb的宽度
+                data.data[0].edit = false // 是否是编辑状态
+                data.data[0].hasChecked = false // checkbox状态是否勾选
+                if (!this.columnGListShow[this.activeName].tableData) { // 如果一开始新建为空，须先初始化
+                  this.columnGListShow[this.activeName].tableData = []
+                }
+                this.columnGListShow[this.activeName].tableData.push(data.data[0])
 
-              this.addGDetail = false
+                this.addGDetail = false
+              }
             }
           } else {
             that.$message.error(data.msg);
@@ -553,15 +611,6 @@ export default {
       );
     },
     /*
-    作用：批量修改图片字段信息，基于后台字段统一，如果不统一反而会更麻烦，需要一个一个赋值
-    @name: String 图片url字段，其他字段都是在这个基础上加上_xxx
-    @imgMsgArr: Array 图片信息
-    @return void
-    */
-    getImgMsg (name, imgMsgArr) {
-      Object.assign(this.form, getImgMsg(name, imgMsgArr)); // Object.assign(target, ...sources)合并图片对象
-    },
-    /*
     作用：table后台更新数据后本地更新
     @params row 修改的该行数据
     @params index 该行的索引index
@@ -610,7 +659,7 @@ export default {
   },
   components: {
     ConfigHeader,
-    Dialog,
+    ddialoog,
     Table,
     ImageShow,
     UploadImage

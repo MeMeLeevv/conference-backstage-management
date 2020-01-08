@@ -1,5 +1,5 @@
 <template>
-  <div id="guests">
+  <div id="news">
     <!-- 大会亮点集合 -->
     <!-- 弹窗 -->
     <ddialoog
@@ -66,7 +66,7 @@
         <!-- 表格 -->
         <div style="margin-top: 20px">
           <ConfigHeader
-            title="嘉宾"
+            title="咨讯"
             @addGroupContent="addGroupContent"
           ></ConfigHeader>
           <!-- <Table class="flexTable" :initTable="initTable" :tableData="tableData"></Table> -->
@@ -96,7 +96,7 @@ import { axiosGet, axiosPost } from '../../assets/js/axios';
 import UploadImage from '../common/uploadImage';
 
 export default {/* 大会嘉宾只有一组内容 */
-  name: 'guests',
+  name: 'news',
   data () {
     return {
       c_id: '',
@@ -122,19 +122,25 @@ export default {/* 大会嘉宾只有一组内容 */
           key: 'text' // 他对应表格数据tableData对象里的key值
         },
         {
-          label: '姓名',
+          label: '标题',
           widthPercent: 0.12,
           type: 'text',
-          key: 'name'
+          key: 'title'
         },
         {
-          label: '头像',
+          label: '内容图',
           widthPercent: 0.12,
           type: 'image',
           key: 'main_img'
         },
         {
-          label: '职务',
+          label: '背景图',
+          widthPercent: 0.12,
+          type: 'image',
+          key: 'background_img'
+        },
+        {
+          label: '详述',
           widthPercent: 0.18,
           type: 'text',
           key: 'content'
@@ -271,21 +277,27 @@ export default {/* 大会嘉宾只有一组内容 */
       this.initDialog = [
         //  初始化新增栏目内容组dialog
         {
-          label: '姓名',
+          label: '标题',
           type: 'text',
-          key: 'name',
+          key: 'title',
           required: true
         },
         {
-          label: '头像',
+          label: '内容图',
           type: 'image',
           key: 'main_img',
           required: true
         },
         {
-          label: '职务',
+          label: '详述',
           type: 'text',
           key: 'content',
+          required: true
+        },
+        {
+          label: '背景图',
+          type: 'image',
+          key: 'background_img',
           required: true
         },
         {
@@ -512,7 +524,7 @@ $colorShow: 30px
 .titledis
   width: 80%
   line-height: 40px
-#guests
+#news
   .flexTable
     margin: 20px 0
   .previewArea

@@ -126,8 +126,11 @@ function trueDeepCopy (result, source) {
     @imgMsgArr: Array 图片信息
     @return object/Array
     */
-export function getImgMsg (name, imgMsgArr) {
-  if (imgMsgArr.length === 1) {
+export function getImgMsg (name, imgMsgArr, multiple) {
+  if (imgMsgArr.length === 0) {
+    return {}
+  }
+  if (!multiple) {
     let img = {}
     img[name] = imgMsgArr[0].img_url
     img[`${name}_jumpurl`] = imgMsgArr[0].jump_url

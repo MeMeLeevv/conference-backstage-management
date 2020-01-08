@@ -224,7 +224,7 @@
       class="batch"
       type="danger"
       round
-      >批量上传图片</el-button
+      >批量新建图片</el-button
     >
   </div>
 </template>

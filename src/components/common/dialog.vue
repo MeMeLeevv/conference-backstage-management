@@ -54,14 +54,14 @@
       </el-form>
 
       <!-- 批量上传界面 -->
-      <el-form v-if="isBatch">
+      <el-form v-if="isBatch&&batchOptions.length > 0">
         <div>
         <!-- 批量上传图片 - 选择哪类图片上传 -->
           <el-form-item
             label="图片类型"
             :label-width="formLabelWidth"
           >
-            <el-select v-model="form.data.img_type" @change="changeBatchOption"> <!-- 根据form.key来动态加载图片uploadImage -->
+            <el-select v-model="formData.img_type"> <!-- 根据form.key来动态加载图片uploadImage -->
               <el-option
                 v-for="item in batchOptions"
                 :key="item.img_type"
@@ -70,42 +70,47 @@
               </el-option>
             </el-select>
           </el-form-item>
-          <!-- 图片类 -->
-          <el-form-item
-            label="选择图片"
-            :label-width="formLabelWidth"
-          >
-            <UploadImage
-              :inputName="form.data.img_type"
-              @getImgMsg="getImgMsg"
-              :limit="imgLimit"
-            ></UploadImage>
-          </el-form-item>
           <!-- 批量上传开关类 -->
           <el-form-item
+            v-if="formData.img_type"
             label="批量方式"
             :label-width="formLabelWidth"
           >
             <el-switch
-              v-model="form.data.new_type"
+              v-model="formData.new_type"
               active-color="#13ce66"
               inactive-color="#ff4949"
-              @change="newTypeChange"
+              :disabled="switchDisabled"
             >
             </el-switch>
-            <span>{{ form.data.new_type ? "使用同一张图片新建" : "使用多张不同图片新建" }}</span>
+            <span>{{ formData.new_type ? "同一张图片新建多组数据" : "多张不同图片新建多组数据" }}</span>
           </el-form-item>
           <!-- 需要使用相同图片新建的个数 -->
           <el-form-item
+            v-if="formData.img_type&&formData.new_type"
             label="新增个数"
             :label-width="formLabelWidth"
           >
-            <el-input-number v-model="form.data.new_num" :min="1" :max="10" label="描述文字"></el-input-number>
+            <el-input-number v-model="formData.new_num" :min="1" :max="imgLimit" label="描述文字"
+            ></el-input-number>
+          </el-form-item>
+          <!-- 图片类 -->
+          <el-form-item
+            v-if="formData.img_type"
+            label="选择图片"
+            :label-width="formLabelWidth"
+          >
+            <UploadImage
+              :inputName="formData.img_type"
+              @getImgMsg="getImgMsg"
+              :limit="formData.new_type ? 1 : imgLimit"
+              :addMsg="`可选择${formData.new_type ? 1 : imgLimit}张图，大小不超过200k`"
+            ></UploadImage>
           </el-form-item>
       </div>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button @click="cancel">取 消</el-button>
         <el-button type="primary" @click="submitForm('ruleForm')"
           >确 定</el-button
         >
@@ -120,7 +125,7 @@ import { getImgMsg } from '../../assets/js/base';
 
 export default {
   /* 信息如果都已经验证成功，则用formData结合上传后台，触发父元素刷新表格 */
-  name: 'dislog',
+  name: 'dialog',
   props: {
     isBatch: { // 是否是多选
       type: Boolean,
@@ -168,14 +173,20 @@ export default {
       dialogFormVisible: false,
       formLabelWidth: '100px',
       dialogVisible: false,
-      form: {
-        status: 0
+      formData: { // 对象json化字符串
+        img_type: '', // title_img_id
+        new_type: false, // 后台接收1或者2
+        new_num: 1
       },
-      batchOptions: []
+      form: {
+        status: 0,
+        imgsArr: [] // [imgid1,imgid2,imgid3,….] json化字符串
+      },
+      batchOptions: [], // 根据传进来的initTable去key=image的字段
+      switchDisabled: false // 批量上传dialog的switch是否禁用
     };
   },
   created () {
-
   },
   mounted () {
     this.$nextTick(function () {
@@ -192,33 +203,70 @@ export default {
     })
   },
   methods: {
-    newTypeChange () {
-      if (this.form.new_type) {
-        this.$emit('toggleNewNum', this.form.new_type)
-      }
-    },
-    /*
-    作用： 修改batchOptions选项时，触发父组件更改initTable
-    return void
-    */
-    changeBatchOption () {
-      let opt
-      for (let i = 0; i < this.batchOptions.length; i++) {
-        if (this.batchOptions[i].img_type === this.form.img_type) {
-          opt = this.batchOptions[i]
-          opt.type = 'image'
-          opt.required = true
+    getImgMsg (name, imgMsg, isRemove) {
+      if (this.isBatch) { // 多图上传
+        if (isRemove) { // 如果是移除的话就将this.form.imgsArr全部替换为移除后剩下的图片数组
+          let imgsArr = getImgMsg(name, imgMsg, true) //
+          let filterImgArr = []
+          for (let i = 0; i < imgsArr.length; i++) {
+            filterImgArr.push(imgsArr[i][`${name}_id`])
+          }
+          this.form.imgsArr = filterImgArr
+          console.log(this.form.imgsArr, 'this.form.imgsArr')
+        } else {
+          let imgsArr = getImgMsg(name, imgMsg, true) //
+          this.form.imgsArr = []
+          for (let i = 0; i < imgsArr.length; i++) {
+            this.form.imgsArr.push(imgsArr[i][`${name}_id`])
+          }
+          console.log(this.form.imgsArr, 'this.form.imgsArr')
         }
+        if (this.form.imgsArr.length > 1) { // 限制，如果已经选了多图，那么switch就要有所限制
+          this.switchDisabled = true
+        } else {
+          this.switchDisabled = false
+        }
+      } else {
+        Object.assign(this.form, getImgMsg(name, imgMsg)); // Object.assign(target, ...sources)合并图片对象
       }
-      this.$emit('changeInitTable', opt)
-    },
-    getImgMsg (name, imgMsgArr) {
-      Object.assign(this.form, getImgMsg(name, imgMsgArr)); // Object.assign(target, ...sources)合并图片对象
     },
     submitForm (formName) {
       /* 触发父组件的addMsg方法 */
       this.dialogFormVisible = false;
+      if (this.isBatch) {
+        if (this.formData.new_type) { // 重复上传多张图片
+          for (let i = 0; i < this.formData.new_num - 1; i++) {
+            this.form.imgsArr.push(this.form.imgsArr[0])
+          }
+        }
+        this.formData.new_type = this.formData.new_type ? 1 : 2
+        this.formData.img_type = this.formData.img_type + '_id'
+        this.form.data = this.formData
+      }
       this.$emit('addbackStageMsg', this.form);
+      this.formData = { // 对象json化字符串
+        img_type: '', // title_img_id
+        new_type: false, // 后台接收1或者2
+        new_num: 1
+      }
+      this.form = {
+        status: 0,
+        imgsArr: [] // [imgid1,imgid2,imgid3,….] json化字符串
+      }
+      this.switchDisabled = false
+    },
+    cancel () {
+      this.dialogFormVisible = false
+      // 初始化
+      this.formData = { // 对象json化字符串
+        img_type: '', // title_img_id
+        new_type: false, // 后台接收1或者2
+        new_num: 1
+      }
+      this.form = {
+        status: 0,
+        imgsArr: [] // [imgid1,imgid2,imgid3,….] json化字符串
+      }
     }
   },
   components: {
@@ -252,7 +300,7 @@ $inputHeight:100px
     top:10px
   .word
     bottom:10px
-#header
+#dislog
   height:30px
   .title
     position:relative

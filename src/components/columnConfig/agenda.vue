@@ -1,5 +1,5 @@
 <template>
-  <div id="guests">
+  <div id="agenda">
     <!-- 大会亮点集合 -->
     <!-- 弹窗 -->
     <ddialoog
@@ -21,6 +21,13 @@
         :closable="false"
       >
         <div class="previewArea">
+          <div class="swatch">
+            <span class="title">标题： </span>
+            <span v-if="!isEditColumn" class="titledis">{{
+              columnListShow.title
+            }}</span>
+            <el-input style="width: 60%" v-else v-model="form.title"></el-input>
+          </div>
           <div class="block">
             <span class="title">标题图： </span>
             <ImageShow
@@ -35,13 +42,6 @@
               @getImgMsg="getImgMsg"
             ></UploadImage>
           </div>
-          <div class="swatch">
-            <span class="title">标题： </span>
-            <span v-if="!isEditColumn" class="titledis">{{
-              columnListShow.title
-            }}</span>
-            <el-input style="width: 60%" v-else v-model="form.title"></el-input>
-          </div>
           <el-button
             type="primary"
             @click="isEditColumn ? submitForm() : editColumn()"
@@ -53,7 +53,6 @@
             @click="isEditColumn = false"
             >取消</el-button
           >
-          <!-- 新增logo图 -->
         </div>
       </el-tab-pane>
 
@@ -66,7 +65,7 @@
         <!-- 表格 -->
         <div style="margin-top: 20px">
           <ConfigHeader
-            title="嘉宾"
+            title="议程"
             @addGroupContent="addGroupContent"
           ></ConfigHeader>
           <!-- <Table class="flexTable" :initTable="initTable" :tableData="tableData"></Table> -->
@@ -96,7 +95,7 @@ import { axiosGet, axiosPost } from '../../assets/js/axios';
 import UploadImage from '../common/uploadImage';
 
 export default {/* 大会嘉宾只有一组内容 */
-  name: 'guests',
+  name: 'agenda',
   data () {
     return {
       c_id: '',
@@ -122,22 +121,10 @@ export default {/* 大会嘉宾只有一组内容 */
           key: 'text' // 他对应表格数据tableData对象里的key值
         },
         {
-          label: '姓名',
-          widthPercent: 0.12,
-          type: 'text',
-          key: 'name'
-        },
-        {
-          label: '头像',
+          label: '描述图',
           widthPercent: 0.12,
           type: 'image',
           key: 'main_img'
-        },
-        {
-          label: '职务',
-          widthPercent: 0.18,
-          type: 'text',
-          key: 'content'
         },
         {
           label: '显示状态',
@@ -271,21 +258,9 @@ export default {/* 大会嘉宾只有一组内容 */
       this.initDialog = [
         //  初始化新增栏目内容组dialog
         {
-          label: '姓名',
-          type: 'text',
-          key: 'name',
-          required: true
-        },
-        {
-          label: '头像',
+          label: '描述图',
           type: 'image',
           key: 'main_img',
-          required: true
-        },
-        {
-          label: '职务',
-          type: 'text',
-          key: 'content',
           required: true
         },
         {
@@ -512,7 +487,7 @@ $colorShow: 30px
 .titledis
   width: 80%
   line-height: 40px
-#guests
+#agenda
   .flexTable
     margin: 20px 0
   .previewArea

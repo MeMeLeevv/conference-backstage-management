@@ -1,6 +1,17 @@
 <template>
-  <div id="headImage"><!-- 内容图(contentImg、主色调(mainColor、背景图(commonImg.imgurl) -->
+  <div id="excellenceAward"><!-- 内容图(contentImg、主色调(mainColor、背景图(commonImg.imgurl) -->
     <div class="previewArea">
+      <div class="swatch">
+        <span class="title">标题：  </span>
+        <span v-if="!isEdit" class="titledis">{{display.title}}</span>
+        <el-input style="width: 60%" v-else v-model="form.title"></el-input>
+      </div>
+      <div class="block">
+        <span class="title">标题图：  </span>
+        <ImageShow title="标题图和标题只需提供一项即可"  :url="display.title_img" :imgW="display.title_img_width"
+        :imgH="display.title_img_height"></ImageShow>
+          <UploadImage v-if="isEdit" inputName="title_img" @getImgMsg="getImgMsg"></UploadImage>
+      </div>
       <div class="block">
         <span class="title">主图：  </span>
         <ImageShow  :url="display.background_img" :imgW="display.background_img_width"
@@ -21,7 +32,7 @@ import { axiosPost, axiosGet } from '../../assets/js/axios';
 import { getLocalData, deepCopy, getImgMsg } from '../../assets/js/base';
 
 export default {
-  name: 'headImage',
+  name: 'excellenceAward',
   components: {
     ImageShow,
     UploadImage
@@ -55,29 +66,6 @@ export default {
       this.$message.error(err)
       console.log(err, '根据栏目id查找栏目信息失败');
     });
-    // let showData = {}
-    // let p1 = this.$axios.get('/api/column/getColumnList', { params: { c_id: cData[0].c_id } })
-    // let p2 = this.$axios.get('/api/columnObjgroup/getColumnObjGroupList', { params: { c_id: cData[0].c_id } })
-    /* Promise.all([p1, p2]).then(([ColumnList, ColumnObjGroupList]) => {
-      return {
-        ColumnList: ColumnList.data, ColumnObjGroupList: ColumnObjGroupList.data
-      }
-    }).then((showData) => {
-      if (showData.ColumnList.code !== '1' || showData.ColumnObjGroupList.code !== '1') {
-        this.$message.error('请求错误，请刷新！');
-        return
-      }
-      this.display.columnList = showData.ColumnList.data[0]
-      this.display.columnGList = showData.ColumnObjGroupList.data
-      if (this.display.columnGList.length === 0) { // 新建组内容
-        this.isEmpty = true
-      } else { // 初始化组内容数据，
-        this.isEmpty = false
-      }
-      console.log(this.display, 'this.display')
-    }).catch(function (err) {
-      this.$message.error(err);
-    }) */
   },
   methods: {
     /*
@@ -95,13 +83,6 @@ export default {
     */
     submitForm (formName) {
       let that = this
-      // console.log(this.form, 'this.form')
-      // let url
-      /* if (this.isEmpty) { // 新建内容组
-        url = '/api/columnObjgroup/newColumnObjGroup'
-      } else { // 更新数据
-        url = '/api/columnObjgroup/updateColumnObjGroup'
-      } */
       axiosPost('/api/column/updateColumn', this.form,
         res => {
           let data = res.data;
@@ -142,7 +123,7 @@ $colorShow: 30px
 .fade-enter, .fade-leave-to
   opacity: 0
 
-#headImage
+#excellenceAward
   .previewArea
     #imageShow
       display: inline-block

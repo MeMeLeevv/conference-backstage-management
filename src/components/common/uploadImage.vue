@@ -65,7 +65,6 @@ export default {
   created () {
     this.fileList = []
     this.imgList = []
-    console.log(this.imgList, 'fileLsit')
   },
   methods: {
     /*
@@ -75,26 +74,66 @@ export default {
     @fileList: Array  请求结果返回的所有文件和响应信息
     @return void
     */
-    uploadSuccess (response, file, fileList) {
-      console.log(response, file, fileList);
-      if (!this.multiple) {
-        this.multiple = Number(this.limit) > 1;
+    /* uploadSuccess (response, file, fileList) {
+      let that = this
+      if (!that.multiple) {
+        that.multiple = Number(that.limit) > 1;
+        console.log(fileList, 'fileList');
+
         for (let i = 0; i < fileList.length; i++) {
-          if (fileList[i].response.code === '1') {
-            let data = fileList[i].response.data
-            data.uid = fileList[i].uid
-            this.imgList.push(data)
-          } else {
-            this.$message.error(fileList[i].response.msg)
-          }
+          console.log(response, '======', file, '========', fileList, 'fileList[' + i + ']');
+          (function (i) {
+            setTimeout(() => {
+              let code = fileList[i].response.code;
+              if (code === '1') {
+                let data = fileList[i].response.data
+                data.uid = fileList[i].uid
+                that.imgList.push(data)
+                // console.log('imgList' + i + '=>', that.imgList, 'code' + i + '=>', fileList[i].response.code);
+              } else {
+                that.$message.error(fileList[i].response.msg)
+              }
+            }, 100);
+          })(i)
         }
-        this.$emit('getImgMsg', this.inputName, this.imgList)
+        that.$emit('getImgMsg', that.inputName, that.imgList)
+      }
+    }, */
+    uploadSuccess (response, file, fileList) {
+      let that = this
+      console.log(fileList, 'fileList');
+      let imgLen = fileList.length
+      if (imgLen > 1) { // 多图上传
+        console.log(response, file, fileList)
+        if (response.code === '1') {
+          let data = response.data
+          data.uid = file.uid
+          that.imgList.push(data)
+          if (that.imgList.length === imgLen) {
+            that.$emit('getImgMsg', that.inputName, that.imgList)
+          }
+          console.log('imgList' + '=>', that.imgList)
+        } else {
+          that.$message.error(response.msg)
+        }
+      } else {
+        let code = response.code;
+        if (code === '1') {
+          let data = response.data
+          data.uid = file.uid
+          that.imgList.push(data)
+          console.log('imgList' + '=>', that.imgList)
+        } else {
+          that.$message.error(response.msg)
+        }
+        that.$emit('getImgMsg', that.inputName, that.imgList)
       }
     },
     handleRemove (file, fileList) { //
       console.log(file, fileList);
       let index = this.imgList.findIndex((item, index) => item.uid === file.uid)
       this.imgList.splice(index, 1)
+      this.$emit('getImgMsg', this.inputName, this.imgList, true) // true表示是移除操作
     },
     handlePictureCardPreview (file) { /* 预览的时候 */
       console.log(file.url, 'file.url'); /* blob的临时对象 */
