@@ -1,5 +1,5 @@
 <template>
-  <div id="partners">
+  <div id="parnerOrMedia">
     <!-- 大会亮点集合 -->
     <!-- 弹窗 -->
     <ddialoog
@@ -156,7 +156,7 @@ import { axiosGet, axiosPost } from '../../assets/js/axios';
 import UploadImage from '../common/uploadImage';
 
 export default {
-  name: 'partners',
+  name: 'parnerOrMedia',
   data () {
     return {
       c_id: '',
@@ -643,7 +643,7 @@ $colorShow: 30px
 .titledis
   width: 80%
   line-height: 40px
-#partners
+#parnerOrMedia
   .flexTable
     margin: 20px 0
   .previewArea

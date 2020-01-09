@@ -1,5 +1,5 @@
 <template>
-  <div id="excellenceAward"><!-- 内容图(contentImg、主色调(mainColor、背景图(commonImg.imgurl) -->
+  <div id="excellenceAwardOrAddress"><!-- 内容图(contentImg、主色调(mainColor、背景图(commonImg.imgurl) -->
     <div class="previewArea">
       <div class="swatch">
         <span class="title">标题：  </span>
@@ -32,7 +32,7 @@ import { axiosPost, axiosGet } from '../../assets/js/axios';
 import { getLocalData, deepCopy, getImgMsg } from '../../assets/js/base';
 
 export default {
-  name: 'excellenceAward',
+  name: 'excellenceAwardOrAddress',
   components: {
     ImageShow,
     UploadImage
@@ -123,7 +123,7 @@ $colorShow: 30px
 .fade-enter, .fade-leave-to
   opacity: 0
 
-#excellenceAward
+#excellenceAwardOrAddress
   .previewArea
     #imageShow
       display: inline-block

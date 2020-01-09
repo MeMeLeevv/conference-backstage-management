@@ -3,20 +3,18 @@ import Vue from 'vue';
 import Router from 'vue-router';
 import HeadImage from './components/columnConfig/headImage';
 import Highlight from './components/columnConfig/highlight';
-import Partners from './components/columnConfig/partners';
+import parnerOrMedia from './components/columnConfig/parnerOrMedia';
 import Guests from './components/columnConfig/guests';
 import Scale from './components/columnConfig/scale';
-import ExcellenceAward from './components/columnConfig/excellenceAward';
-import CooperativeMedia from './components/columnConfig/cooperativeMedia';
-import Agenda from './components/columnConfig/agenda';
-import Registration from './components/columnConfig/registration';
+import excellenceAwardOrAddress from './components/columnConfig/excellenceAwardOrAddress';
+import agendaOrContactOrRegis from './components/columnConfig/agendaOrContactOrRegis';
 import News from './components/columnConfig/news';
 import Background from './components/columnConfig/background';
 import Home from './components/home';
 import Login from './components/login';
 import BackStage from './components/backStage';
 import ConferenceMsg from './components/conferenceMsg';
-import AgendaManage from './components/agendaManage';
+import agendaManage from './components/agendaManage';
 
 Vue.use(Router);
 
@@ -68,19 +66,14 @@ export default new Router({
           component: Scale
         },
         {
-          path: 'columnConfig/registration/:c_id',
-          name: 'registration',
-          component: Registration
+          path: 'columnConfig/excellenceAwardOrAddress/:c_id',
+          name: 'excellenceAwardOrAddress',
+          component: excellenceAwardOrAddress
         },
         {
-          path: 'columnConfig/excellenceAward/:c_id',
-          name: 'excellenceAward',
-          component: ExcellenceAward
-        },
-        {
-          path: 'columnConfig/agenda/:c_id',
-          name: 'agenda',
-          component: Agenda
+          path: 'columnConfig/agendaOrContactOrRegis/:c_id',
+          name: 'agendaOrContactOrRegis',
+          component: agendaOrContactOrRegis
         },
         {
           path: 'columnConfig/news/:c_id',
@@ -88,19 +81,14 @@ export default new Router({
           component: News
         },
         {
-          path: 'columnConfig/partners/:c_id',
-          name: 'partners',
-          component: Partners
-        },
-        {
-          path: 'columnConfig/cooperativeMedia/:c_id',
-          name: 'cooperativeMedia',
-          component: CooperativeMedia
+          path: 'columnConfig/parnerOrMedia/:c_id',
+          name: 'parnerOrMedia',
+          component: parnerOrMedia
         },
         {
           path: 'agendaManage/:c_id',
           name: 'agendaManage',
-          component: AgendaManage
+          component: agendaManage
         }
       ]
     },

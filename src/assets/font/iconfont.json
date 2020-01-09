@@ -6,6 +6,13 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "705809",
+      "name": "临时",
+      "font_class": "linshi",
+      "unicode": "e67f",
+      "unicode_decimal": 59007
+    },
+    {
       "icon_id": "774409",
       "name": "退出",
       "font_class": "-exit",
@@ -111,6 +118,13 @@
       "unicode_decimal": 58951
     },
     {
+      "icon_id": "6999238",
+      "name": "成功",
+      "font_class": "chenggong",
+      "unicode": "e62f",
+      "unicode_decimal": 58927
+    },
+    {
       "icon_id": "7440415",
       "name": "加",
       "font_class": "-plus",
@@ -137,6 +151,13 @@
       "font_class": "quxiao",
       "unicode": "e668",
       "unicode_decimal": 58984
+    },
+    {
+      "icon_id": "10936701",
+      "name": "已发布",
+      "font_class": "yifabu",
+      "unicode": "e626",
+      "unicode_decimal": 58918
     },
     {
       "icon_id": "12095315",

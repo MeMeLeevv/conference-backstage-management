@@ -1,5 +1,5 @@
 <template>
-  <div id="agenda">
+  <div id="agendaOrContactOrRegis">
     <!-- 大会亮点集合 -->
     <!-- 弹窗 -->
     <ddialoog
@@ -95,7 +95,7 @@ import { axiosGet, axiosPost } from '../../assets/js/axios';
 import UploadImage from '../common/uploadImage';
 
 export default {/* 大会嘉宾只有一组内容 */
-  name: 'agenda',
+  name: 'agendaOrContactOrRegis',
   data () {
     return {
       c_id: '',
@@ -487,7 +487,7 @@ $colorShow: 30px
 .titledis
   width: 80%
   line-height: 40px
-#agenda
+#agendaOrContactOrRegis
   .flexTable
     margin: 20px 0
   .previewArea

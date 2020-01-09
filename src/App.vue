@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-      <NavBar v-if="(getHasLogin&&!isIndex) && !isLogin" class="navBar"></NavBar><!-- 已登录且不是首页或者不是登录页的时候显示navbar -->
+      <NavBar ref="navbar" v-if="(getHasLogin&&!isIndex) && !isLogin" class="navBar"></NavBar><!-- 已登录且不是首页或者不是登录页的时候显示navbar -->
       <div class="right-side" :style="`width: ${(isIndex||!getHasLogin) || isLogin ? '100%' : '87.5%'}`"><!-- 处于首页或者登录页（getHasLogin=false）时right-sight宽度要处于全屏 -->
         <HeadBar v-if="getHasLogin && !isLogin" :showAvatar="isIndex" @exitAccount="exitAccount"  :title="getBackStageTitle ? '管理后台 —— '+getBackStageTitle: '大会管理后台'"
         class="headBar" :manager="getAccount.username"></HeadBar><!-- 这里需要传props：title来变换大会header的值，
@@ -19,6 +19,11 @@ import { axiosPost } from './assets/js/axios';
 
 export default {
   name: 'app',
+  provide () {
+    return {
+      changeAgendaName: this.changeAgendaName
+    }
+  },
   data () {
     return {
       isIndex: true, /* 是否是首页 */
@@ -50,23 +55,31 @@ export default {
       if (this.isIndex) { // 如果是首页需要把大会标题初始化
         this.setBackStageTitle('');
       }
-      if (this.from !== '/' && this.to.search(/(\/\d+)$/) !== -1) { // 如果要返回首页，页面会停留在http://localhost:8000/#/117，此时页面会出现空白，要需要加以判断
+      /* if (this.from !== '/' && this.to.search(/(\/\d+)$/) !== -1) { // 如果要返回首页，页面会停留在http://localhost:8000/#/117，此时页面会出现空白，要需要加以判断
         this.$router.push('/'); // 返回首页
-      } else {
-        // vue不同路由使用同一组件会造成不刷新的情况，即监测到this.from和this.to使用同一组件时不刷新，所以这里就监测path:columnConfig/***/:c_id,
-        // 如果/c_id之前的路径是相通的则刷新并重新定义路由
-        let toIndex = this.to.lastIndexOf('/')
-        let fromIndex = this.from.lastIndexOf('/')
-        if (this.to.slice(0, toIndex) === this.from.slice(0, fromIndex)) {
-          this.reload(this.to)
-        }
+      } else { */
+      // vue不同路由使用同一组件会造成不刷新的情况，即监测到this.from和this.to使用同一组件时不刷新，所以这里就监测path:columnConfig/***/:c_id,
+      // 如果/c_id之前的路径是相通的则刷新并重新定义路由
+      let toIndex = this.to.lastIndexOf('/')
+      let fromIndex = this.from.lastIndexOf('/')
+      if (this.to.slice(0, toIndex) === this.from.slice(0, fromIndex)) {
+        this.reload(this.to)
       }
+      // }
     }
   },
   computed: {
     ...mapGetters(['getOriginPage', 'getHasLogin', 'getBackStageTitle', 'getAccount', 'getColumnMsg'])
   },
   methods: {
+    /*
+    作用：agenda具体页面修改name或者删除栏目的时候，navbar也要跟着改变
+    @params url String 刷新后页面的路由
+    @return null
+    */
+    changeAgendaName (deleteAid) {
+      this.$refs.navbar.requestAgenda(deleteAid) // 调用子组件的方法，重新请求agenda列表
+    },
     /*
     作用：刷新并重新定义路由，防止同一组件的不同路由不刷新
     @params url String 刷新后页面的路由
