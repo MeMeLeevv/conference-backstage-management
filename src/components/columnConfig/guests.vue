@@ -69,7 +69,6 @@
             title="嘉宾"
             @addGroupContent="addGroupContent"
           ></ConfigHeader>
-          <!-- <Table class="flexTable" :initTable="initTable" :tableData="tableData"></Table> -->
           <Table
             v-if="tableData"
             class="flexTable"
@@ -185,13 +184,9 @@ export default {/* 大会嘉宾只有一组内容 */
         }
         this.columnListShow = showData.columnListShow.data[0]; // 栏目信息展示
         this.columnGListShow = showData.ColumnObjGroupList.data; // 栏目内容组信息展示
-        console.log(this.columnGListShow, 'this.columnGListShow')
         if (this.columnGListShow.length === 0) {
           // tableData初始化，新建组内容
           this.addbackStageMsg({}, true) // 新增栏目组数据
-
-          /*  this.columnGListShow[this.activeName] = {} /// 这两行不可省略，否则当用户新建栏目内容的时候此时表格tableData没有初始化为[]的话之后往tableData添加数据时视图无法得到相应
-          this.columnGListShow[this.activeName].tableData = [] */
         } else {
           // 初始化栏目内容组数据，
           this.group_id = this.columnGListShow[0].group_id
@@ -210,20 +205,17 @@ export default {/* 大会嘉宾只有一组内容 */
                   this.tableData[j].edit = false; // 是否是编辑状态
                   this.tableData[j].hasChecked = false; // checkbox状态是否勾选
                 }
-                console.log(this.tableData, 'this.tableData');
               } else {
                 this.$message.error(data.msg);
               }
             },
             err => {
-              console.log(err, '根据栏目id查找栏目信息失败');
               this.$message.error(err);
             }
           )
         }
       })
       .catch(function (err) {
-        console.log(err, '根据栏目id查找栏目信息失败');
         that.$message.error(err);
       });
   },
@@ -326,11 +318,9 @@ export default {/* 大会嘉宾只有一组内容 */
           form.status = form.status ? 1 : 0; // status是Boolean格式，需转成number传给后台
         }
       }
-      console.log(form, 'addbackStageMsg.form')
       axiosPost(url, form, res => {
         let data = res.data;
         if (data.code === '1') {
-          console.log(data.data, 'addbackStageMsg.returndata');
           that.$message({
             message: data.msg,
             type: 'success'
@@ -356,7 +346,6 @@ export default {/* 大会嘉宾只有一组内容 */
                 }
               },
               err => {
-                console.log(err, '根据栏目id查找栏目信息失败');
                 this.$message.error(err);
               }
             )
@@ -375,7 +364,6 @@ export default {/* 大会嘉宾只有一组内容 */
               );
             }
           }
-          console.log(this.tableData, 'addTa  bleData')
         } else {
           that.$message.error(data.msg);
         }
@@ -397,10 +385,9 @@ export default {/* 大会嘉宾只有一组内容 */
     /*
     作用：子组件触发，本地批量显示或隐藏数据
     @params ids Array 要修改的数据obj_id
-    @return void !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    @return void
     */
     batchHS (ids, status) {
-      console.log(ids, status, 'batchHS');
       for (let i = 0; i < ids.length; i++) {
         this.columnGListShow[this.activeName].tableData.forEach(item => {
           if (item.obj_id === ids[i]) {
@@ -415,7 +402,6 @@ export default {/* 大会嘉宾只有一组内容 */
     */
     submitForm () {
       let that = this;
-      // console.log(this.form, 'this.form')
       let url;
       // 更新栏目信息
       url = '/api/column/updateColumn';
@@ -428,7 +414,6 @@ export default {/* 大会嘉宾只有一组内容 */
           let data = res.data;
           if (data.code === '1') {
             this.columnListShow = deepCopy(this.form);
-            // this.form = {}
             that.$message({
               message: data.msg,
               type: 'success'
@@ -446,7 +431,7 @@ export default {/* 大会嘉宾只有一组内容 */
 
     /*
     作用：table后台更新数据后本地更新
-    @params row 修改的该行数据
+    @params item 修改的该行数据
     @params index 该行的索引index
     @return void
     */

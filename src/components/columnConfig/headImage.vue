@@ -55,29 +55,6 @@ export default {
       this.$message.error(err)
       console.log(err, '根据栏目id查找栏目信息失败');
     });
-    // let showData = {}
-    // let p1 = this.$axios.get('/api/column/getColumnList', { params: { c_id: cData[0].c_id } })
-    // let p2 = this.$axios.get('/api/columnObjgroup/getColumnObjGroupList', { params: { c_id: cData[0].c_id } })
-    /* Promise.all([p1, p2]).then(([ColumnList, ColumnObjGroupList]) => {
-      return {
-        ColumnList: ColumnList.data, ColumnObjGroupList: ColumnObjGroupList.data
-      }
-    }).then((showData) => {
-      if (showData.ColumnList.code !== '1' || showData.ColumnObjGroupList.code !== '1') {
-        this.$message.error('请求错误，请刷新！');
-        return
-      }
-      this.display.columnList = showData.ColumnList.data[0]
-      this.display.columnGList = showData.ColumnObjGroupList.data
-      if (this.display.columnGList.length === 0) { // 新建组内容
-        this.isEmpty = true
-      } else { // 初始化组内容数据，
-        this.isEmpty = false
-      }
-      console.log(this.display, 'this.display')
-    }).catch(function (err) {
-      this.$message.error(err);
-    }) */
   },
   methods: {
     /*
@@ -95,20 +72,12 @@ export default {
     */
     submitForm (formName) {
       let that = this
-      // console.log(this.form, 'this.form')
-      // let url
-      /* if (this.isEmpty) { // 新建内容组
-        url = '/api/columnObjgroup/newColumnObjGroup'
-      } else { // 更新数据
-        url = '/api/columnObjgroup/updateColumnObjGroup'
-      } */
       axiosPost('/api/column/updateColumn', this.form,
         res => {
           let data = res.data;
           if (data.code === '1') {
             this.display = deepCopy(this.form)
             this.isEdit = false
-            // console.log(this.display, 'result')
             that.$message({
               message: data.msg,
               type: 'success'

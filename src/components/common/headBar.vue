@@ -38,7 +38,7 @@ export default {
     }
   },
   methods: {
-    errorHandler () { /* 头像加载失败 */
+    errorHandler () { // 头像加载失败
       return true;
     }
   },

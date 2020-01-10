@@ -19,9 +19,7 @@
     <ConfigHeader class="headTitle" title="背景描述" :needDialog="false" :needInnerDialog="false"></ConfigHeader>
     <quill-editor :content="isEdit? form.desc_content : display.desc_content"
                 :options="editorOption"
-                @blur="onEditorBlur($event)"
                 @focus="onEditorFocus($event)"
-                @ready="onEditorReady($event)"
                 @change="onEditorChange($event)">
     </quill-editor>
     <div class="submit">
@@ -65,8 +63,7 @@ export default {
     };
   },
   created () {
-    /* 取得当前栏目的信息 */
-    /// let that = this;
+    // 取得当前栏目的信息
     let cData = getLocalData(['columnMsg']); // 取出点击保存在本地后的栏目信息
     this.c_id = cData[0].c_id
     this.p_id = cData[0].p_id
@@ -74,14 +71,12 @@ export default {
       let data = res.data
       if (data.code === '1') {
         this.display = data.data[0];
-        console.log(this.display, 'display')
         this.form = deepCopy(this.display)
       } else {
         this.$message.error(data.msg)
       }
     }, (err) => {
       this.$message.error(err)
-      console.log(err, '根据栏目id查找栏目信息失败');
     });
   },
   computed: {
@@ -124,7 +119,7 @@ export default {
     作用：更新栏目数据
     @return void
     */
-    submitForm (formName) {
+    submitForm () {
       let that = this
       axiosPost('/api/column/updateColumn', this.form,
         res => {
@@ -145,17 +140,23 @@ export default {
           this.$message.error('更新大会头图失败，请重试！' + err);
         });
     },
-    onEditorBlur (editor) {
-    },
+    /*
+    作用：点击富文本编辑器，如果不是编辑状态，编辑器默认不可编辑
+    @params editor Object 事件对象
+    @return void
+    */
     onEditorFocus (editor) {
-      if (!this.isEdit) { // 如果不是编辑状态，编辑器默认不可编辑
+      if (!this.isEdit) {
         editor.enable(false)
       } else {
         editor.enable(true)
       }
     },
-    onEditorReady (editor) {
-    },
+    /*
+    作用：编辑器被改动时，内容同步更新到this.form.desc_content
+    @params editor Object 事件对象
+    @return void
+    */
     onEditorChange ({ editor, html, text }) {
       this.form.desc_content = html;
     }

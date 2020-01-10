@@ -64,7 +64,6 @@ export default {
       }
     }, (err) => {
       this.$message.error(err)
-      console.log(err, '根据栏目id查找栏目信息失败');
     });
   },
   methods: {
@@ -81,7 +80,7 @@ export default {
     作用：更新栏目数据
     @return void
     */
-    submitForm (formName) {
+    submitForm () {
       let that = this
       axiosPost('/api/column/updateColumn', this.form,
         res => {
@@ -89,7 +88,6 @@ export default {
           if (data.code === '1') {
             this.display = deepCopy(this.form)
             this.isEdit = false
-            // console.log(this.display, 'result')
             that.$message({
               message: data.msg,
               type: 'success'

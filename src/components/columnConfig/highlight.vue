@@ -227,7 +227,6 @@ export default {
     let cData = getLocalData(['columnMsg']); // 取出点击保存在本地后的栏目信息
     this.c_id = cData[0].c_id;
     this.p_id = cData[0].p_id;
-    console.log(this.c_id, 'c-Id')
 
     let p1 = this.$axios.get('/api/column/getColumnList', { // 查询栏目信息
       params: { c_id: cData[0].c_id }
@@ -289,24 +288,16 @@ export default {
                 }
               },
               err => {
-                console.log(err, '根据栏目id查找栏目信息失败');
                 this.$message.error(err);
               }
             );
           }
-          console.log(this.columnGListShow, 'this.columnGListShow');
         }
       })
       .catch(function (err) {
-        console.log(err, '根据栏目id查找栏目信息失败');
         that.$message.error(err);
       });
   },
-  /*   watch: {
-    activeName: function (newV) {
-      this.form.group_id = this.columnGListShow[newV - 1].group_id // watch 监听也行
-    }
-  }, */
   methods: {
     /*
     作用：捕捉table子组件传过来的批量上传图片事件
@@ -425,14 +416,12 @@ export default {
           form.status = form.status ? 1 : 0; // status是Boolean格式，需转成number传给后台
         }
       }
-      // console.log(form, 'addbackStageMsg.Form');
       axiosPost(
         url,
         form,
         res => {
           let data = res.data;
           if (data.code === '1') {
-            console.log(data.data, 'addbackStageMsg.data')
             that.$message({
               message: data.msg,
               type: 'success'
@@ -461,7 +450,6 @@ export default {
                   }
                 },
                 err => {
-                  console.log(err, '根据栏目id查找栏目信息失败');
                   this.$message.error(err);
                 }
               )
@@ -515,10 +503,9 @@ export default {
     /*
     作用：子组件触发，本地批量显示或隐藏数据
     @params ids Array 要修改的数据obj_id
-    @return void !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    @return void
     */
     batchHS (ids, status) {
-      console.log(ids, status, 'batchHS')
       for (let i = 0; i < ids.length; i++) {
         this.columnGListShow[this.activeName].tableData.forEach(item => {
           if (item.obj_id === ids[i]) {
@@ -533,7 +520,6 @@ export default {
     */
     submitForm () {
       let that = this;
-      // console.log(this.form, 'this.form')
       let url;
       if (this.isEditColumn) {
         // 更新栏目信息
@@ -543,8 +529,6 @@ export default {
         // 更新栏目内容组信息
         url = '/api/columnObjgroup/updateColumnObjGroup';
       }
-      console.log(this.form, 'submitForm.form');
-
       axiosPost(
         url,
         this.form,
@@ -558,7 +542,6 @@ export default {
               this.columnGListShow[this.activeName] = deepCopy(this.form);
               this.isEditGroup = false;
             }
-            // this.form = {}
             that.$message({
               message: data.msg,
               type: 'success'

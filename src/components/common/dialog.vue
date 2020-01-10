@@ -1,6 +1,6 @@
 <template>
   <div id="dislog">
-    <!-- 弹窗 -->
+    <!-- 栏目弹窗 -->
     <el-dialog
       v-if="needDialog"
       :title="`请编辑${title}信息`"
@@ -124,7 +124,7 @@ import UploadImage from './uploadImage';
 import { getImgMsg } from '../../assets/js/base';
 
 export default {
-  /* 信息如果都已经验证成功，则用formData结合上传后台，触发父元素刷新表格 */
+  // 信息如果都已经验证成功，则用formData结合上传后台，触发父元素刷新表格
   name: 'dialog',
   props: {
     isBatch: { // 是否是多选
@@ -186,8 +186,6 @@ export default {
       switchDisabled: false // 批量上传dialog的switch是否禁用
     };
   },
-  created () {
-  },
   mounted () {
     this.$nextTick(function () {
       // 根据initTable初始化批量上传时的图片选择
@@ -203,23 +201,28 @@ export default {
     })
   },
   methods: {
-    getImgMsg (name, imgMsg, isRemove) {
+    /*
+    作用： 上传图片成功后，将图片信息(id/width/height/url)合并到this.form,这里只能上传一张
+    @params name: String 该图片的url的key值名称
+    @params imgMsgList Array 已上传的图片信息组
+    @params isRemove Boolean 如果是移除操作，则需要剔除该图片信息
+    @return void
+    */
+    getImgMsg (name, imgMsgList, isRemove) {
       if (this.isBatch) { // 多图上传
         if (isRemove) { // 如果是移除的话就将this.form.imgsArr全部替换为移除后剩下的图片数组
-          let imgsArr = getImgMsg(name, imgMsg, true) //
+          let imgsArr = getImgMsg(name, imgMsgList, true) //
           let filterImgArr = []
           for (let i = 0; i < imgsArr.length; i++) {
             filterImgArr.push(imgsArr[i][`${name}_id`])
           }
           this.form.imgsArr = filterImgArr
-          console.log(this.form.imgsArr, 'this.form.imgsArr')
         } else {
-          let imgsArr = getImgMsg(name, imgMsg, true) //
+          let imgsArr = getImgMsg(name, imgMsgList, true) //
           this.form.imgsArr = []
           for (let i = 0; i < imgsArr.length; i++) {
             this.form.imgsArr.push(imgsArr[i][`${name}_id`])
           }
-          console.log(this.form.imgsArr, 'this.form.imgsArr')
         }
         if (this.form.imgsArr.length > 1) { // 限制，如果已经选了多图，那么switch就要有所限制
           this.switchDisabled = true
@@ -227,11 +230,14 @@ export default {
           this.switchDisabled = false
         }
       } else {
-        Object.assign(this.form, getImgMsg(name, imgMsg)); // Object.assign(target, ...sources)合并图片对象
+        Object.assign(this.form, getImgMsg(name, imgMsgList)); // Object.assign(target, ...sources)合并图片对象
       }
     },
-    submitForm (formName) {
-      /* 触发父组件的addMsg方法 */
+    /*
+    作用： 提交数据
+    @return void
+    */
+    submitForm () {
       this.dialogFormVisible = false;
       if (this.isBatch) {
         if (this.formData.new_type) { // 重复上传多张图片
@@ -243,29 +249,33 @@ export default {
         this.formData.img_type = this.formData.img_type + '_id'
         this.form.data = this.formData
       }
-      this.$emit('addbackStageMsg', this.form);
-      this.formData = { // 对象json化字符串
-        img_type: '', // title_img_id
-        new_type: false, // 后台接收1或者2
+      this.$emit('addbackStageMsg', this.form); /// 触发父组件的addbackStageMsg方法,提交数据给后台
+      this.formData = { // 初始化数据
+        img_type: '',
+        new_type: false,
         new_num: 1
       }
       this.form = {
         status: 0,
-        imgsArr: [] // [imgid1,imgid2,imgid3,….] json化字符串
+        imgsArr: []
       }
       this.switchDisabled = false
     },
+    /*
+    作用： 取消提交数据
+    @return void
+    */
     cancel () {
       this.dialogFormVisible = false
       // 初始化
-      this.formData = { // 对象json化字符串
-        img_type: '', // title_img_id
-        new_type: false, // 后台接收1或者2
+      this.formData = {
+        img_type: '',
+        new_type: false,
         new_num: 1
       }
       this.form = {
         status: 0,
-        imgsArr: [] // [imgid1,imgid2,imgid3,….] json化字符串
+        imgsArr: []
       }
     }
   },

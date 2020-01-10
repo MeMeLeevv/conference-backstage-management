@@ -249,21 +249,9 @@ import { storeLocalData, deepCopy } from '../../assets/js/base';
 import { mapMutations, mapGetters } from 'vuex';
 import draggable from 'vuedraggable';
 
-/*
-这里的elementUI的memu组件省略了router属性，由于我们需要保存每个navbar点击后的msg，然后再跳转页面，如果加上router，执行顺序会相反
-防止代码太耦合，记得判断高亮的router的公共字段要放在store中形成变量！！！！！！！！！！
-
-议程逻辑如下：
-1、先查询所有议程信息，然后展示在navbar中，要注意临界条件(空数据),navbar中展示的功能还包括可拖动、可新增、标题太长要省略。
-2、在上1时已经把所有议程信息（名称、时间、地点）都拉出来了，所以navbar每个议程bar里都要保存好那三点信息，然后点击某一栏就在议程基本信息里赋值，然后再根据8.3 ag _id去获取议程内容，
-每次修改议程内容的表格时要通过ag_content_id来更新数据
-注意删除议程，既要把navbar里对应的要删掉，router也要即使跳转到上一或者下一或者直接大会信息那里
-*/
-
 export default {
   name: 'navBar',
   data () {
-    /* 排序字段跟他的index挂钩！！！ */
     var id = this.$route.params.id; //   /117/columnConfig/headImage
     var openColumn = this.$route.path.indexOf('columnConfig') !== -1 ? `/${id}/columnConfig` : `/${id}/agendaManage` // 加载时候navbar展开情况
     return {
@@ -489,16 +477,15 @@ export default {
         }
       })
       .catch(function (err) {
-        console.log(err, '根据栏目id查找栏目信息失败');
         that.$message.error(err);
       });
   },
-  mounted () {
-    this.$nextTick(() => {});
-  },
   methods: {
+    /* 关于鼠标直接拖拽排序的，navbar列表改变后直接将排序后的数据发请求给后台，下次再次请求时发送更换后的数据即可 */
+    ...mapMutations(['setTemporaryAgenda', 'setaAgendaBtnDisabled']),
     /*
-    作用：重新请求agenda
+    作用： 议程组件触发app.vue里的requestAgenda方法，此方法接着触发navbar重新请求agenda来修改navbar的显示情况
+    @params deleteAid Boolean 是否是删除议程
     @return void
     */
     requestAgenda (deleteAid) {
@@ -506,13 +493,10 @@ export default {
 
       axiosGet('/api/agenda/getAgenda', { p_id: this.$route.params.id }, (res) => { /* 查询大会信息并展示在预览区，如果没有值要有初始化 */
         let data = res.data
-        console.log(data, '查找列表成功');
-
         if (data.code === '1') {
           data.data.map(item => {
             item.jump_url = `/${item.p_id}/agendaManage/${item.a_id}`; // 根据大会id、议程id拼接对应的jump_url
           });
-          console.log(data.data, 'agendaData');
 
           this.navMsg[3].subTitle = data.data;
 
@@ -522,7 +506,6 @@ export default {
             subTitle.forEach((item, index) => {
               if (item.a_id === deleteAid) activeIndex = index // 找到当前被删除的index
             })
-            console.log()
             if (len === 1) { // 如果列表只有一个，删除后默认跳转到大会信息页
               this.$router.push(`/${this.$route.params.id}/conferenceMsg`)
             } else {
@@ -532,7 +515,6 @@ export default {
                 activeIndex -= 1
               }
               storeLocalData([['columnMsg', subTitle[activeIndex]]]);
-
               this.$router.push(subTitle[activeIndex].jump_url)
             }
           } else {
@@ -545,11 +527,8 @@ export default {
         }
       }, (err) => {
         this.$message.error(err)
-        console.log(err, '根据大会id查找大会信息失败');
       });
     },
-    /* 关于鼠标直接拖拽排序的，navbar列表改变后直接将排序后的数据发请求给后台，下次再次请求时发送更换后的数据即可 */
-    ...mapMutations(['setTemporaryAgenda', 'setaAgendaBtnDisabled']),
     /*
     作用：点击新增栏目btn
     @return void

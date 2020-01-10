@@ -55,7 +55,7 @@ export default {
   },
   data () {
     return {
-      imgList: [],
+      imgList: [], // 已上传的图片信息数组
       dialogImageUrl: '',
       dialogVisible: false,
       fileList: [],
@@ -74,37 +74,10 @@ export default {
     @fileList: Array  请求结果返回的所有文件和响应信息
     @return void
     */
-    /* uploadSuccess (response, file, fileList) {
-      let that = this
-      if (!that.multiple) {
-        that.multiple = Number(that.limit) > 1;
-        console.log(fileList, 'fileList');
-
-        for (let i = 0; i < fileList.length; i++) {
-          console.log(response, '======', file, '========', fileList, 'fileList[' + i + ']');
-          (function (i) {
-            setTimeout(() => {
-              let code = fileList[i].response.code;
-              if (code === '1') {
-                let data = fileList[i].response.data
-                data.uid = fileList[i].uid
-                that.imgList.push(data)
-                // console.log('imgList' + i + '=>', that.imgList, 'code' + i + '=>', fileList[i].response.code);
-              } else {
-                that.$message.error(fileList[i].response.msg)
-              }
-            }, 100);
-          })(i)
-        }
-        that.$emit('getImgMsg', that.inputName, that.imgList)
-      }
-    }, */
     uploadSuccess (response, file, fileList) {
       let that = this
-      console.log(fileList, 'fileList');
       let imgLen = fileList.length
       if (imgLen > 1) { // 多图上传
-        console.log(response, file, fileList)
         if (response.code === '1') {
           let data = response.data
           data.uid = file.uid
@@ -112,7 +85,6 @@ export default {
           if (that.imgList.length === imgLen) {
             that.$emit('getImgMsg', that.inputName, that.imgList)
           }
-          console.log('imgList' + '=>', that.imgList)
         } else {
           that.$message.error(response.msg)
         }
@@ -122,24 +94,37 @@ export default {
           let data = response.data
           data.uid = file.uid
           that.imgList.push(data)
-          console.log('imgList' + '=>', that.imgList)
         } else {
           that.$message.error(response.msg)
         }
         that.$emit('getImgMsg', that.inputName, that.imgList)
       }
     },
+    /*
+    作用：移除已上传的图片，并且要在imgList将它移除
+    @file: Object  该次请求结果返回的文件和响应信息
+    @fileList: Array  请求结果返回的所有文件和响应信息
+    @return void
+    */
     handleRemove (file, fileList) { //
-      console.log(file, fileList);
       let index = this.imgList.findIndex((item, index) => item.uid === file.uid)
       this.imgList.splice(index, 1)
       this.$emit('getImgMsg', this.inputName, this.imgList, true) // true表示是移除操作
     },
-    handlePictureCardPreview (file) { /* 预览的时候 */
-      console.log(file.url, 'file.url'); /* blob的临时对象 */
+    /*
+    作用：预览图片
+    @file: Object  该次请求结果返回的文件和响应信息
+    @return void
+    */
+    handlePictureCardPreview (file) {
       this.dialogImageUrl = file.url;
       this.dialogVisible = true;
     },
+    /*
+    作用：上传图片前，需要先判断文件格式以及大小是否不合格
+    @file: Object  该次请求结果返回的文件和响应信息
+    @return void
+    */
     beforeAvatarUpload (file) { /* 上传前 */
       const isJPG = this.isImage(file.type);
       const isLt2M = (file.size / 1024 / 200).toPrecision(3) < 1;
@@ -151,6 +136,11 @@ export default {
       }
       return isJPG && isLt2M;
     },
+    /*
+    作用：判断图片格式
+    @ext: String  图片后缀格式
+    @return void
+    */
     isImage (ext) {
       return (
         [
@@ -169,6 +159,10 @@ export default {
         ].indexOf(ext) !== -1
       );
     },
+    /*
+    作用：超出上传图片指定数量
+    @return void
+    */
     imgExceed () {
       this.$message({
         message: '图片只能上传指定数量！,请先删除已存在的图片！',

@@ -172,7 +172,6 @@ export default {/* 大会嘉宾只有一组内容 */
         }
         this.columnListShow = showData.columnListShow.data[0]; // 栏目信息展示
         this.columnGListShow = showData.ColumnObjGroupList.data; // 栏目内容组信息展示
-        console.log(this.columnGListShow, 'this.columnGListShow')
         if (this.columnGListShow.length === 0) {
           // tableData初始化，新建组内容
           this.addbackStageMsg({}, true) // 新增栏目组数据
@@ -197,13 +196,11 @@ export default {/* 大会嘉宾只有一组内容 */
                   this.tableData[j].edit = false; // 是否是编辑状态
                   this.tableData[j].hasChecked = false; // checkbox状态是否勾选
                 }
-                console.log(this.tableData, 'this.tableData');
               } else {
                 this.$message.error(data.msg);
               }
             },
             err => {
-              console.log(err, '根据栏目id查找栏目信息失败');
               this.$message.error(err);
             }
           )
@@ -214,17 +211,6 @@ export default {/* 大会嘉宾只有一组内容 */
         that.$message.error(err);
       });
   },
-  /*   beforeRouteUpdate (to, from, next) {
-    // 在当前路由改变，但是该组件被复用时调用
-    // 举例来说，对于一个带有动态参数的路径 /foo/:id，在 /foo/1 和 /foo/2 之间跳转的时候，
-    // 由于会渲染同样的 Foo 组件，因此组件实例会被复用。而这个钩子就会在这个情况下被调用。
-    // 可以访问组件实例 `this`
-    console.log(to, 'to')
-    if (to.params.c_id) {
-      // this.reload()
-      // this.$router.push(to.path)
-    }
-  }, */
   methods: {
     /*
     作用：捕捉table子组件传过来的批量上传图片事件
@@ -301,11 +287,9 @@ export default {/* 大会嘉宾只有一组内容 */
           form.status = form.status ? 1 : 0; // status是Boolean格式，需转成number传给后台
         }
       }
-      console.log(form, 'addbackStageMsg.form')
       axiosPost(url, form, res => {
         let data = res.data;
         if (data.code === '1') {
-          console.log(data.data, 'addbackStageMsg.returndata');
           that.$message({
             message: data.msg,
             type: 'success'
@@ -331,7 +315,6 @@ export default {/* 大会嘉宾只有一组内容 */
                 }
               },
               err => {
-                console.log(err, '根据栏目id查找栏目信息失败');
                 this.$message.error(err);
               }
             )
@@ -350,7 +333,6 @@ export default {/* 大会嘉宾只有一组内容 */
               );
             }
           }
-          console.log(this.tableData, 'addTa  bleData')
         } else {
           that.$message.error(data.msg);
         }
@@ -372,10 +354,9 @@ export default {/* 大会嘉宾只有一组内容 */
     /*
     作用：子组件触发，本地批量显示或隐藏数据
     @params ids Array 要修改的数据obj_id
-    @return void !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    @return void
     */
     batchHS (ids, status) {
-      console.log(ids, status, 'batchHS');
       for (let i = 0; i < ids.length; i++) {
         this.columnGListShow[this.activeName].tableData.forEach(item => {
           if (item.obj_id === ids[i]) {
@@ -390,7 +371,6 @@ export default {/* 大会嘉宾只有一组内容 */
     */
     submitForm () {
       let that = this;
-      // console.log(this.form, 'this.form')
       let url;
       // 更新栏目信息
       url = '/api/column/updateColumn';
@@ -403,7 +383,6 @@ export default {/* 大会嘉宾只有一组内容 */
           let data = res.data;
           if (data.code === '1') {
             this.columnListShow = deepCopy(this.form);
-            // this.form = {}
             that.$message({
               message: data.msg,
               type: 'success'

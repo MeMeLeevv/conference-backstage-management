@@ -35,13 +35,7 @@ export default {
       } else {
         callback();
       }
-    };
-    /*     var validatePassword = (rule, value, callback) => {
-      console.log(value, 'value')
-      if (!value) {
-        return callback(new Error('内容不能为空！'))
-      }
-    } */
+    }
     return {
       form: {
         user: '',
@@ -84,13 +78,10 @@ export default {
             password: this.form.password
           }, (res) => { /* 查询大会信息并展示在预览区，如果没有值要有初始化 */
             let data = res.data;
-            console.log(data, 'logindata')
-            // 请求失败
             // eslint-disable-next-line eqeqeq
             if (data.code == 1) {
               this.setAccount(data.data); // 设置用户账号
               if (this.getOriginPage) { // 跳转到原来的页面
-                // console.log(this.getOriginPage, '跳转到原来的页面:this.originPage');
                 this.setHasLogin(true);
                 this.$router.push(this.getOriginPage);
               } else { // 否则默认跳转到首页
@@ -116,39 +107,7 @@ export default {
               duration: '1000'
             });
           });
-
-          /* this.$axios.get(`/api/user/login?user=${this.form.user}&password=${this.form.password}`).then((res) => { // 提交登录数据
-            let data = res.data;
-            if (data.code === '1') {
-              this.setAccount(data.data); // 设置用户账号
-              if (this.getOriginPage) { // 跳转到原来的页面
-                console.log(this.getOriginPage, '跳转到原来的页面:this.originPage');
-                this.setHasLogin(true);
-                this.$router.push(this.getOriginPage);
-              } else { // 否则默认跳转到首页
-                this.setHasLogin(true);
-                this.$router.push('/');
-              }
-              loading.close(); /// 关闭加载
-            } else {
-              loading.close(); /// 关闭加载
-              this.$message({
-                message: '登陆失败,请重试！',
-                type: 'error',
-                duration: '1000'
-              });
-            }
-          }).catch((err) => {
-            loading.close(); /// 关闭加载
-            this.$message({
-              message: '登陆失败,请重试！' + err,
-              type: 'error',
-              duration: '1000'
-            });
-          }).finally(() => {
-          }); */
         } else {
-          console.log('error submit!!');
           return false;
         }
       });

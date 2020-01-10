@@ -7,7 +7,7 @@
           <el-time-picker
             is-range
             v-model="dialogForm.timeline"
-            range-separator="至"
+            range-separator="-"
             start-placeholder="开始时间"
             end-placeholder="结束时间"
             format="hh:mm A"
@@ -112,130 +112,155 @@
         <el-button @click="editAllContents">一键编辑</el-button>
         <el-button @click="saveAllContents">一键保存</el-button>
       </div>
-      <el-table
-        ref="singleTable"
-        :data="tableContents"
-        highlight-current-row
-        style="width: 100%"
-      >
-        <el-table-column align="center" type="index" width="100">
-        </el-table-column>
-        <el-table-column
-          align="center"
-          property="time"
-          label="时间"
-          width="250"
-        >
-          <template slot-scope="scope">
-            <!-- <el-input placeholder="请输入时间"  v-model="scope.row.time"></el-input> -->
-            <div v-if="scope.row.editable">
-              <el-time-picker
-                style="width: 235px"
-                is-range
-                align="left"
-                v-model="scope.row.timeline"
-                range-separator="-"
-                start-placeholder="开始时间"
-                end-placeholder="结束时间"
-                format="hh:mm A"
-                placeholder="选择时间范围（hh:mm）"
-              >
-              </el-time-picker>
-            </div>
-            <div
-              v-else
-              :title="`${scope.row.timeline_start} - ${scope.row.timeline_end}`"
+
+      <table class="table" cellspacing="0" cellpadding="0">
+        <!-- 初始化表头 -->
+        <thead class="thead-dark">
+          <tr>
+            <th
+              scope="col"
+              v-for="item in initTable"
+              :key="item.id"
+              :style="`width: ${item.widthPercent * clientWidth}px`"
             >
-              {{
-                `${(
-                  new Date(scope.row.timeline_start).getHours() + ""
-                ).padStart(2, "0")}:${(
-                  new Date(scope.row.timeline_start).getMinutes() + ""
-                ).padStart(2, "0")}
-               - ${(new Date(scope.row.timeline_end).getHours() + "").padStart(
+              {{ item.label }}
+            </th>
+          </tr>
+        </thead>
+
+        <draggable
+          v-if="tableContents.length !== 0"
+          v-model="tableContents"
+          tag="tbody"
+          @end="dropColumn"
+        >
+          <!-- tr的高度根据图片的高度0.12来调整 -->
+          <tr
+            v-for="(item, index) in tableContents"
+            :ref="`row${index}`"
+            :key="item.id"
+            class="row"
+            @mouseenter="putBg(`row${index}`)"
+            @mouseleave="moveBg(`row${index}`)"
+            :style="`height:${0.12 * clientWidth * 0.5 + 10}px`"
+          >
+            <!-- 显示数量index -->
+            <td scope="row">{{ index }}</td>
+            <!-- 时间 -->
+            <td :style="`width: ${0.1 * clientWidth}px`">
+              <div v-if="item.editable">
+                <el-time-picker
+                  style="width: 200px"
+                  is-range
+                  align="left"
+                  v-model="item.timeline"
+                  range-separator="-"
+                  start-placeholder="开始时间"
+                  end-placeholder="结束时间"
+                  format="hh:mm A"
+                  placeholder="选择时间范围（hh:mm）"
+                >
+                </el-time-picker>
+              </div>
+              <div
+                v-else
+                :title="
+                  `${item.timeline_start} - ${item.timeline_end}`
+                "
+              >
+                {{
+                  `${(
+                    new Date(item.timeline_start).getHours() + ""
+                  ).padStart(2, "0")}:${(
+                    new Date(item.timeline_start).getMinutes() + ""
+                  ).padStart(2, "0")}
+               - ${(new Date(item.timeline_end).getHours() + "").padStart(
                  2,
                  "0"
                )}:${(
-                  new Date(scope.row.timeline_end).getMinutes() + ""
-                ).padStart(2, "0")}`
-              }}
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column
-          align="center"
-          property="plate"
-          label="所属板块"
-          width="250"
-        >
-          <template slot-scope="scope">
-            <el-input
-              v-if="scope.row.editable"
-              type="textarea"
-              placeholder="请输入所属板块"
-              :autosize="{ minRows: 1, maxRows: 4 }"
-              v-model="scope.row.plate"
-            ></el-input>
-            <div v-else :title="scope.row.plate" class="ellipsis">{{ scope.row.plate }}</div>
-          </template>
-        </el-table-column>
-        <el-table-column align="center" property="content" label="具体内容">
-          <template slot-scope="scope">
-            <div class="input">
-              主题 :
+                    new Date(item.timeline_end).getMinutes() + ""
+                  ).padStart(2, "0")}`
+                }}
+              </div>
+            </td>
+            <!-- 所属板块 -->
+            <td :style="`width: ${0.2 * clientWidth}px`">
               <el-input
-                v-if="scope.row.editable"
-                v-model="scope.row.theme"
-                placeholder="请输入主题"
-              ></el-input>
-              <span class="tableItem ellipsis" v-else :title="scope.row.theme">{{
-                scope.row.theme
-              }}</span>
-            </div>
-            <div class="input">
-              主持人 :
-              <el-input
-                v-if="scope.row.editable"
-                v-model="scope.row.host"
-                placeholder="请输入主持人"
-              ></el-input>
-              <span class="tableItem" v-else :title="scope.row.host">{{
-                scope.row.host
-              }}</span>
-            </div>
-            <div class="input">
-              嘉宾 :
-              <el-input
-                class="guests"
+                v-if="item.editable"
                 type="textarea"
+                placeholder="请输入所属板块"
                 :autosize="{ minRows: 1, maxRows: 4 }"
-                v-if="scope.row.editable"
-                v-model="scope.row.guest"
-                placeholder="请输入嘉宾"
+                v-model="item.plate"
               ></el-input>
-              <span class="tableItem ellipsis" v-else :title="scope.row.guest">{{
-                scope.row.guest
-              }}</span>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" align="center" width="200">
-          <template slot-scope="scope">
-            <el-button
-              size="mini"
-              @click="editAgendaCon(scope.$index, scope.row)"
-              >{{ scope.row.editable ? "保存" : "编辑" }}</el-button
-            >
-            <el-button
-              size="mini"
-              type="danger"
-              @click="deleteAgendaCon(scope.$index, scope.row)"
-              >{{ scope.row.editable ? "取消" : "删除" }}</el-button
-            >
-          </template>
-        </el-table-column>
-      </el-table>
-      <el-button @click="dialogFormVisible = true" class="add">新增议程内容</el-button>
+              <div :style="`width: ${0.2 * clientWidth}px`" v-else :title="item.plate" class="ellipsis">
+                {{ item.plate }}
+              </div>
+            </td>
+            <!-- 具体内容 -->
+            <td :style="`width: ${0.35 * clientWidth}px`">
+              <div class="input">
+                主题 :
+                <el-input
+                  v-if="item.editable"
+                  v-model="item.theme"
+                  placeholder="请输入主题"
+                ></el-input>
+                <span
+                  class="tableItem ellipsis"
+                  v-else
+                  :title="item.theme"
+                  >{{ item.theme }}</span
+                >
+              </div>
+              <div class="input">
+                主持人 :
+                <el-input
+                  v-if="item.editable"
+                  v-model="item.host"
+                  placeholder="请输入主持人"
+                ></el-input>
+                <span class="tableItem" v-else :title="item.host">{{
+                  item.host
+                }}</span>
+              </div>
+              <div class="input">
+                嘉宾 :
+                <el-input
+                  class="guests"
+                  type="textarea"
+                  :autosize="{ minRows: 1, maxRows: 4 }"
+                  v-if="item.editable"
+                  v-model="item.guest"
+                  placeholder="请输入嘉宾"
+                ></el-input>
+                <span
+                  class="tableItem ellipsis"
+                  v-else
+                  :title="item.guest"
+                  >{{ item.guest }}</span
+                >
+              </div>
+            </td>
+            <td>
+              <el-button
+                size="mini"
+                @click="editAgendaCon(index, item)"
+                >{{ item.editable ? "保存" : "编辑" }}</el-button
+              >
+              <el-button
+                size="mini"
+                type="danger"
+                @click="deleteAgendaCon(index, item)"
+                >{{ item.editable ? "取消" : "删除" }}</el-button
+              >
+            </td>
+          </tr>
+        </draggable>
+      </table>
+
+      <el-button @click="dialogFormVisible = true" class="add"
+        >新增议程内容</el-button
+      >
       <div class="center">
         <el-button class="add" @click="publicAgenda(agendaMsg.status)">
           <i
@@ -251,6 +276,7 @@
 
 <script>
 import { axiosPost } from '../assets/js/axios';
+import draggable from 'vuedraggable';
 
 import { getLocalData } from '../assets/js/base';
 import { mapMutations, mapGetters } from 'vuex';
@@ -278,6 +304,33 @@ export default {
         host: '',
         guest: ''
       },
+      initTable: [ // 初始化表格表头
+        {
+          label: '序号', // 表头名
+          widthPercent: 0.05, // 表头占父类长度百分比
+          key: 'index'
+        },
+        {
+          label: '时间', // 表头名
+          widthPercent: 0.12, // 表头占父类长度百分比
+          key: 'timeline'
+        },
+        {
+          label: '所属板块', // 表头名
+          widthPercent: 0.15, // 表头占父类长度百分比
+          key: 'plate'
+        },
+        {
+          label: '具体内容', // 表头名
+          widthPercent: 0.2, // 表头占父类长度百分比
+          key: 'detailCon'
+        },
+        {
+          label: '操作', // 表头名
+          widthPercent: 0.1, // 表头占父类长度百分比
+          key: 'detailCon'
+        }
+      ],
       tableContents: [], // 保存议程内容信息
       dialogFormVisible: false,
       formLabelWidth: '80px'
@@ -288,11 +341,11 @@ export default {
   },
   created () {
     let that = this;
+    this.clientWidth = document.body.clientWidth;
     this.agendaMsg = getLocalData([
       'columnMsg'
-    ])[0]; /* 这里获取到用户点击的栏目，利用id去抓取数据 */
+    ])[0]; /* 这里获取到用户点击的议程信息，利用id去抓取数据 */
     console.log(this.agendaMsg, 'agendaMsg');
-    // 根据
     axiosPost(
       '/api/agenda/getAgendaContent',
       {
@@ -425,8 +478,8 @@ export default {
           this.$message({
             type: 'info',
             message: '已取消修改'
-          })
-        })
+          });
+        });
     },
 
     /*
@@ -503,10 +556,10 @@ export default {
         center: true
       })
         .then(() => {
-          let agendaContents = []
+          let agendaContents = [];
           for (let i = 0; i < this.tableContents.length; i++) {
             if (this.tableContents[i].editable) {
-              agendaContents.push(this.tableContents[i]) // 将编辑过的议程内容收集
+              agendaContents.push(this.tableContents[i]); // 将编辑过的议程内容收集
             }
           }
           // 向后台发送数据
@@ -707,9 +760,61 @@ export default {
         }
         row.editable = false;
       }
+    },
+    /*
+    作用：发送更新栏目内容顺序sort请求给后台
+    @data: Array 对应更新顺序的表格的数据
+    @return void
+    */
+    dropColumn () {
+      let sortData = [];
+      let that = this;
+      // 改变每个议程的sort信息，对应索引值
+      this.tableContents.map((item, index) => {
+        sortData.push(item.ag_content_id);
+      });
+      // 更新栏目内容排序
+      axiosPost(
+        '/api/column/sortColumn',
+        {
+          sortData: JSON.stringify(sortData),
+          type: 5
+        },
+        res => {
+          //
+          let data = res.data;
+          if (data.code === '1') {
+            that.$message({
+              message: data.msg,
+              type: 'success'
+            });
+          } else {
+            this.$message.error(data.msg);
+          }
+        },
+        err => {
+          this.$message.error('排序栏目失败，请重试！' + err);
+        }
+      );
+    },
+    /*
+    作用：给鼠标hover的那行表格数据更改背景
+    @ref: String 该行tr的ref
+    @return void
+    */
+    putBg (ref) {
+      this.$refs[ref][0].style.background = '#f5f7fa'
+    },
+    /*
+    作用：给鼠标移出的那行表格数据恢复白色背景
+    @ref: String 该行tr的ref
+    @return void
+    */
+    moveBg (ref) {
+      this.$refs[ref][0].style.background = 'white'
     }
   },
-  components: {}
+  components: { draggable }
 };
 </script>
 <style lang="sass" scoped>
@@ -766,4 +871,24 @@ export default {
       font-weight: 500
     .add
       margin: 30px
+.table
+  .thead-dark
+    background: #545c64
+    color: white
+    font-size: 18px
+    tr
+      height: 50px
+      th
+        border-bottom: 1px solid #ebeef5
+  .el-button
+    padding: 10px
+    font-size: 16px
+.row
+  text-align: center
+  td
+    border-bottom: 1px solid #f2f2f2
+  .el-select>.el-input
+    margin: 0 auto
+  .el-input
+    width: 80%
 </style>
