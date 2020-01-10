@@ -12,8 +12,7 @@
             end-placeholder="结束时间"
             format="hh:mm A"
             placeholder="选择时间范围（hh:mm）"
-            @change="timeChange"
-            >
+          >
           </el-time-picker>
         </el-form-item>
         <el-form-item label="所属板块 : " :label-width="formLabelWidth">
@@ -35,7 +34,7 @@
             <el-input
               v-model="dialogForm.host"
               autocomplete="off"
-              placeholder="请输入主持"
+              placeholder="请输入主持人"
             ></el-input>
           </el-form-item>
           <el-form-item label="嘉宾" label-width="50px">
@@ -51,21 +50,13 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click.stop="dialogFormVisible = false">取 消</el-button>
-        <el-button
-          type="primary"
-          @click.stop="
-            isAddNewA
-              ? addNewAgenda('ruleForm')
-              : isAddNewC
-              ? addNewColumn('ruleForm')
-              : editColumn('ruleForm')
-          "
+        <el-button type="primary" @click.stop="addNewAgenda('ruleForm')"
           >确 定</el-button
         >
       </div>
     </el-dialog>
+    <el-button @click="deleteAgenda">删除议程</el-button>
     <div class="baseMsg">
-      <el-button @click="deleteAgenda">删除议程</el-button>
       <div class="header">议程基本信息</div>
       <el-form
         ref="agendaMsg"
@@ -73,7 +64,7 @@
         label-width="80px"
         :model="agendaMsg"
       >
-        <el-form-item label="议程名称" style="width: 500px">
+        <el-form-item label="议程名称" style="width: 600px">
           <el-input
             v-model="agendaMsg.agenda_name"
             placeholder="请输入议程名称"
@@ -94,7 +85,7 @@
           </el-date-picker>
         </el-form-item>
 
-        <el-form-item label="议程地点" style="width: 500px">
+        <el-form-item label="议程地点" style="width: 600px">
           <el-input
             placeholder="请输入议程地址"
             v-model="agendaMsg.agenda_department"
@@ -103,12 +94,12 @@
           ></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" class="save" @click="editOrSave">{{
+          <el-button type="primary" class="save" @click="editOrSaveAgenda">{{
             baseMsgDisabled ? "编辑" : "保存"
           }}</el-button>
           <el-button
             v-if="!baseMsgDisabled"
-            @click="cancel('agendaMsg')"
+            @click="cancelAgenda('agendaMsg')"
             class="cancel"
             >取消</el-button
           >
@@ -125,7 +116,6 @@
         ref="singleTable"
         :data="tableContents"
         highlight-current-row
-        @current-change="handleCurrentChange"
         style="width: 100%"
       >
         <el-table-column align="center" type="index" width="100">
@@ -134,40 +124,41 @@
           align="center"
           property="time"
           label="时间"
-          width="200"
+          width="250"
         >
           <template slot-scope="scope">
             <!-- <el-input placeholder="请输入时间"  v-model="scope.row.time"></el-input> -->
             <div v-if="scope.row.editable">
-              <el-time-select
-                placeholder="起始时间"
-                @change="pickUpTime(scope.row, 'start')"
-                v-model="scope.row.startTime"
-                :picker-options="{
-                  start: '08:00',
-                  step: '00:15',
-                  end: '23:30'
-                }"
+              <el-time-picker
+                style="width: 235px"
+                is-range
+                align="left"
+                v-model="scope.row.timeline"
+                range-separator="-"
+                start-placeholder="开始时间"
+                end-placeholder="结束时间"
+                format="hh:mm A"
+                placeholder="选择时间范围（hh:mm）"
               >
-              </el-time-select>
-              <el-time-select
-                placeholder="结束时间"
-                @change="pickUpTime(scope.row, 'end')"
-                v-model="scope.row.endTime"
-                :picker-options="{
-                  start: '08:00',
-                  step: '00:15',
-                  end: '23:30',
-                  minTime: scope.row.startTime
-                }"
-              >
-              </el-time-select>
+              </el-time-picker>
             </div>
             <div
               v-else
-              :title="`${scope.row.startTime} - ${scope.row.endTime}`"
+              :title="`${scope.row.timeline_start} - ${scope.row.timeline_end}`"
             >
-              {{ `${scope.row.startTime} - ${scope.row.endTime}` }}
+              {{
+                `${(
+                  new Date(scope.row.timeline_start).getHours() + ""
+                ).padStart(2, "0")}:${(
+                  new Date(scope.row.timeline_start).getMinutes() + ""
+                ).padStart(2, "0")}
+               - ${(new Date(scope.row.timeline_end).getHours() + "").padStart(
+                 2,
+                 "0"
+               )}:${(
+                  new Date(scope.row.timeline_end).getMinutes() + ""
+                ).padStart(2, "0")}`
+              }}
             </div>
           </template>
         </el-table-column>
@@ -185,7 +176,7 @@
               :autosize="{ minRows: 1, maxRows: 4 }"
               v-model="scope.row.plate"
             ></el-input>
-            <div v-else :title="scope.row.plate">{{ scope.row.plate }}</div>
+            <div v-else :title="scope.row.plate" class="ellipsis">{{ scope.row.plate }}</div>
           </template>
         </el-table-column>
         <el-table-column align="center" property="content" label="具体内容">
@@ -197,7 +188,7 @@
                 v-model="scope.row.theme"
                 placeholder="请输入主题"
               ></el-input>
-              <span class="tableItem" v-else :title="scope.row.content.theme">{{
+              <span class="tableItem ellipsis" v-else :title="scope.row.theme">{{
                 scope.row.theme
               }}</span>
             </div>
@@ -208,7 +199,7 @@
                 v-model="scope.row.host"
                 placeholder="请输入主持人"
               ></el-input>
-              <span class="tableItem" v-else :title="scope.row.content.host">{{
+              <span class="tableItem" v-else :title="scope.row.host">{{
                 scope.row.host
               }}</span>
             </div>
@@ -222,7 +213,7 @@
                 v-model="scope.row.guest"
                 placeholder="请输入嘉宾"
               ></el-input>
-              <span class="tableItem" v-else :title="scope.row.guest">{{
+              <span class="tableItem ellipsis" v-else :title="scope.row.guest">{{
                 scope.row.guest
               }}</span>
             </div>
@@ -232,21 +223,27 @@
           <template slot-scope="scope">
             <el-button
               size="mini"
-              @click="handleEdit(scope.$index, scope.row)"
+              @click="editAgendaCon(scope.$index, scope.row)"
               >{{ scope.row.editable ? "保存" : "编辑" }}</el-button
             >
             <el-button
               size="mini"
               type="danger"
-              @click="handleDelete(scope.$index, scope.row)"
+              @click="deleteAgendaCon(scope.$index, scope.row)"
               >{{ scope.row.editable ? "取消" : "删除" }}</el-button
             >
           </template>
         </el-table-column>
       </el-table>
-      <el-button @click="dialogFormVisible = true" class="add">新增</el-button>
+      <el-button @click="dialogFormVisible = true" class="add">新增议程内容</el-button>
       <div class="center">
-        <el-button class="add">发布议程</el-button>
+        <el-button class="add" @click="publicAgenda(agendaMsg.status)">
+          <i
+            class="iconfont"
+            :class="agendaMsg.status === 2 ? 'iconlinshi' : 'iconyifabu'"
+          ></i
+          >{{ agendaMsg.status === 2 ? " 取消发布" : " 发布议程" }}</el-button
+        >
       </div>
     </div>
   </div>
@@ -259,50 +256,29 @@ import { getLocalData } from '../assets/js/base';
 import { mapMutations, mapGetters } from 'vuex';
 
 export default {
-  inject: ['changeAgendaName'],
+  inject: ['changeAgendaStatus'],
   name: 'agendaManage',
   data () {
     return {
       baseMsgDisabled: true,
       agendaMsg: {
-        agenda_name: '2018广东互联网大会开幕式',
+        // 议程基本信息
+        agenda_name: '',
         agenda_time: '',
-        agenda_department: '单行输入'
+        agenda_department: ''
       },
       dialogForm: {
+        // 新增弹出dialog信息
         a_id: '',
-        timeline: '',
+        timeline: '', // 接受elementUI组件的时间戳数组
+        timeline_start: '',
+        timeline_end: '',
         plate: '',
         theme: '',
         host: '',
         guest: ''
       },
-      tableContents: [
-        {
-          startTime: '',
-          endTime: '',
-          plate: '往届大会回顾视频、嘉宾签到、自由交流',
-          content: {
-            title:
-              '123432453555555555555555555555555555555555555555555555555555555555555555',
-            host: '1323',
-            guests: '131'
-          },
-          editable: false
-        },
-        {
-          startTime: '',
-          endTime: '',
-          plate: '主持人开场',
-          content: {
-            title: '234345',
-            host: '王世军（广东电视台 知名主持人）',
-            guests: '2342'
-          },
-          editable: false
-        }
-      ],
-      currentRow: null,
+      tableContents: [], // 保存议程内容信息
       dialogFormVisible: false,
       formLabelWidth: '80px'
     };
@@ -327,7 +303,19 @@ export default {
         let data = res.data;
         console.log(data, 'agendaContentData');
         if (data.code === '1') {
-          this.tableContents = data.data;
+          let result = data.data; // Array
+          if (result.length !== 0) {
+            // 这里获取的时间需要加工一下，将时间戳 timeline_start以及timeline_end合并成timeline数组
+            for (let i = 0; i < result.length; i++) {
+              result[i].timeline = [
+                new Date(result[i].timeline_start),
+                new Date(result[i].timeline_end)
+              ];
+              result[i].editable = false; // 状态为不可编辑状态
+            }
+            this.tableContents = result;
+          }
+
           that.$message({
             message: data.msg,
             type: 'success'
@@ -343,146 +331,39 @@ export default {
   },
   methods: {
     ...mapMutations(['setTemporaryAgenda', 'setaAgendaBtnDisabled']),
-    timeChange () {
-      console.log(this.dialogForm.timeline)
-      console.log(this.dialogForm.timeline[0])
-    },
     /*
-    作用： 新增议程内容
+    作用： 新增议程内容,提交dialogForm,但是需要修改一下 timeline = [Fri Jan 10 2020 09:15:39 GMT+0800 (中国标准时间), Fri Jan 10 2020 10:15:39 GMT+0800 (中国标准时间)] ，
+    把它拆成 timeline_start = Date.parse(timeline[0]) 和 timeline_end = Date.parse(timeline[1]),转成时间戳
+    @return void
     */
-    addContent () {
-      /* 由于每个item都有保存功能，点击保存后会发送请求后台保存草稿，那么我新建的时候不需要发送请求，如果点击保存后没有id那么表示新增，是否可拖动？还是需要后台增加排序号？ */
-    },
-    pickUpTime (item, who) {
-      /* 首先要区分：假设数据库不存在startTime和endTime 那么新增时候和已存在time的情况下
-      新增情况下：环境内只有一对startTime和endTime，这个不行，如果用户点击多个编辑那么这将会不够用
-      还是需要在每个item里都有这对，那么新增的时候，用
-      {
-          time: '-',
-          startTime: '',
-          endTime: '',
-          plate: '请输入所属板块',
-          content: {
-            title: '请输入',
-            host: '',
-            guests: ''
-          },
-          editable: false
-        }
-        time = `${startTime} - ${endTime}`
-      */
-    },
-    /*
-  初始化议程列表先去本地拉已发布和草稿的议程
-  nav新增的时候用户点击多少store就push多少数据，保存了才发送到后台,删除也需要发送到后台，一键保存全部发送到后台、
-  议程——如何区分是本地临时草稿，还是后台的草稿或者已发布的议程？！分配id，本地临时草稿的id位数与后台不一样
-  在store里，保存
-  agendaMsg: {
-    name: '2018广东互联网大会开幕式',
-    date: '2018/11/02 AM',
-    address: '广州越秀区',
-    contents: [
-      {
-        startTime: '',
-        endTime: '',
-        plate: '主持人开场',
-        content： {
-          title: '234345',
-          host: '王世军（广东电视台 知名主持人）',
-          guests: '2342'
-        },
-        editable: false
-      }
-    ]
-  }
-  */
-    setCurrent (row) {
-      this.$refs.singleTable.setCurrentRow(row);
-    },
-    handleCurrentChange (val) {
-      this.currentRow = val;
-    },
-    /*
-    作用：一键编辑
-     */
-    editAllContents () {},
-    /*
-    作用：一键保存
-     */
-    saveAllContents () {
-      /* 一键保存，发送所有的this.agendaMsg到后台 */
-    },
-    handleEdit (index, row) {
-      console.log(index, row);
-      if (row.editable) {
-        /* 此时是保存按钮，需要更新本地的数据，被分配的id需要传进去， */
-        this.$confirm('是否确定保存?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        })
-          .then(() => {
-            this.$message({
-              type: 'success',
-              message: '保存成功!'
-            });
-            row.editable = !row.editable;
-          })
-          .catch(() => {
-            this.$message({
-              type: 'info',
-              message: '已取消保存'
-            });
-          });
-      } else {
-        row.editable = !row.editable;
-      }
-    },
-    handleDelete (index, row) {
-      console.log(index, row);
-      if (!row.editable) {
-        /* 此时是删除，需要提示 */
-        this.$confirm('此操作将永久删除该行内容, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        })
-          .then(() => {
-            this.tableContents.splice(index, 1);
-            this.$message({
-              type: 'success',
-              message: '删除成功!'
-            });
-            row.editable = !row.editable;
-          })
-          .catch(() => {
-            this.$message({
-              type: 'info',
-              message: '已取消删除'
-            });
-          });
-      } else {
-        row.editable = !row.editable;
-      }
-    },
-    editOrSave (disabled) {
-      if (!this.baseMsgDisabled) {
-        /* 可编辑状态false,需保存，先验证所填信息是否正确 */
-        this.save('agendaMsg'); // 保存,发送请求保存为草稿
-      }
-      this.baseMsgDisabled = !this.baseMsgDisabled;
-    },
-    save (formName) {
+    addNewAgenda () {
       let that = this;
+      console.log(this.dialogForm, 'dialogForm');
+      this.dialogForm.a_id = this.agendaMsg.a_id;
+      this.dialogForm.timeline_start = Date.parse(this.dialogForm.timeline[0]); // 取出日期对象,转成时间戳
+      this.dialogForm.timeline_end = Date.parse(this.dialogForm.timeline[1]);
       axiosPost(
-        '/api/agenda/updateAgenda',
-        this.agendaMsg,
+        '/api/agenda/newAgendaContent',
+        this.dialogForm,
         res => {
           //
           let data = res.data;
-          console.log(data, 'updateAgendaData');
+          console.log(data, 'addAgendaContentData');
           if (data.code === '1') {
-            this.changeAgendaName();
+            this.dialogFormVisible = false;
+            let result = data.data;
+            // 初始化
+            console.log(result, 'result');
+            console.log(
+              new Date(result.timeline_start),
+              'new Date(result.timeline_start)'
+            );
+            result.timeline = [
+              new Date(result.timeline_start),
+              new Date(result.timeline_end)
+            ]; // 将时间戳转成日期对象，供elementUI时间组件展示数据
+            result.editable = false; // 状态为不可编辑状态
+            this.tableContents.push(result);
             that.$message({
               message: data.msg,
               type: 'success'
@@ -492,15 +373,62 @@ export default {
           }
         },
         err => {
-          this.$message.error('排序栏目失败，请重试！' + err);
+          this.$message.error('新增议程内容失败，请重试！' + err);
         }
       );
     },
-    cancel (formName) {
-      /* 保留之前的状态 */
-      // 表单恢复正原来的数据
+    /*
+    作用：删除议程,删除后默认跳到下一个或者上一个路由
+     */
+    editOrSaveAgenda (disabled) {
+      if (!this.baseMsgDisabled) {
+        /* 可编辑状态false,需保存，先验证所填信息是否正确 */
+        this.saveAgenda('agendaMsg'); // 保存,发送请求保存为草稿
+      }
       this.baseMsgDisabled = !this.baseMsgDisabled;
     },
+    /*
+    作用：保存修改议程
+     */
+    saveAgenda (formName) {
+      let that = this;
+      this.$confirm('此操作将修改该议程信息, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+        center: true
+      })
+        .then(() => {
+          axiosPost(
+            '/api/agenda/updateAgenda',
+            this.agendaMsg,
+            res => {
+              //
+              let data = res.data;
+              console.log(data, 'updateAgendaData');
+              if (data.code === '1') {
+                this.changeAgendaStatus();
+                that.$message({
+                  message: data.msg,
+                  type: 'success'
+                });
+              } else {
+                this.$message.error(data.msg);
+              }
+            },
+            err => {
+              this.$message.error('更新议程信息失败，请重试！' + err);
+            }
+          );
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消修改'
+          })
+        })
+    },
+
     /*
     作用：删除议程,删除后默认跳到下一个或者上一个路由
      */
@@ -523,7 +451,7 @@ export default {
               let data = res.data;
               console.log(data, 'updateAgendaData');
               if (data.code === '1') {
-                this.changeAgendaName(this.agendaMsg.a_id);
+                this.changeAgendaStatus(this.agendaMsg.a_id);
                 that.$message({
                   message: data.msg,
                   type: 'success'
@@ -543,6 +471,242 @@ export default {
             message: '已取消删除'
           });
         });
+    },
+    /*
+    作用：取消编辑议程 保留之前的状态，表单恢复正原来的数据
+    */
+    cancelAgenda (formName) {
+      this.baseMsgDisabled = !this.baseMsgDisabled;
+    },
+    /*
+    作用：一键编辑，注意：点击一键编辑后，要判断状态如果已经是编辑状态editable = true就不需要再改变状态了，
+     */
+    editAllContents () {
+      for (let i = 0; i < this.tableContents.length; i++) {
+        if (!this.tableContents[i].editable) {
+          for (let j of Object.keys(this.tableContents[i])) {
+            // 保存旧值
+            this.tableContents[i][`old${j}`] = this.tableContents[i][j];
+          }
+          this.tableContents[i].editable = true; // 编辑状态
+        }
+      }
+    },
+    /*
+    作用：一键保存，需要跳过editable = false
+     */
+    saveAllContents () {
+      this.$confirm('此操作将保存所有改动过的该议程, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+        center: true
+      })
+        .then(() => {
+          let agendaContents = []
+          for (let i = 0; i < this.tableContents.length; i++) {
+            if (this.tableContents[i].editable) {
+              agendaContents.push(this.tableContents[i]) // 将编辑过的议程内容收集
+            }
+          }
+          // 向后台发送数据
+          let that = this;
+          axiosPost(
+            '/api/agenda/updateAgContByOneClick',
+            { agendaContents: JSON.stringify(agendaContents) },
+            res => {
+              //
+              let data = res.data;
+              console.log(data, 'saveAllContentsData');
+              if (data.code === '1') {
+                for (let i = 0; i < this.tableContents.length; i++) {
+                  if (this.tableContents[i].editable) {
+                    this.tableContents[i].editable = false; // 设为不可编辑状态
+                  }
+                }
+                that.$message({
+                  message: data.msg,
+                  type: 'success'
+                });
+              } else {
+                this.$message.error(data.msg);
+              }
+            },
+            err => {
+              this.$message.error('排序栏目失败，请重试！' + err);
+            }
+          );
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });
+        });
+    },
+    /*
+    作用：发布议程
+     */
+    publicAgenda (status) {
+      let that = this;
+      let confirmInfo, errorInfo;
+      if (status === 2) {
+        // 表示需要取消发布
+        confirmInfo = '此操作将取消发布该议程, 是否继续?';
+        errorInfo = '取消发布议程失败，请重试！';
+        status = 1;
+      } else {
+        // 发布
+        confirmInfo = '此操作将发布该议程, 是否继续?';
+        errorInfo = '发布议程失败，请重试！';
+        status = 2;
+      }
+      this.$confirm(confirmInfo, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+        center: true
+      })
+        .then(() => {
+          this.agendaMsg.status = status;
+          axiosPost(
+            '/api/agenda/updateAgenda',
+            this.agendaMsg,
+            res => {
+              //
+              let data = res.data;
+              console.log(data, 'updateAgendaData');
+              if (data.code === '1') {
+                this.changeAgendaStatus();
+                that.$message({
+                  message: data.msg,
+                  type: 'success'
+                });
+              } else {
+                this.$message.error(data.msg);
+              }
+            },
+            err => {
+              this.$message.error(errorInfo + err);
+            }
+          );
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消此操作'
+          });
+        });
+    },
+    /*
+    作用：编辑/保存议程内容 保存与一键保存功能类似，都是修改处于编辑状态的数据，将初始数据保存起来（设置对应的old***存入对象里）
+    */
+    editAgendaCon (index, row) {
+      let that = this;
+      // 保存初始对象,在取消的时候利用其恢复旧值
+      for (let i of Object.keys(row)) {
+        row[`old${i}`] = row[i];
+      }
+      console.log(index, row);
+      //  此时是保存按钮
+      if (row.editable) {
+        this.$confirm('是否确定保存?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+          .then(() => {
+            row.timeline_start = Date.parse(row.timeline[0]); // 取出日期对象,转成时间戳
+            row.timeline_end = Date.parse(row.timeline[1]);
+            axiosPost(
+              '/api/agenda/updateAgendaContent',
+              row,
+              res => {
+                //
+                let data = res.data;
+                console.log(data, 'EditAgendaContentData');
+                if (data.code === '1') {
+                  this.dialogFormVisible = false;
+                  let result = data.data;
+                  // 初始化
+                  console.log(result, 'result');
+                  row.editable = !row.editable;
+                  that.$message({
+                    message: data.msg,
+                    type: 'success'
+                  });
+                } else {
+                  this.$message.error(data.msg);
+                }
+              },
+              err => {
+                this.$message.error('修改议程内容失败，请重试！' + err);
+              }
+            );
+          })
+          .catch(() => {
+            this.$message({
+              type: 'info',
+              message: '已取消保存'
+            });
+          });
+      } else {
+        row.editable = !row.editable;
+      }
+    },
+    /*
+    作用： 删除议程内容
+    */
+    deleteAgendaCon (index, row) {
+      let that = this;
+      console.log(index, row);
+      // 此时是删除，需要提示
+      if (!row.editable) {
+        this.$confirm('此操作将永久删除该行内容, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+          .then(() => {
+            row.status = 0;
+            axiosPost(
+              '/api/agenda/updateAgendaContent',
+              row,
+              res => {
+                //
+                let data = res.data;
+                if (data.code === '1') {
+                  this.tableContents.splice(index, 1);
+                  that.$message({
+                    type: 'success',
+                    message: '删除成功!'
+                  });
+                  row.editable = !row.editable;
+                } else {
+                  this.$message.error(data.msg);
+                }
+              },
+              err => {
+                this.$message.error('修改议程内容失败，请重试！' + err);
+              }
+            );
+          })
+          .catch(() => {
+            this.$message({
+              type: 'info',
+              message: '已取消删除'
+            });
+          });
+      } else {
+        // 取消操作，恢复旧值
+        for (let i of Object.keys(row)) {
+          if (i.indexOf('old') !== -1) {
+            let key = i.slice(3);
+            row[key] = row[i];
+          }
+        }
+        row.editable = false;
+      }
     }
   },
   components: {}
@@ -558,10 +722,13 @@ export default {
   .el-button
     position: relative
     right: -70%
+.center
+  text-align: center
 #agendaManage
   #header
     margin-bottom: 20px
   .baseMsg
+    margin-top: 10px
     .el-form
       background: white
       padding: 40px
@@ -587,6 +754,9 @@ export default {
       .el-input
         width: 500px
         margin-left: 10px
+    .el-date-editor .el-range-separator
+      padding: 0
+      width: 12%
     .tableItem
       width: 500px
       overflow: hidden

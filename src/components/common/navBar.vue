@@ -140,7 +140,7 @@
                     class="router"
                     :class="item.active ? 'activeColor' : ''"
                   >
-                    <div>
+                    <div class="ellipsis">
                       {{ item.name }}
                       <i
                         v-if="item.showEditIcon"
@@ -194,7 +194,7 @@
               }}</span>
               <i
                 class="iconfont iconwenhao"
-                title="栏目可拖动以调整网页展示顺序"
+                title="议程可拖动以调整展示顺序，状态有‘草稿’或者‘已发布’两种"
               ></i>
             </template>
             <el-menu-item-group>
@@ -223,7 +223,7 @@
                   <i style="position:absolute; left: 10px" class="iconfont" :class="item.status === 1 ? 'iconlinshi' : 'iconyifabu'"
                       :title="item.status === 1 ? '草稿' : '已发布'"
                       ></i>
-                    <div style="position: relative;overflow: hidden; text-overflow: ellipsis">
+                    <div class="ellipsis" :title="item.agenda_name">
                       {{ item.agenda_name }}
                     </div>
                   </el-menu-item>
@@ -534,6 +534,10 @@ export default {
               storeLocalData([['columnMsg', subTitle[activeIndex]]]);
 
               this.$router.push(subTitle[activeIndex].jump_url)
+            }
+          } else {
+            for (let i = 0; i < this.navMsg[3].subTitle.length; i++) { // 使navbar对应议程高亮
+              this.navMsg[3].subTitle[i].active = this.navMsg[3].subTitle[i].jump_url === this.$route.path;
             }
           }
         } else {

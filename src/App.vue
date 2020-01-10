@@ -21,7 +21,7 @@ export default {
   name: 'app',
   provide () {
     return {
-      changeAgendaName: this.changeAgendaName
+      changeAgendaStatus: this.changeAgendaStatus
     }
   },
   data () {
@@ -77,7 +77,7 @@ export default {
     @params url String 刷新后页面的路由
     @return null
     */
-    changeAgendaName (deleteAid) {
+    changeAgendaStatus (deleteAid) {
       this.$refs.navbar.requestAgenda(deleteAid) // 调用子组件的方法，重新请求agenda列表
     },
     /*
@@ -181,6 +181,10 @@ export default {
 <style lang="sass">
 *
   box-sizing: border-box
+.ellipsis
+  overflow: hidden
+  text-overflow: ellipsis
+  white-space: nowrap
 body
   height: 100vh
   background: #f2f2f2
