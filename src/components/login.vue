@@ -25,7 +25,6 @@
 <script>
 import { mapGetters, mapMutations } from 'vuex';
 import { axiosPost } from '../assets/js/axios';
-
 export default {
   name: 'login',
   data () {
@@ -52,7 +51,6 @@ export default {
     };
   },
   created () {
-
   },
   computed: {
     ...mapGetters(['getOriginPage', 'getHasLogin', 'getAccount'])
@@ -62,7 +60,6 @@ export default {
       'setHasLogin', 'setAccount'
     ]),
     keybordEvent () {
-
     },
     submitForm (formName) {
       this.$refs[formName].validate((valid) => {
@@ -73,7 +70,7 @@ export default {
           background: 'rgba(255, 255, 255, 0.7)'
         });
         if (valid) {
-          axiosPost('/api/user/login', {
+          axiosPost('/user/login', {
             user: this.form.user,
             password: this.form.password
           }, (res) => { /* 查询大会信息并展示在预览区，如果没有值要有初始化 */

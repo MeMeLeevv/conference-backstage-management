@@ -30,13 +30,13 @@
 </template>
 
 <script>
-import ConfigHeader from '../common/configHeader';
-import UploadImage from '../common/uploadImage';
 import { axiosPost, axiosGet } from '../../assets/js/axios';
 import { mapGetters } from 'vuex';
 import { getImgMsg, getLocalData, deepCopy } from '../../assets/js/base';
-import ImageShow from '../common/imageShow';
 
+const ConfigHeader = () => import('../common/configHeader')
+const ImageShow = () => import('../common/imageShow')
+const UploadImage = () => import('../common/uploadImage')
 export default {
   name: 'guests',
   data () {
@@ -67,7 +67,7 @@ export default {
     let cData = getLocalData(['columnMsg']); // 取出点击保存在本地后的栏目信息
     this.c_id = cData[0].c_id
     this.p_id = cData[0].p_id
-    axiosGet('/api/column/getColumnList', { c_id: this.c_id }, (res) => {
+    axiosGet('/column/getColumnList', { c_id: this.c_id }, (res) => {
       let data = res.data
       if (data.code === '1') {
         this.display = data.data[0];
@@ -121,7 +121,7 @@ export default {
     */
     submitForm () {
       let that = this
-      axiosPost('/api/column/updateColumn', this.form,
+      axiosPost('/column/updateColumn', this.form,
         res => {
           let data = res.data;
           if (data.code === '1') {
@@ -183,7 +183,6 @@ export default {
     .cancel
       background: #DDDDDD
       color: black
-
 $colorShow: 30px
 .title,.titledis
   width: 80px
@@ -196,10 +195,8 @@ $colorShow: 30px
   line-height: 40px
 .fade-enter-active, .fade-leave-active
   transition: opacity .3s
-
 .fade-enter, .fade-leave-to
   opacity: 0
-
 .previewArea
   #imageShow
     display: inline-block

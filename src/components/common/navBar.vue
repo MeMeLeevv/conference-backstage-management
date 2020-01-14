@@ -3,7 +3,7 @@
     <!-- 可利用transition进行过度 -->
     <el-dialog title="栏目信息" :visible.sync="dialogFormVisible">
       <!-- 新建栏目dialog -->
-      <el-form v-if="isAddNewC" :model="form" :rules="rules" ref="ruleForm">
+      <el-form v-if="isAddNewC || isEditC" :model="form" :rules="rules" ref="ruleForm">
         <el-form-item
           label="栏目名称"
           :label-width="formLabelWidth"
@@ -91,7 +91,7 @@
       >
         <!-- 头像 -->
         <div class="avatar">
-          <img src="../../assets/images/avatar.jpg" alt="Your Avatar" />
+          <img src="http://img.iimedia.cn/0000117b83e66a86ad4b1d2c9d2984319f463b5f5d2e28075324f8aba0388fc65c95f" alt="Your Avatar" />
         </div>
         <div v-for="nav in navMsg" :key="nav.id">
           <el-menu-item
@@ -261,6 +261,7 @@ export default {
       dragging: false,
       isAddNewC: true, // 是否是新建栏目
       isAddNewA: false, // 是否是新建议程
+      isEditC: false,
       visible: false, // 删除的弹出框显示状态
       deleteCID: '', // 删除栏目id
       editIndex: 0,
@@ -427,10 +428,10 @@ export default {
     this.columnTitleActive = this.$route.path.indexOf('/columnConfig') !== -1; // 刷新网页监测路由以是否高亮栏目配置
     this.agendaTitleActive = this.$route.path.indexOf('/agendaManage') !== -1; // 刷新网页监测路由以是否高亮议程配置
     this.p_id = Number(this.$route.params.id)
-    let p1 = this.$axios.get('/api/column/getColumnList', {
+    let p1 = this.$axios.get('/column/getColumnList', {
       params: { p_id: this.$route.params.id }
     });
-    let p2 = this.$axios.get('/api/agenda/getAgenda', {
+    let p2 = this.$axios.get('/agenda/getAgenda', {
       params: { p_id: this.$route.params.id }
     });
       // 同时请求栏目列表和议程列表
@@ -466,7 +467,6 @@ export default {
         });
         this.navMsg[3].subTitle = subTitles;
         console.log(subTitles, '查找议程列表成功');
-
         for (let i = 0; i < this.navMsg[2].subTitle.length; i++) {
           this.navMsg[2].subTitle[i].active =
           this.navMsg[2].subTitle[i].jump_url === this.$route.path;
@@ -490,16 +490,13 @@ export default {
     */
     requestAgenda (deleteAid) {
       let subTitle = deepCopy(this.navMsg[3].subTitle) // 提前储存议程列表
-
-      axiosGet('/api/agenda/getAgenda', { p_id: this.$route.params.id }, (res) => { /* 查询大会信息并展示在预览区，如果没有值要有初始化 */
+      axiosGet('/agenda/getAgenda', { p_id: this.$route.params.id }, (res) => { /* 查询大会信息并展示在预览区，如果没有值要有初始化 */
         let data = res.data
         if (data.code === '1') {
           data.data.map(item => {
             item.jump_url = `/${item.p_id}/agendaManage/${item.a_id}`; // 根据大会id、议程id拼接对应的jump_url
           });
-
           this.navMsg[3].subTitle = data.data;
-
           if (deleteAid) { // 如果是删除议程
             let activeIndex
             let len = subTitle.length
@@ -542,9 +539,9 @@ export default {
       };
       this.isAddNewC = true;
       this.isAddNewA = false;
+      this.isEditC = false
       this.dialogFormVisible = true;
     },
-
     /*
     作用：点击编辑栏目图标
     @item: Object 对应新增表单的ref
@@ -554,6 +551,7 @@ export default {
       this.form = item; // 保留栏目信息
       this.isAddNewC = false;
       this.isAddNewA = false;
+      this.isEditC = true
       this.editIndex = index;
       this.dialogFormVisible = true;
     },
@@ -567,7 +565,7 @@ export default {
       console.log(item, 'deleteItem');
       let that = this;
       axiosPost(
-        '/api/column/updateColumn',
+        '/column/updateColumn',
         {
           status: 0,
           c_id: item.c_id
@@ -606,6 +604,7 @@ export default {
       };
       this.isAddNewC = false;
       this.isAddNewA = true;
+      this.isEditC = false
       this.dialogFormVisible = true;
     },
     /*
@@ -621,7 +620,7 @@ export default {
       );
       // 更新栏目排序
       axiosPost(
-        '/api/agenda/newAgenda',
+        '/agenda/newAgenda',
         this.form,
         res => {
           //
@@ -659,7 +658,7 @@ export default {
             '发送新增栏目请求给后台，后台返回栏目id，然后push进栏目的subTitle中'
           );
           axiosPost(
-            '/api/column/newColumn',
+            '/column/newColumn',
             this.form,
             res => {
               let data = res.data;
@@ -691,9 +690,8 @@ export default {
         }
       });
     },
-
     /*
-    作用：发送新增栏目请求给后台
+    作用：发送更新栏目请求给后台
     @formName: String 对应新增表单的ref
     @return void
     */
@@ -707,7 +705,7 @@ export default {
             '发送新增栏目请求给后台，后台返回栏目id，然后push进栏目的subTitle中'
           );
           axiosPost(
-            '/api/column/updateColumn',
+            '/column/updateColumn',
             this.form,
             res => {
               let data = res.data;
@@ -767,7 +765,7 @@ export default {
       }
       // 更新栏目排序
       axiosPost(
-        '/api/column/sortColumn',
+        '/column/sortColumn',
         {
           sortData: JSON.stringify(sortData),
           type

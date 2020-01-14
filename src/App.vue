@@ -11,12 +11,12 @@
 </template>
 
 <script>
-import NavBar from './components/common/navBar';
-import HeadBar from './components/common/headBar';
 import { mapGetters, mapMutations } from 'vuex';
 import { storeLocalData, getLocalData } from './assets/js/base'
 import { axiosPost } from './assets/js/axios';
 
+const NavBar = () => import('./components/common/navBar')
+const HeadBar = () => import('./components/common/headBar')
 export default {
   name: 'app',
   provide () {
@@ -99,7 +99,6 @@ export default {
       'setBackStageTitle',
       'setColumnMsg'
     ]),
-
     /*
     作用：检查登录状态,并作出处理
     @return null
@@ -107,13 +106,12 @@ export default {
     checkLogin () {
       let that = this
       // 查询大会信息并展示在预览区，如果没有值要有初始化
-      axiosPost('/api/user/logingetState', null, (res) => {
+      axiosPost('/user/logingetState', null, (res) => {
         let data = res.data;
         // eslint-disable-next-line eqeqeq
         if (data.code == 1) {
           this.setHasLogin(true); // 设置登录状态
           this.setAccount(data.data);// 设置用户账号
-
           let oldRouter = getLocalData(['oldRouter']) // 获取跳转到登录页面前的路径
           // 如果上一个路径是登录或者没有，则默认返回首页
           if (oldRouter === '/login' || !oldRouter) {
@@ -122,10 +120,6 @@ export default {
             this.$router.push(oldRouter[0])
           }
         } else {
-          that.$message({
-            message: data.msg,
-            type: 'warning'
-          });
           this.setHasLogin(false);
           this.setOriginPage(this.from); // 先保存之前的页面链接
           this.$router.push('/login'); // 去往登录页面
@@ -139,7 +133,7 @@ export default {
     @return null
     */
     exitAccount () {
-      axiosPost('/api/user/loginout', null, (res) => {
+      axiosPost('/user/loginout', null, (res) => {
         let data = res.data;
         console.log(data, 'logindata')
         // eslint-disable-next-line eqeqeq

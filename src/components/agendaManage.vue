@@ -277,10 +277,8 @@
 <script>
 import { axiosPost } from '../assets/js/axios';
 import draggable from 'vuedraggable';
-
 import { getLocalData } from '../assets/js/base';
 import { mapMutations, mapGetters } from 'vuex';
-
 export default {
   inject: ['changeAgendaStatus'],
   name: 'agendaManage',
@@ -347,7 +345,7 @@ export default {
     ])[0]; /* 这里获取到用户点击的议程信息，利用id去抓取数据 */
     console.log(this.agendaMsg, 'agendaMsg');
     axiosPost(
-      '/api/agenda/getAgendaContent',
+      '/agenda/getAgendaContent',
       {
         a_id: this.agendaMsg.a_id
       },
@@ -368,7 +366,6 @@ export default {
             }
             this.tableContents = result;
           }
-
           that.$message({
             message: data.msg,
             type: 'success'
@@ -396,7 +393,7 @@ export default {
       this.dialogForm.timeline_start = Date.parse(this.dialogForm.timeline[0]); // 取出日期对象,转成时间戳
       this.dialogForm.timeline_end = Date.parse(this.dialogForm.timeline[1]);
       axiosPost(
-        '/api/agenda/newAgendaContent',
+        '/agenda/newAgendaContent',
         this.dialogForm,
         res => {
           //
@@ -453,7 +450,7 @@ export default {
       })
         .then(() => {
           axiosPost(
-            '/api/agenda/updateAgenda',
+            '/agenda/updateAgenda',
             this.agendaMsg,
             res => {
               //
@@ -481,7 +478,6 @@ export default {
           });
         });
     },
-
     /*
     作用：删除议程,删除后默认跳到下一个或者上一个路由
      */
@@ -497,7 +493,7 @@ export default {
           /* 在数据库中删除好后提示 */
           this.agendaMsg.status = 0;
           axiosPost(
-            '/api/agenda/updateAgenda',
+            '/agenda/updateAgenda',
             this.agendaMsg,
             res => {
               //
@@ -565,7 +561,7 @@ export default {
           // 向后台发送数据
           let that = this;
           axiosPost(
-            '/api/agenda/updateAgContByOneClick',
+            '/agenda/updateAgContByOneClick',
             { agendaContents: JSON.stringify(agendaContents) },
             res => {
               //
@@ -623,7 +619,7 @@ export default {
         .then(() => {
           this.agendaMsg.status = status;
           axiosPost(
-            '/api/agenda/updateAgenda',
+            '/agenda/updateAgenda',
             this.agendaMsg,
             res => {
               //
@@ -672,7 +668,7 @@ export default {
             row.timeline_start = Date.parse(row.timeline[0]); // 取出日期对象,转成时间戳
             row.timeline_end = Date.parse(row.timeline[1]);
             axiosPost(
-              '/api/agenda/updateAgendaContent',
+              '/agenda/updateAgendaContent',
               row,
               res => {
                 //
@@ -723,7 +719,7 @@ export default {
           .then(() => {
             row.status = 0;
             axiosPost(
-              '/api/agenda/updateAgendaContent',
+              '/agenda/updateAgendaContent',
               row,
               res => {
                 //
@@ -775,7 +771,7 @@ export default {
       });
       // 更新栏目内容排序
       axiosPost(
-        '/api/column/sortColumn',
+        '/column/sortColumn',
         {
           sortData: JSON.stringify(sortData),
           type: 5

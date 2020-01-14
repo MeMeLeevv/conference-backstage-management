@@ -10,7 +10,7 @@
       @closeDialog="needDialog = false"
       :isBatch="isBatch"
       :imgLimit="imgLimit"
-      :initTable="initTable"
+      :initTableHeader="initTableHeader"
     ></ddialoog>
 
     <el-tabs v-model="columnActiveName" type="border-card">
@@ -127,11 +127,11 @@
                 :initDialog="initDialog"
                 @addGroupContent="addGroupContent"
               ></ConfigHeader>
-              <!-- <Table class="flexTable" :initTable="initTable" :tableData="tableData"></Table> -->
+              <!-- <Table class="flexTable" :initTableHeader="initTableHeader" :tableData="tableData"></Table> -->
               <Table
                 v-if="item.tableData"
                 class="flexTable"
-                :initTable="initTable"
+                :initTableHeader="initTableHeader"
                 :tableData="item.tableData"
                 @updateColumnObj="updateColumnObj"
                 @batchHS="batchHS"
@@ -147,14 +147,14 @@
 </template>
 
 <script>
-import ConfigHeader from '../common/configHeader';
-import ddialoog from '../common/dialog';
-import Table from '../common/table';
 import { getImgMsg, getLocalData, deepCopy } from '../../assets/js/base';
-import ImageShow from '../common/imageShow';
 import { axiosGet, axiosPost } from '../../assets/js/axios';
-import UploadImage from '../common/uploadImage';
 
+const ConfigHeader = () => import('../common/configHeader')
+const ddialoog = () => import('../common/dialog')
+const Table = () => import('../common/table')
+const ImageShow = () => import('../common/imageShow')
+const UploadImage = () => import('../common/uploadImage')
 export default {
   name: 'highlight',
   data () {
@@ -174,7 +174,7 @@ export default {
       form: {}, // 信息提交区
       activeName: '0', // 栏目tab的激活name
       columnActiveName: 'column', // 栏目内容组tab的激活name
-      initTable: [ // 初始化表格样式信息
+      initTableHeader: [ // 初始化表格样式信息
         {
           label: 'index', // 表头名
           widthPercent: 0.05, // 表头占父类长度百分比
@@ -227,11 +227,10 @@ export default {
     let cData = getLocalData(['columnMsg']); // 取出点击保存在本地后的栏目信息
     this.c_id = cData[0].c_id;
     this.p_id = cData[0].p_id;
-
-    let p1 = this.$axios.get('/api/column/getColumnList', { // 查询栏目信息
+    let p1 = this.$axios.get('/column/getColumnList', { // 查询栏目信息
       params: { c_id: cData[0].c_id }
     });
-    let p2 = this.$axios.get('/api/columnObjgroup/getColumnObjGroupList', { // 查询栏目组信息
+    let p2 = this.$axios.get('/columnObjgroup/getColumnObjGroupList', { // 查询栏目组信息
       params: { c_id: cData[0].c_id }
     });
     // 同时请求栏目信息和栏目内容组信息
@@ -272,7 +271,7 @@ export default {
           this.groupDetailEmpty = false
           for (let i = 0; i < this.columnGListShow.length; i++) { // 循环请求每个组的表格信息
             axiosGet(
-              '/api/columnObj/getColumnObjList',
+              '/columnObj/getColumnObjList',
               { group_id: this.columnGListShow[i].group_id },
               res => {
                 let data = res.data;
@@ -399,7 +398,7 @@ export default {
       let that = this;
       let url, imgNum
       if (this.imgLimit > 1) { // 批量上传
-        url = '/api/columnObj/batUploadImgAndNew'
+        url = '/columnObj/batUploadImgAndNew'
         form.data.group_id = this.columnGListShow[this.activeName].group_id
         imgNum = form.imgsArr.length
         form.data = JSON.stringify(form.data)
@@ -407,11 +406,11 @@ export default {
       } else {
         if (this.addGroup) {
         // 新增栏目组数据
-          url = '/api/columnObjgroup/newColumnObjGroup';
+          url = '/columnObjgroup/newColumnObjGroup';
           form.c_id = this.c_id;
         } else if (this.addGDetail) {
         // 新增栏目detail内容信息
-          url = '/api/columnObj/newColumnObj';
+          url = '/columnObj/newColumnObj';
           form.group_id = this.columnGListShow[this.activeName].group_id;
           form.status = form.status ? 1 : 0; // status是Boolean格式，需转成number传给后台
         }
@@ -428,7 +427,7 @@ export default {
             });
             if (this.imgLimit > 1) {
               axiosGet( // 重新请求table数据
-                '/api/columnObj/getColumnObjList',
+                '/columnObj/getColumnObjList',
                 { group_id: this.columnGListShow[this.activeName].group_id },
                 res => {
                   let data = res.data;
@@ -468,7 +467,6 @@ export default {
                   this.columnGListShow[this.activeName].tableData = []
                 }
                 this.columnGListShow[this.activeName].tableData.push(data.data[0])
-
                 this.addGDetail = false
               }
             }
@@ -523,11 +521,11 @@ export default {
       let url;
       if (this.isEditColumn) {
         // 更新栏目信息
-        url = '/api/column/updateColumn';
+        url = '/column/updateColumn';
         this.form.c_id = this.c_id;
       } else {
         // 更新栏目内容组信息
-        url = '/api/columnObjgroup/updateColumnObjGroup';
+        url = '/columnObjgroup/updateColumnObjGroup';
       }
       axiosPost(
         url,
@@ -617,7 +615,7 @@ export default {
       });
       // 更新栏目内容排序
       axiosPost(
-        '/api/column/sortColumn',
+        '/column/sortColumn',
         {
           sortData: JSON.stringify(sortData),
           type: 3

@@ -120,8 +120,9 @@
 </template>
 
 <script>
-import UploadImage from './uploadImage';
 import { getImgMsg } from '../../assets/js/base';
+
+const UploadImage = () => import('./uploadImage')
 
 export default {
   // 信息如果都已经验证成功，则用formData结合上传后台，触发父元素刷新表格
@@ -152,7 +153,7 @@ export default {
         return [];
       }
     },
-    initTable: {
+    initTableHeader: {
       /* 初始化表格数据 */
       type: Array,
       default: function () {
@@ -182,14 +183,14 @@ export default {
         status: 0,
         imgsArr: [] // [imgid1,imgid2,imgid3,….] json化字符串
       },
-      batchOptions: [], // 根据传进来的initTable去key=image的字段
+      batchOptions: [], // 根据传进来的initTableHeader去key=image的字段
       switchDisabled: false // 批量上传dialog的switch是否禁用
     };
   },
   mounted () {
     this.$nextTick(function () {
-      // 根据initTable初始化批量上传时的图片选择
-      for (let value of this.initTable) { // 在每次迭代中，将不同属性的值分配给变量
+      // 根据initTableHeader初始化批量上传时的图片选择
+      for (let value of this.initTableHeader) { // 在每次迭代中，将不同属性的值分配给变量
         if (value.type === 'image') {
           this.batchOptions.push({
             img_type: value.key,
@@ -371,5 +372,4 @@ $inputHeight:100px
     line-height:20px
   .el-switch+ span
     line-height:30px
-
 </style>

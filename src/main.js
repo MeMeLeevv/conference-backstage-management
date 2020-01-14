@@ -2,7 +2,7 @@
 /* eslint-disable */
 import 'normalize.css';
 import './assets/font/iconfont.css';
-import ElementUI from 'element-ui';
+import ElementUI from './element/index'
 import 'element-ui/lib/theme-chalk/index.css';
 import Qs from 'qs';
 import Vue from 'vue';

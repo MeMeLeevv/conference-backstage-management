@@ -9,7 +9,7 @@
       @addbackStageMsg="addbackStageMsg"
       @closeDialog="needDialog = false"
       :imgLimit="imgLimit"
-      :initTable="initTable"
+      :initTableHeader="initTableHeader"
       :isBatch="isBatch"
     ></ddialoog>
 
@@ -82,11 +82,11 @@
             title="规模"
             @addGroupContent="addGroupContent"
           ></ConfigHeader>
-          <!-- <Table class="flexTable" :initTable="initTable" :tableData="tableData"></Table> -->
+          <!-- <Table class="flexTable" :initTableHeader="initTableHeader" :tableData="tableData"></Table> -->
           <Table
             v-if="tableData"
             class="flexTable"
-            :initTable="initTable"
+            :initTableHeader="initTableHeader"
             :tableData="tableData"
             @updateColumnObj="updateColumnObj"
             @batchHS="batchHS"
@@ -100,14 +100,14 @@
 </template>
 
 <script>
-import ConfigHeader from '../common/configHeader';
-import ddialoog from '../common/dialog';
-import Table from '../common/table';
 import { getImgMsg, getLocalData, deepCopy } from '../../assets/js/base';
-import ImageShow from '../common/imageShow';
 import { axiosGet, axiosPost } from '../../assets/js/axios';
-import UploadImage from '../common/uploadImage';
 
+const ConfigHeader = () => import('../common/configHeader')
+const ddialoog = () => import('../common/dialog')
+const Table = () => import('../common/table')
+const ImageShow = () => import('../common/imageShow')
+const UploadImage = () => import('../common/uploadImage')
 export default {/* 大会嘉宾只有一组内容 */
   name: 'scale',
   data () {
@@ -126,7 +126,7 @@ export default {/* 大会嘉宾只有一组内容 */
       form: {}, // 信息提交区
       activeName: '0', // 栏目tab的激活name
       columnActiveName: 'column', // 栏目内容组tab的激活name
-      initTable: [
+      initTableHeader: [
         // 初始化表格样式信息
         {
           label: 'index', // 表头名
@@ -174,10 +174,10 @@ export default {/* 大会嘉宾只有一组内容 */
     let cData = getLocalData(['columnMsg']); // 取出点击保存在本地后的栏目信息
     this.c_id = cData[0].c_id;
     this.p_id = cData[0].p_id;
-    let p1 = this.$axios.get('/api/column/getColumnList', {
+    let p1 = this.$axios.get('/column/getColumnList', {
       params: { c_id: cData[0].c_id }
     });
-    let p2 = this.$axios.get('/api/columnObjgroup/getColumnObjGroupList', {
+    let p2 = this.$axios.get('/columnObjgroup/getColumnObjGroupList', {
       params: { c_id: cData[0].c_id }
     });
       // 同时请求栏目信息和栏目内容组信息
@@ -206,13 +206,12 @@ export default {/* 大会嘉宾只有一组内容 */
           // 初始化栏目内容组数据，
           this.group_id = this.columnGListShow[0].group_id
           axiosGet(
-            '/api/columnObj/getColumnObjList',
+            '/columnObj/getColumnObjList',
             { group_id: this.group_id },
             res => {
               let data = res.data;
               if (data.code === '1') {
                 this.tableData = data.data;
-
                 for (let j = 0; j < this.tableData.length; j++
                 ) {
                   // 初始化表格信息
@@ -234,7 +233,6 @@ export default {/* 大会嘉宾只有一组内容 */
         that.$message.error(err);
       });
   },
-
   methods: {
     /*
     作用：捕捉table子组件传过来的批量上传图片事件
@@ -305,7 +303,7 @@ export default {/* 大会嘉宾只有一组内容 */
       let that = this;
       let url, imgNum
       if (this.imgLimit > 1) { // 批量上传
-        url = '/api/columnObj/batUploadImgAndNew'
+        url = '/columnObj/batUploadImgAndNew'
         form.data.group_id = this.group_id
         imgNum = form.imgsArr.length
         form.data = JSON.stringify(form.data)
@@ -313,12 +311,12 @@ export default {/* 大会嘉宾只有一组内容 */
       } else {
         if (isColumnList) {
         // 新增栏目组数据
-          url = '/api/columnObjgroup/newColumnObjGroup';
+          url = '/columnObjgroup/newColumnObjGroup';
           form.c_id = this.c_id;
           form.status = 1; // 默认展示
         } else {
         // 新增栏目detail内容信息
-          url = '/api/columnObj/newColumnObj';
+          url = '/columnObj/newColumnObj';
           form.group_id = this.group_id;
           form.status = form.status ? 1 : 0; // status是Boolean格式，需转成number传给后台
         }
@@ -332,7 +330,7 @@ export default {/* 大会嘉宾只有一组内容 */
           });
           if (this.imgLimit > 1) {
             axiosGet( // 重新请求table数据
-              '/api/columnObj/getColumnObjList',
+              '/columnObj/getColumnObjList',
               { group_id: this.group_id },
               res => {
                 let data = res.data;
@@ -409,9 +407,8 @@ export default {/* 大会嘉宾只有一组内容 */
       let that = this;
       let url;
       // 更新栏目信息
-      url = '/api/column/updateColumn';
+      url = '/column/updateColumn';
       this.form.c_id = this.c_id;
-
       axiosPost(
         url,
         this.form,
@@ -433,7 +430,6 @@ export default {/* 大会嘉宾只有一组内容 */
         }
       );
     },
-
     /*
     作用：table后台更新数据后本地更新
     @params row 修改的该行数据
@@ -458,7 +454,7 @@ export default {/* 大会嘉宾只有一组内容 */
       });
       // 更新栏目内容排序
       axiosPost(
-        '/api/column/sortColumn',
+        '/column/sortColumn',
         {
           sortData: JSON.stringify(sortData),
           type: 3

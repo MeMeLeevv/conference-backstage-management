@@ -15,11 +15,11 @@
 </template>
 
 <script>
-import ImageShow from '../common/imageShow';
-import UploadImage from '../common/uploadImage';
 import { axiosPost, axiosGet } from '../../assets/js/axios';
 import { getLocalData, deepCopy, getImgMsg } from '../../assets/js/base';
 
+const ImageShow = () => import('../common/imageShow')
+const UploadImage = () => import('../common/uploadImage')
 export default {
   name: 'headImage',
   components: {
@@ -32,7 +32,6 @@ export default {
       p_id: '',
       isEdit: false,
       display: {
-
       },
       form: {}
     }
@@ -43,7 +42,7 @@ export default {
     let cData = getLocalData(['columnMsg']); // 取出点击保存在本地后的栏目信息
     this.c_id = cData[0].c_id
     this.p_id = cData[0].p_id
-    axiosGet('/api/column/getColumnList', { c_id: this.c_id }, (res) => {
+    axiosGet('/column/getColumnList', { c_id: this.c_id }, (res) => {
       let data = res.data
       if (data.code === '1') {
         this.display = data.data[0];
@@ -72,7 +71,7 @@ export default {
     */
     submitForm (formName) {
       let that = this
-      axiosPost('/api/column/updateColumn', this.form,
+      axiosPost('/column/updateColumn', this.form,
         res => {
           let data = res.data;
           if (data.code === '1') {
@@ -107,10 +106,8 @@ $colorShow: 30px
   line-height: 40px
 .fade-enter-active, .fade-leave-active
   transition: opacity .3s
-
 .fade-enter, .fade-leave-to
   opacity: 0
-
 #headImage
   .previewArea
     #imageShow

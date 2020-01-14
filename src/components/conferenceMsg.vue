@@ -50,11 +50,11 @@
 
 <script>
 import { mapGetters, mapMutations } from 'vuex';
-import UploadImage from './common/uploadImage';
-import ImageShow from './common/imageShow';
 import { axiosGet, axiosPost } from '../assets/js/axios';
 import { deepCopy } from '../assets/js/base';
 
+const ImageShow = () => import('./common/imageShow')
+const UploadImage = () => import('./common/uploadImage')
 export default {
   name: 'conferenceMsg',
   data () {
@@ -133,7 +133,7 @@ export default {
     };
   },
   created () {
-    axiosGet('/api/project/getBaseProjectByPid', { p_id: this.$route.params.id }, (res) => { /* 查询大会信息并展示在预览区，如果没有值要有初始化 */
+    axiosGet('/project/getBaseProjectByPid', { p_id: this.$route.params.id }, (res) => { /* 查询大会信息并展示在预览区，如果没有值要有初始化 */
       let data = res.data
       if (data.code === '1') {
         this.display = data.data;
@@ -176,7 +176,7 @@ export default {
     submitForm () {
       let that = this
       // console.log(this.form, 'this.form')
-      axiosPost('/api/project/updateProject', this.form,
+      axiosPost('/project/updateProject', this.form,
         res => {
           let data = res.data;
           if (data.code === '1') {
@@ -216,10 +216,8 @@ $colorShow: 30px
   line-height: 40px
 .fade-enter-active, .fade-leave-active
   transition: opacity .3s
-
 .fade-enter, .fade-leave-to
   opacity: 0
-
 #conferenceMsg
   .area
     font-size: 22px

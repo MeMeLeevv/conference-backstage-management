@@ -68,7 +68,6 @@
 <script>
 import { mapGetters, mapMutations } from 'vuex';
 import { axiosPost } from '../assets/js/axios';
-
 export default {
   name: 'home',
   data () {
@@ -91,7 +90,7 @@ export default {
     let that = this;
     this.setBackStageTitle('');
     // 请求大会列表
-    axiosPost('/api/project/allProjectList', null,
+    axiosPost('/project/allProjectList', null,
       res => {
         // 查询大会信息并展示在预览区，如果没有值要有初始化
         let data = res.data;
@@ -179,7 +178,7 @@ export default {
         if (valid) {
           this.dialogFormVisible = false;
           this.form.status = this.form.status ? 1 : 0
-          axiosPost('/api/project/updateProject', this.form,
+          axiosPost('/project/updateProject', this.form,
             res => {
               let data = res.data;
               if (data.code === '1') {
@@ -225,7 +224,7 @@ export default {
             this.form,
             '发送新增大会请求给后台，后台返回大会信息，然后unshift进大会列表里'
           );
-          axiosPost('/api/project/newProject', {
+          axiosPost('/project/newProject', {
             name: this.form.name,
             project_type: this.form.project_type,
             status: this.form.status ? 1 : 0

@@ -1,20 +1,22 @@
 /* eslint-disable */
 import Vue from 'vue';
 import Router from 'vue-router';
-import HeadImage from './components/columnConfig/headImage';
-import Highlight from './components/columnConfig/highlight';
-import parnerOrMedia from './components/columnConfig/parnerOrMedia';
-import Guests from './components/columnConfig/guests';
-import Scale from './components/columnConfig/scale';
-import excellenceAwardOrAddress from './components/columnConfig/excellenceAwardOrAddress';
-import agendaOrContactOrRegis from './components/columnConfig/agendaOrContactOrRegis';
-import News from './components/columnConfig/news';
-import Background from './components/columnConfig/background';
-import Home from './components/home';
-import Login from './components/login';
-import BackStage from './components/backStage';
-import ConferenceMsg from './components/conferenceMsg';
-import agendaManage from './components/agendaManage';
+
+const HeadImage = () => import('./components/columnConfig/headImage')
+const Highlight = () => import('./components/columnConfig/highlight')
+const parnerOrMedia = () => import('./components/columnConfig/parnerOrMedia')
+const Guests = () => import('./components/columnConfig/guests')
+const Scale = () => import('./components/columnConfig/scale')
+const excellenceAwardOrAddress = () => import('./components/columnConfig/excellenceAwardOrAddress')
+const agendaOrContactOrRegis = () => import('./components/columnConfig/agendaOrContactOrRegis')
+const News = () => import('./components/columnConfig/news')
+const Background = () => import('./components/columnConfig/background')
+const Home = () => import('./components/home')
+const Login = () => import('./components/login')
+const BackStage = () => import('./components/backStage')
+const ConferenceMsg = () => import('./components/conferenceMsg')
+const agendaManage = () => import('./components/agendaManage')
+
 
 Vue.use(Router);
 

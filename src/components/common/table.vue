@@ -109,7 +109,7 @@
                 <el-upload
                   v-if="item.edit"
                   class="upload-demo hidden fileInput"
-                  action="/api/common/uploadImg"
+                  action="/common/uploadImg"
                   :on-success="uploadSuccess.bind(null, 'background_img')"
                 >
                   <el-button
@@ -159,7 +159,7 @@
                 <el-upload
                   v-if="item.edit"
                   class="upload-demo hidden fileInput"
-                  action="/api/common/uploadImg"
+                  action="/common/uploadImg"
                   :on-success="uploadSuccess.bind(null, 'title_img')"
                 >
                   <el-button
@@ -208,7 +208,7 @@
                 <el-upload
                   v-if="item.edit"
                   class="upload-demo hidden fileInput"
-                  action="/api/common/uploadImg"
+                  action="/common/uploadImg"
                   :on-success="uploadSuccess.bind(null, 'main_img')"
                 >
                   <el-button
@@ -348,7 +348,6 @@
 import draggable from 'vuedraggable';
 import { deepCopy, getImgMsg } from '../../assets/js/base';
 import { axiosPost } from '../../assets/js/axios';
-
 export default {
   name: 'flexTable',
   props: {
