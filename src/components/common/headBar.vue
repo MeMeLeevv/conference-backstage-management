@@ -1,9 +1,9 @@
 <template>
   <div id="headBar" class="clearify">
     <div v-if="showAvatar" class="avatar"><!-- 用户退出登录后清除相应记录 -->
-      <el-avatar :size="30" style="vertical-align:middle" src="../../assets/images/iimedia.png"
+      <el-avatar :size="30" style="vertical-align:middle" src="http://img.iimedia.cn/10001ef0ab5dd0553c0d6711fb324c6467ee996aa58eda9e3ce5a1655f15e98092874"
       @error="errorHandler">
-      <img src="../../assets/images/iimedia.png"/>
+      <img src="http://img.iimedia.cn/10001ef0ab5dd0553c0d6711fb324c6467ee996aa58eda9e3ce5a1655f15e98092874"/>
     </el-avatar>
     </div>
       <span class="title" :style="`left: ${showAvatar ? '15%' : '5%'}`">{{title}}</span><!-- 这里title需要和用户点击的大会项目有关 -->

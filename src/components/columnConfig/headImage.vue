@@ -40,6 +40,10 @@ export default {
     // 首先先初始化数据，大会头图就是栏目内容里的栏目背景图
     /// let that = this;
     let cData = getLocalData(['columnMsg']); // 取出点击保存在本地后的栏目信息
+    if (!cData[0].c_id) { // 如果没有缓存，则跳转到首页
+      this.$router.push('/')
+      return
+    }
     this.c_id = cData[0].c_id
     this.p_id = cData[0].p_id
     axiosGet(`${this.$store.state.api}/column/getColumnList`, { c_id: this.c_id }, (res) => {

@@ -20,7 +20,7 @@
           <el-avatar :size="100" :src="meeting.avatar"
             ><!-- meeting.commonImg.imgurl -->
             <img
-              src="../assets/images/errorImg.png"
+              src="http://img.iimedia.cn/000014d94ec093800b8e8d5b020d09ada58ed059dd3dd2f5a671721de4ba6be963434"
             />
           </el-avatar>
         </span>

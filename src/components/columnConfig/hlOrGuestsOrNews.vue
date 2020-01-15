@@ -1,5 +1,5 @@
 <template>
-  <div id="news">
+  <div id="hlOrGuestsOrNews">
     <!-- 大会亮点集合 -->
     <!-- 弹窗 -->
     <ddialoog
@@ -66,10 +66,9 @@
         <!-- 表格 -->
         <div style="margin-top: 20px">
           <ConfigHeader
-            title="咨讯"
+            title="内容"
             @addGroupContent="addGroupContent"
           ></ConfigHeader>
-          <!-- <Table class="flexTable" :initTableHeader="initTableHeader" :tableData="tableData"></Table> -->
           <Table
             v-if="tableData"
             class="flexTable"
@@ -96,7 +95,7 @@ const Table = () => import('../common/table')
 const ImageShow = () => import('../common/imageShow')
 const UploadImage = () => import('../common/uploadImage')
 export default {/* 大会嘉宾只有一组内容 */
-  name: 'news',
+  name: 'hlOrGuestsOrNews',
   data () {
     return {
       c_id: '',
@@ -165,8 +164,145 @@ export default {/* 大会嘉宾只有一组内容 */
     // 注意如果属性层级太深，超过两层，需要判断是否存在值（v-if），否则双向绑定不起作用！
     let that = this;
     let cData = getLocalData(['columnMsg']); // 取出点击保存在本地后的栏目信息
+    if (!cData[0].c_id) { // 如果没有缓存，则跳转到首页
+      this.$router.push('/')
+      return
+    }
     this.c_id = cData[0].c_id;
     this.p_id = cData[0].p_id;
+    this.type = cData[0].type;
+    if (this.type === 8) { // news
+      this.initTableHeader = [
+        // 初始化表格样式信息
+        {
+          label: 'index', // 表头名
+          widthPercent: 0.05, // 表头占父类长度百分比
+          type: 'text', // 表头input类型
+          key: 'text' // 他对应表格数据tableData对象里的key值
+        },
+        {
+          label: '标题',
+          widthPercent: 0.12,
+          type: 'text',
+          key: 'title'
+        },
+        {
+          label: '内容图',
+          widthPercent: 0.12,
+          type: 'image',
+          key: 'main_img'
+        },
+        {
+          label: '背景图',
+          widthPercent: 0.12,
+          type: 'image',
+          key: 'background_img'
+        },
+        {
+          label: '详述',
+          widthPercent: 0.18,
+          type: 'text',
+          key: 'content'
+        },
+        {
+          label: '显示状态',
+          widthPercent: 0.12,
+          type: 'select',
+          key: 'status'
+        },
+        {
+          label: '操作',
+          type: 'operating',
+          widthPercent: 0.1,
+          key: 'operating'
+        }
+      ]
+    } else if (this.type === 6) { // guests
+      this.initTableHeader = [
+        // 初始化表格样式信息
+        {
+          label: 'index', // 表头名
+          widthPercent: 0.05, // 表头占父类长度百分比
+          type: 'text', // 表头input类型
+          key: 'text' // 他对应表格数据tableData对象里的key值
+        },
+        {
+          label: '姓名',
+          widthPercent: 0.12,
+          type: 'text',
+          key: 'name'
+        },
+        {
+          label: '头像',
+          widthPercent: 0.12,
+          type: 'image',
+          key: 'main_img'
+        },
+        {
+          label: '职务',
+          widthPercent: 0.18,
+          type: 'text',
+          key: 'content'
+        },
+        {
+          label: '显示状态',
+          widthPercent: 0.12,
+          type: 'select',
+          key: 'status'
+        },
+        {
+          label: '操作',
+          type: 'operating',
+          widthPercent: 0.1,
+          key: 'operating'
+        }
+      ]
+    } else if (this.type === 3) { // highLight
+      this.initTableHeader = [ // 初始化表格样式信息
+        {
+          label: 'index', // 表头名
+          widthPercent: 0.05, // 表头占父类长度百分比
+          type: 'text', // 表头input类型
+          key: 'text' // 他对应表格数据tableData对象里的key值
+        },
+        {
+          label: '内容标题',
+          widthPercent: 0.18,
+          type: 'text',
+          key: 'title'
+        },
+        {
+          label: '内容标题背景图',
+          widthPercent: 0.12,
+          type: 'image',
+          key: 'title_img'
+        },
+        {
+          label: '内容背景图',
+          widthPercent: 0.12,
+          type: 'image',
+          key: 'background_img'
+        },
+        {
+          label: '描述',
+          widthPercent: 0.18,
+          type: 'text',
+          key: 'content'
+        },
+        {
+          label: '显示状态',
+          widthPercent: 0.12,
+          type: 'select',
+          key: 'status'
+        },
+        {
+          label: '操作',
+          type: 'operating',
+          widthPercent: 0.1,
+          key: 'operating'
+        }
+      ]
+    }
     let p1 = this.$axios.get(`${this.$store.state.api}/column/getColumnList`, {
       params: { c_id: cData[0].c_id }
     });
@@ -255,39 +391,82 @@ export default {/* 大会嘉宾只有一组内容 */
     */
     addGroupContent () {
       this.needDialog = true;
-      this.initDialog = [
+      if (this.type === 8) { // news
+        this.initDialog = [
         //  初始化新增栏目内容组dialog
-        {
-          label: '标题',
-          type: 'text',
-          key: 'title',
-          required: true
-        },
-        {
-          label: '内容图',
-          type: 'image',
-          key: 'main_img',
-          required: true
-        },
-        {
-          label: '详述',
-          type: 'text',
-          key: 'content',
-          required: true
-        },
-        {
-          label: '背景图',
-          type: 'image',
-          key: 'background_img',
-          required: true
-        },
-        {
-          label: '状态',
-          type: 'Switch',
-          key: 'status',
-          required: true
-        }
-      ];
+          {
+            label: '标题',
+            type: 'text',
+            key: 'title',
+            required: true
+          },
+          {
+            label: '内容图',
+            type: 'image',
+            key: 'main_img',
+            required: true
+          },
+          {
+            label: '详述',
+            type: 'text',
+            key: 'content',
+            required: true
+          },
+          {
+            label: '背景图',
+            type: 'image',
+            key: 'background_img',
+            required: true
+          },
+          {
+            label: '状态',
+            type: 'Switch',
+            key: 'status',
+            required: true
+          }
+        ];
+      } else if (this.type === 6) { // guests
+        this.initDialog = [
+        //  初始化新增栏目内容组dialog
+          {
+            label: '姓名',
+            type: 'text',
+            key: 'name',
+            required: true
+          },
+          {
+            label: '头像',
+            type: 'image',
+            key: 'main_img',
+            required: true
+          },
+          {
+            label: '职务',
+            type: 'text',
+            key: 'content',
+            required: true
+          },
+          {
+            label: '状态',
+            type: 'Switch',
+            key: 'status',
+            required: true
+          }
+        ];
+      } else if (this.type === 3) { // highLight
+        this.initDialog = [
+          {
+            label: '标题',
+            type: 'text',
+            key: 'name'
+          },
+          {
+            label: '背景图',
+            type: 'image',
+            key: 'background_img'
+          }
+        ];
+      }
       this.isBatch = false
       this.imgLimit = 1
     },
@@ -370,7 +549,7 @@ export default {/* 大会嘉宾只有一组内容 */
         }
       },
       err => {
-        this.$message.error('更新大会嘉宾失败，请重试！' + err);
+        this.$message.error('更新失败，请重试！' + err);
       }
       );
     },
@@ -497,7 +676,7 @@ $colorShow: 30px
 .titledis
   width: 80%
   line-height: 40px
-#news
+#hlOrGuestsOrNews
   .flexTable
     margin: 20px 0
   .previewArea

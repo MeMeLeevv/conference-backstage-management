@@ -17,7 +17,7 @@ export default {
   props: {
     url: {
       type: String,
-      default: '../../assets/images/errorImg.png'
+      default: 'http://img.iimedia.cn/000014d94ec093800b8e8d5b020d09ada58ed059dd3dd2f5a671721de4ba6be963434'
     },
     size: {
       type: Number,

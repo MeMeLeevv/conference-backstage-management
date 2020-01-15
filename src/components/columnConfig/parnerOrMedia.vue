@@ -207,6 +207,10 @@ export default {
     // 注意如果属性层级太深，超过两层，需要判断是否存在值（v-if），否则双向绑定不起作用！
     let that = this;
     let cData = getLocalData(['columnMsg']); // 取出点击保存在本地后的栏目信息
+    if (!cData[0].c_id) { // 如果没有缓存，则跳转到首页
+      this.$router.push('/')
+      return
+    }
     this.c_id = cData[0].c_id;
     this.p_id = cData[0].p_id;
     let p1 = this.$axios.get(`${this.$store.state.api}/column/getColumnList`, { // 查询栏目信息

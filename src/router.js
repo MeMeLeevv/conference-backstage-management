@@ -3,13 +3,11 @@ import Vue from 'vue';
 import Router from 'vue-router';
 
 const HeadImage = () => import('./components/columnConfig/headImage')
-const Highlight = () => import('./components/columnConfig/highlight')
 const parnerOrMedia = () => import('./components/columnConfig/parnerOrMedia')
-const Guests = () => import('./components/columnConfig/guests')
 const Scale = () => import('./components/columnConfig/scale')
 const excellenceAwardOrAddress = () => import('./components/columnConfig/excellenceAwardOrAddress')
 const agendaOrContactOrRegis = () => import('./components/columnConfig/agendaOrContactOrRegis')
-const News = () => import('./components/columnConfig/news')
+const HlOrGuestsOrNews = () => import('./components/columnConfig/hlOrGuestsOrNews')
 const Background = () => import('./components/columnConfig/background')
 const Home = () => import('./components/home')
 const Login = () => import('./components/login')
@@ -53,16 +51,6 @@ export default new Router({
 
         },
         {
-          path: 'columnConfig/highlight/:c_id',
-          name: 'highlight',
-          component: Highlight
-        },
-        {
-          path: 'columnConfig/guests/:c_id',
-          name: 'guests',
-          component: Guests
-        },
-        {
           path: 'columnConfig/scale/:c_id',
           name: 'scale',
           component: Scale
@@ -78,9 +66,9 @@ export default new Router({
           component: agendaOrContactOrRegis
         },
         {
-          path: 'columnConfig/news/:c_id',
-          name: 'news',
-          component: News
+          path: 'columnConfig/hlOrGuestsOrNews/:c_id',
+          name: 'hlOrGuestsOrNews',
+          component: HlOrGuestsOrNews
         },
         {
           path: 'columnConfig/parnerOrMedia/:c_id',

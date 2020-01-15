@@ -91,7 +91,7 @@
       >
         <!-- 头像 -->
         <div class="avatar">
-          <img src="../../assets/images/iimedia.png" alt="Your Avatar" />
+          <img src="http://img.iimedia.cn/10001ef0ab5dd0553c0d6711fb324c6467ee996aa58eda9e3ce5a1655f15e98092874" alt="Your Avatar" />
         </div>
         <div v-for="nav in navMsg" :key="nav.id">
           <el-menu-item
@@ -288,12 +288,12 @@ export default {
         // 栏目类型
         1: 'headImage',
         2: 'background',
-        3: 'highlight',
+        3: 'hlOrGuestsOrNews',
         4: 'scale',
         5: 'excellenceAwardOrAddress',
-        6: 'guests',
+        6: 'hlOrGuestsOrNews',
         7: 'agendaOrContactOrRegis',
-        8: 'news',
+        8: 'hlOrGuestsOrNews',
         9: 'agendaOrContactOrRegis',
         10: 'parnerOrMedia',
         11: 'parnerOrMedia',
