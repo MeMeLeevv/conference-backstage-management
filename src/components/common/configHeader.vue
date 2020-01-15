@@ -32,7 +32,6 @@ export default {/* 信息如果都已经验证成功，则用formData结合上�
   },
   data () { /* 新发现！ */
     return {
-      url: 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'
     }
   },
   methods: {

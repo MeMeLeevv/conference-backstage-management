@@ -63,14 +63,14 @@ export default {
     },
     submitForm (formName) {
       this.$refs[formName].validate((valid) => {
-        const loading = this.$loading({ // 加载效果
-          lock: true,
-          text: '登录中...',
-          spinner: 'el-icon-loading',
-          background: 'rgba(255, 255, 255, 0.7)'
-        });
         if (valid) {
-          axiosPost('/user/login', {
+          const loading = this.$loading({ // 加载效果
+            lock: true,
+            text: '登录中...',
+            spinner: 'el-icon-loading',
+            background: 'rgba(255, 255, 255, 0.7)'
+          });
+          axiosPost(`${this.$store.state.api}/user/login`, {
             user: this.form.user,
             password: this.form.password
           }, (res) => { /* 查询大会信息并展示在预览区，如果没有值要有初始化 */
@@ -105,7 +105,7 @@ export default {
             });
           });
         } else {
-          return false;
+          this.$message.error('内容不能为空！')
         }
       });
     }
@@ -117,7 +117,7 @@ export default {
   width: 100%
   height: 100vh
   position: relative
-  background: center / cover no-repeat url(http://img.iimedia.cn/100011ebc20a66df727b206de85451e3a88a02c9566992aef1d70c5a34a7816e97d75)
+  background: center / cover no-repeat url(../assets/images/loginBg.png)
   .wrapper
     width: 400px
     padding: 50px

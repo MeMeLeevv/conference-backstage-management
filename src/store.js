@@ -18,7 +18,8 @@ export default new Vuex.Store({
     account: '', // 管理者的账户信息
     columnMsg: {}, /* 保存当前被点击时候的栏目id */
     temporaryAgenda: {},/* 保存本地临时 */
-    agendaBtnDisabled: false /* 新增议程按钮的可编辑状态 */
+    agendaBtnDisabled: false, /* 新增议程按钮的可编辑状态 */
+    api: '/api' // 请求链接的跨域前缀
   },
   getters: {// 来实时监听state值的变化(最新状态)
     getDeviceWidth (state) {

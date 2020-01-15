@@ -4,6 +4,7 @@ import 'normalize.css';
 import './assets/font/iconfont.css';
 import ElementUI from './element/index'
 import 'element-ui/lib/theme-chalk/index.css';
+import './assets/css/override-element-ui.css';
 import Qs from 'qs';
 import Vue from 'vue';
 import App from './App.vue';

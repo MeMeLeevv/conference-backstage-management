@@ -49,7 +49,7 @@
           >
           <el-button
             v-if="isEditColumn"
-            type="primary"
+            type="default"
             @click="isEditColumn = false"
             >取消</el-button
           >
@@ -160,10 +160,10 @@ export default {/* 大会嘉宾只有一组内容 */
     let cData = getLocalData(['columnMsg']); // 取出点击保存在本地后的栏目信息
     this.c_id = cData[0].c_id;
     this.p_id = cData[0].p_id;
-    let p1 = this.$axios.get('/column/getColumnList', {
+    let p1 = this.$axios.get(`${this.$store.state.api}/column/getColumnList`, {
       params: { c_id: cData[0].c_id }
     });
-    let p2 = this.$axios.get('/columnObjgroup/getColumnObjGroupList', {
+    let p2 = this.$axios.get(`${this.$store.state.api}/columnObjgroup/getColumnObjGroupList`, {
       params: { c_id: cData[0].c_id }
     });
       // 同时请求栏目信息和栏目内容组信息
@@ -191,7 +191,7 @@ export default {/* 大会嘉宾只有一组内容 */
           // 初始化栏目内容组数据，
           this.group_id = this.columnGListShow[0].group_id
           axiosGet(
-            '/columnObj/getColumnObjList',
+            `${this.$store.state.api}/columnObj/getColumnObjList`,
             { group_id: this.group_id },
             res => {
               let data = res.data;
@@ -299,7 +299,7 @@ export default {/* 大会嘉宾只有一组内容 */
       let that = this;
       let url, imgNum
       if (this.imgLimit > 1) { // 批量上传
-        url = '/columnObj/batUploadImgAndNew'
+        url = `${this.$store.state.api}/columnObj/batUploadImgAndNew`
         form.data.group_id = this.group_id
         imgNum = form.imgsArr.length
         form.data = JSON.stringify(form.data)
@@ -307,12 +307,12 @@ export default {/* 大会嘉宾只有一组内容 */
       } else {
         if (isColumnList) {
         // 新增栏目组数据
-          url = '/columnObjgroup/newColumnObjGroup';
+          url = `${this.$store.state.api}/columnObjgroup/newColumnObjGroup`;
           form.c_id = this.c_id;
           form.status = 1; // 默认展示
         } else {
         // 新增栏目detail内容信息
-          url = '/columnObj/newColumnObj';
+          url = `${this.$store.state.api}/columnObj/newColumnObj`;
           form.group_id = this.group_id;
           form.status = form.status ? 1 : 0; // status是Boolean格式，需转成number传给后台
         }
@@ -326,7 +326,7 @@ export default {/* 大会嘉宾只有一组内容 */
           });
           if (this.imgLimit > 1) {
             axiosGet( // 重新请求table数据
-              '/columnObj/getColumnObjList',
+              `${this.$store.state.api}/columnObj/getColumnObjList`,
               { group_id: this.group_id },
               res => {
                 let data = res.data;
@@ -403,7 +403,7 @@ export default {/* 大会嘉宾只有一组内容 */
       let that = this;
       let url;
       // 更新栏目信息
-      url = '/column/updateColumn';
+      url = `${this.$store.state.api}/column/updateColumn`;
       this.form.c_id = this.c_id;
       axiosPost(
         url,
@@ -450,7 +450,7 @@ export default {/* 大会嘉宾只有一组内容 */
       });
       // 更新栏目内容排序
       axiosPost(
-        '/column/sortColumn',
+        `${this.$store.state.api}/column/sortColumn`,
         {
           sortData: JSON.stringify(sortData),
           type: 3

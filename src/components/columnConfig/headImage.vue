@@ -8,7 +8,7 @@
           <UploadImage v-if="isEdit" inputName="background_img" @getImgMsg="getImgMsg" addMsg="只能上传一张图片"></UploadImage>
       </div>
       <el-button type="primary" @click="isEdit? submitForm() : (isEdit = true)">{{isEdit ? '保存':'编辑'}}</el-button>
-      <el-button v-if="isEdit" type="primary" @click="isEdit = false">取消</el-button>
+      <el-button type="default" v-if="isEdit" @click="isEdit = false">取消</el-button>
       <!-- 新增logo图 -->
     </div>
   </div>
@@ -42,7 +42,7 @@ export default {
     let cData = getLocalData(['columnMsg']); // 取出点击保存在本地后的栏目信息
     this.c_id = cData[0].c_id
     this.p_id = cData[0].p_id
-    axiosGet('/column/getColumnList', { c_id: this.c_id }, (res) => {
+    axiosGet(`${this.$store.state.api}/column/getColumnList`, { c_id: this.c_id }, (res) => {
       let data = res.data
       if (data.code === '1') {
         this.display = data.data[0];
@@ -71,7 +71,7 @@ export default {
     */
     submitForm (formName) {
       let that = this
-      axiosPost('/column/updateColumn', this.form,
+      axiosPost(`${this.$store.state.api}/column/updateColumn`, this.form,
         res => {
           let data = res.data;
           if (data.code === '1') {

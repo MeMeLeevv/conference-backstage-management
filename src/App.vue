@@ -1,8 +1,8 @@
 <template>
   <div id="app">
-      <NavBar ref="navbar" v-if="(getHasLogin&&!isIndex) && !isLogin" class="navBar"></NavBar><!-- 已登录且不是首页或者不是登录页的时候显示navbar -->
-      <div class="right-side" :style="`width: ${(isIndex||!getHasLogin) || isLogin ? '100%' : '87.5%'}`"><!-- 处于首页或者登录页（getHasLogin=false）时right-sight宽度要处于全屏 -->
-        <HeadBar v-if="getHasLogin && !isLogin" :showAvatar="isIndex" @exitAccount="exitAccount"  :title="getBackStageTitle ? '管理后台 —— '+getBackStageTitle: '大会管理后台'"
+      <NavBar ref="navbar" v-if="(getHasLogin&&!isIndex) && !isLoginPage" class="navBar"></NavBar><!-- 已登录且不是首页或者不是登录页的时候显示navbar -->
+      <div class="right-side" :style="`width: ${(isIndex||!getHasLogin) || isLoginPage ? '100%' : '87.5%'}`"><!-- 处于首页或者登录页（getHasLogin=false）时right-sight宽度要处于全屏 -->
+        <HeadBar v-if="getHasLogin && !isLoginPage" :showAvatar="isIndex" @exitAccount="exitAccount"  :title="getBackStageTitle ? '管理后台 —— '+getBackStageTitle: '大会管理后台'"
         class="headBar" :manager="getAccount.username"></HeadBar><!-- 这里需要传props：title来变换大会header的值，
         取值方法是首页的组件监测到用户点击项目后触发传参给父组件，也就是调用这里的title改变 -->
         <router-view v-if="isRouterAlive" class="content" />
@@ -29,14 +29,16 @@ export default {
       isIndex: true, /* 是否是首页 */
       to: '',
       from: '',
-      isLogin: true,
+      isLoginPage: false,
       isRouterAlive: true
     };
   },
   created () { // 第一次加载或者刷新的时候判断路由
+    document.title = '大会管理后台'
+    this.$router.push('/login')
     this.checkLogin(); // 判断登录状态
-    this.isLogin = this.$route.path === '/login'; // 如果是登录页面 ，不显示navbar
-    this.isIndex = this.$route.path === '/'; // 如果是首页，则不显示navbar
+    this.isLoginPage = this.$route.path === '/login'; // 如果是登录页面 ，不显示navbar
+    this.isIndex = this.$route.path === '/'; // 如果是首页，不显示navbar
   },
   mounted () {
     let _this = this// 保存this指向，在window.onbeforeunload可以成功找到route的path
@@ -51,7 +53,7 @@ export default {
       this.from = from.path;
       this.to = to.path;
       this.isIndex = to.path === '/';
-      this.isLogin = to.path === '/login';
+      this.isLoginPage = to.path === '/login';
       if (this.isIndex) { // 如果是首页需要把大会标题初始化
         this.setBackStageTitle('');
       }
@@ -72,6 +74,13 @@ export default {
     ...mapGetters(['getOriginPage', 'getHasLogin', 'getBackStageTitle', 'getAccount', 'getColumnMsg'])
   },
   methods: {
+    ...mapMutations([
+      'setOriginPage',
+      'setHasLogin',
+      'setAccount',
+      'setBackStageTitle',
+      'setColumnMsg'
+    ]),
     /*
     作用：agenda具体页面修改name或者删除栏目的时候，navbar也要跟着改变
     @params url String 刷新后页面的路由
@@ -92,13 +101,6 @@ export default {
         this.$router.push(url)
       })
     },
-    ...mapMutations([
-      'setOriginPage',
-      'setHasLogin',
-      'setAccount',
-      'setBackStageTitle',
-      'setColumnMsg'
-    ]),
     /*
     作用：检查登录状态,并作出处理
     @return null
@@ -106,7 +108,7 @@ export default {
     checkLogin () {
       let that = this
       // 查询大会信息并展示在预览区，如果没有值要有初始化
-      axiosPost('/user/logingetState', null, (res) => {
+      axiosPost(`${this.$store.state.api}/user/logingetState`, null, (res) => {
         let data = res.data;
         // eslint-disable-next-line eqeqeq
         if (data.code == 1) {
@@ -122,7 +124,7 @@ export default {
         } else {
           this.setHasLogin(false);
           this.setOriginPage(this.from); // 先保存之前的页面链接
-          this.$router.push('/login'); // 去往登录页面
+          // this.$router.push('/login'); // 去往登录页面
         }
       }, (err) => {
         that.$message.error('加载大会列表失败！建议重新加载页面！' + err);
@@ -133,7 +135,7 @@ export default {
     @return null
     */
     exitAccount () {
-      axiosPost('/user/loginout', null, (res) => {
+      axiosPost(`${this.$store.state.api}/user/loginout`, null, (res) => {
         let data = res.data;
         console.log(data, 'logindata')
         // eslint-disable-next-line eqeqeq
@@ -207,4 +209,5 @@ span
     z-index: 0
   .content
     padding: 50px
+
 </style>

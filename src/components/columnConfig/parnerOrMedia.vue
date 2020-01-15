@@ -49,7 +49,7 @@
           >
           <el-button
             v-if="isEditColumn"
-            type="primary"
+            type="default"
             @click="isEditColumn = false"
             >取消</el-button
           >
@@ -64,7 +64,7 @@
         :closable="false"
       >
         <div style="margin-bottom: 20px;">
-          <el-button size="small" @click="addGroupMsg()">
+          <el-button size="small" @click="addGroupMsg()" type="primary">
             新增栏目内容
           </el-button>
         </div>
@@ -115,7 +115,7 @@
               >
               <el-button
                 v-if="isEditGroup"
-                type="primary"
+                type="default"
                 @click="isEditGroup = false"
                 >取消</el-button
               >
@@ -209,10 +209,10 @@ export default {
     let cData = getLocalData(['columnMsg']); // 取出点击保存在本地后的栏目信息
     this.c_id = cData[0].c_id;
     this.p_id = cData[0].p_id;
-    let p1 = this.$axios.get('/column/getColumnList', { // 查询栏目信息
+    let p1 = this.$axios.get(`${this.$store.state.api}/column/getColumnList`, { // 查询栏目信息
       params: { c_id: cData[0].c_id }
     });
-    let p2 = this.$axios.get('/columnObjgroup/getColumnObjGroupList', { // 查询栏目组信息
+    let p2 = this.$axios.get(`${this.$store.state.api}/columnObjgroup/getColumnObjGroupList`, { // 查询栏目组信息
       params: { c_id: cData[0].c_id }
     });
     // 同时请求栏目信息和栏目内容组信息
@@ -251,7 +251,7 @@ export default {
           this.groupDetailEmpty = false
           for (let i = 0; i < this.columnGListShow.length; i++) { // 循环请求每个组的表格信息
             axiosGet(
-              '/columnObj/getColumnObjList',
+              `${this.$store.state.api}/columnObj/getColumnObjList`,
               { group_id: this.columnGListShow[i].group_id },
               res => {
                 let data = res.data;
@@ -359,7 +359,7 @@ export default {
       let that = this;
       let url, imgNum
       if (this.imgLimit > 1) { // 批量上传
-        url = '/columnObj/batUploadImgAndNew'
+        url = `${this.$store.state.api}/columnObj/batUploadImgAndNew`
         form.data.group_id = this.columnGListShow[this.activeName].group_id
         imgNum = form.imgsArr.length
         form.data = JSON.stringify(form.data)
@@ -367,11 +367,11 @@ export default {
       } else {
         if (this.addGroup) {
         // 新增栏目组数据
-          url = '/columnObjgroup/newColumnObjGroup';
+          url = `${this.$store.state.api}/columnObjgroup/newColumnObjGroup`;
           form.c_id = this.c_id;
         } else if (this.addGDetail) {
         // 新增栏目detail内容信息
-          url = '/columnObj/newColumnObj';
+          url = `${this.$store.state.api}/columnObj/newColumnObj`;
           form.group_id = this.columnGListShow[this.activeName].group_id;
           form.status = form.status ? 1 : 0; // status是Boolean格式，需转成number传给后台
         }
@@ -389,7 +389,7 @@ export default {
             });
             if (this.imgLimit > 1) {
               axiosGet( // 重新请求table数据
-                '/columnObj/getColumnObjList',
+                `${this.$store.state.api}/columnObj/getColumnObjList`,
                 { group_id: this.columnGListShow[this.activeName].group_id },
                 res => {
                   let data = res.data;
@@ -484,11 +484,11 @@ export default {
       let url;
       if (this.isEditColumn) {
         // 更新栏目信息
-        url = '/column/updateColumn';
+        url = `${this.$store.state.api}/column/updateColumn`;
         this.form.c_id = this.c_id;
       } else {
         // 更新栏目内容组信息
-        url = '/columnObjgroup/updateColumnObjGroup';
+        url = `${this.$store.state.api}/columnObjgroup/updateColumnObjGroup`;
       }
       axiosPost(
         url,
@@ -535,7 +535,7 @@ export default {
       }
       this.columnGListShow[index].status = 0
       axiosPost(
-        'api/columnObjgroup/updateColumnObjGroup',
+        `${this.$store.state.api}/columnObjgroup/updateColumnObjGroup`,
         this.columnGListShow[index],
         res => {
           let data = res.data;
@@ -578,7 +578,7 @@ export default {
       });
       // 更新栏目内容排序
       axiosPost(
-        '/column/sortColumn',
+        `${this.$store.state.api}/column/sortColumn`,
         {
           sortData: JSON.stringify(sortData),
           type: 3

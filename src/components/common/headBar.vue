@@ -1,9 +1,9 @@
 <template>
   <div id="headBar" class="clearify">
     <div v-if="showAvatar" class="avatar"><!-- 用户退出登录后清除相应记录 -->
-      <el-avatar :size="30" style="vertical-align:middle" src="https://mir-s3-cdn-cf.behance.net/project_modules/max_1200/da132c85978729.5d8bbe537d947.gif"
+      <el-avatar :size="30" style="vertical-align:middle" src="../../assets/images/iimedia.png"
       @error="errorHandler">
-      <img src="https://cube.elemecdn.com/e/fd/0fc7d20532fdaf769a25683617711png.png"/>
+      <img src="../../assets/images/iimedia.png"/>
     </el-avatar>
     </div>
       <span class="title" :style="`left: ${showAvatar ? '15%' : '5%'}`">{{title}}</span><!-- 这里title需要和用户点击的大会项目有关 -->
@@ -71,6 +71,8 @@ export default {
     right: 13%
     top: 0
     cursor: pointer
+    .manager
+      color: rgba(170, 71, 108, 1)
     .manager,.exit
       margin: 0 10px 0 0
       line-height: 60px

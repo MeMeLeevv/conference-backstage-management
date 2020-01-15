@@ -41,8 +41,8 @@
             <el-option label="奖项" :value="2"></el-option>
           </el-select>
       </div>
-      <el-button type="primary" @click="isEdit? submitForm('ruleForm') : isEdit = true">{{isEdit ? '保存':'编辑'}}</el-button>
-      <el-button v-if="isEdit" type="primary" @click="isEdit = false">取消</el-button>
+      <el-button class="saveBtn"  @click="isEdit? submitForm('ruleForm') : isEdit = true">{{isEdit ? '保存':'编辑'}}</el-button>
+      <el-button class="cancelBtn" v-if="isEdit" @click="isEdit = false">取消</el-button>
       <!-- 新增logo图 -->
     </div>
   </div>
@@ -60,7 +60,6 @@ export default {
   data () {
     return {
       isEdit: false,
-      errorImg: 'https://cube.elemecdn.com/e/fd/0fc7d20532fdaf769a25683617711png.png',
       showColor: false,
       predefineColors: [
         '#ff4500',
@@ -133,7 +132,7 @@ export default {
     };
   },
   created () {
-    axiosGet('/project/getBaseProjectByPid', { p_id: this.$route.params.id }, (res) => { /* 查询大会信息并展示在预览区，如果没有值要有初始化 */
+    axiosGet(`${this.$store.state.api}/project/getBaseProjectByPid`, { p_id: this.$route.params.id }, (res) => { /* 查询大会信息并展示在预览区，如果没有值要有初始化 */
       let data = res.data
       if (data.code === '1') {
         this.display = data.data;
@@ -176,7 +175,7 @@ export default {
     submitForm () {
       let that = this
       // console.log(this.form, 'this.form')
-      axiosPost('/project/updateProject', this.form,
+      axiosPost(`${this.$store.state.api}/project/updateProject`, this.form,
         res => {
           let data = res.data;
           if (data.code === '1') {

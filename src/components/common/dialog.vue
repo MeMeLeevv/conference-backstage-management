@@ -110,7 +110,7 @@
       </div>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="cancel">取 消</el-button>
+        <el-button @click="cancel" type="default">取 消</el-button>
         <el-button type="primary" @click="submitForm('ruleForm')"
           >确 定</el-button
         >
@@ -126,7 +126,7 @@ const UploadImage = () => import('./uploadImage')
 
 export default {
   // 信息如果都已经验证成功，则用formData结合上传后台，触发父元素刷新表格
-  name: 'dialog',
+  name: 'dislog',
   props: {
     isBatch: { // 是否是多选
       type: Boolean,

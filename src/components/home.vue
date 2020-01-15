@@ -20,7 +20,7 @@
           <el-avatar :size="100" :src="meeting.avatar"
             ><!-- meeting.commonImg.imgurl -->
             <img
-              src="https://cube.elemecdn.com/e/fd/0fc7d20532fdaf769a25683617711png.png"
+              src="../assets/images/errorImg.png"
             />
           </el-avatar>
         </span>
@@ -90,7 +90,7 @@ export default {
     let that = this;
     this.setBackStageTitle('');
     // 请求大会列表
-    axiosPost('/project/allProjectList', null,
+    axiosPost(`${this.$store.state.api}/project/allProjectList`, null,
       res => {
         // 查询大会信息并展示在预览区，如果没有值要有初始化
         let data = res.data;
@@ -178,7 +178,7 @@ export default {
         if (valid) {
           this.dialogFormVisible = false;
           this.form.status = this.form.status ? 1 : 0
-          axiosPost('/project/updateProject', this.form,
+          axiosPost(`${this.$store.state.api}/project/updateProject`, this.form,
             res => {
               let data = res.data;
               if (data.code === '1') {
@@ -224,7 +224,7 @@ export default {
             this.form,
             '发送新增大会请求给后台，后台返回大会信息，然后unshift进大会列表里'
           );
-          axiosPost('/project/newProject', {
+          axiosPost(`${this.$store.state.api}/project/newProject`, {
             name: this.form.name,
             project_type: this.form.project_type,
             status: this.form.status ? 1 : 0
@@ -276,13 +276,14 @@ export default {
   .block:hover
     cursor: pointer
   .conList
+    width: 70%
     position: absolute
-    left: 50%
+    left: 53%
     transform: translateX(-50%)
     .block
       display: inline-block
       text-align: center
-      width: 29%
+      width: 20%
       margin: 2.1%
       padding: 20px
       .title

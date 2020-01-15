@@ -287,25 +287,22 @@
             <td>
               <div v-if="item.edit">
                 <el-button
-                  class="greenColor"
                   @click.stop="setNewValue(item, index)"
-                  type="text"
+                  type="primary"
                   size="medium "
                   >确定</el-button
                 >
                 <el-button
-                  class="redColor"
                   @click.stop="keepOldValue(item)"
-                  type="text"
+                  type="default"
                   size="medium "
                   >取消</el-button
                 >
               </div>
               <div v-else>
                 <el-button
-                  class="greenColor"
                   @click.stop="editClick(item)"
-                  type="text"
+                  type="primary"
                   size="medium "
                   >编辑</el-button
                 >
@@ -543,7 +540,7 @@ export default {
         .then(() => {
           // 请求后台更新栏目内容
           axiosPost(
-            'api/columnObj/updateColumnObj',
+            `${this.$store.state.api}/columnObj/updateColumnObj`,
             this.form,
             res => {
               let data = res.data;
@@ -710,7 +707,7 @@ export default {
         status = 1;
       }
       axiosPost(
-        'api/columnObj/batUpdateStatus',
+        `${this.$store.state.api}/columnObj/batUpdateStatus`,
         {
           updateData: JSON.stringify(multipleSelection), // 数组传入后台都要字符串化
           status

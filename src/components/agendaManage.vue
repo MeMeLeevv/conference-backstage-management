@@ -49,13 +49,13 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click.stop="dialogFormVisible = false">取 消</el-button>
+        <el-button type="default" @click.stop="dialogFormVisible = false">取 消</el-button>
         <el-button type="primary" @click.stop="addNewAgenda('ruleForm')"
           >确 定</el-button
         >
       </div>
     </el-dialog>
-    <el-button @click="deleteAgenda">删除议程</el-button>
+    <el-button type="default" @click="deleteAgenda">删除议程</el-button>
     <div class="baseMsg">
       <div class="header">议程基本信息</div>
       <el-form
@@ -94,13 +94,13 @@
           ></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" class="save" @click="editOrSaveAgenda">{{
+          <el-button type="primary" @click="editOrSaveAgenda">{{
             baseMsgDisabled ? "编辑" : "保存"
           }}</el-button>
           <el-button
             v-if="!baseMsgDisabled"
             @click="cancelAgenda('agendaMsg')"
-            class="cancel"
+            type="default"
             >取消</el-button
           >
         </el-form-item>
@@ -109,8 +109,8 @@
     <div class="contentMsg">
       <div class="header">
         议程内容编辑
-        <el-button @click="editAllContents">一键编辑</el-button>
-        <el-button @click="saveAllContents">一键保存</el-button>
+        <el-button type="primary" @click="editAllContents">一键编辑</el-button>
+        <el-button type="default" @click="saveAllContents">一键保存</el-button>
       </div>
 
       <table class="table" cellspacing="0" cellpadding="0">
@@ -244,12 +244,13 @@
             <td>
               <el-button
                 size="mini"
+                type="primary"
                 @click="editAgendaCon(index, item)"
                 >{{ item.editable ? "保存" : "编辑" }}</el-button
               >
               <el-button
                 size="mini"
-                type="danger"
+                type="default"
                 @click="deleteAgendaCon(index, item)"
                 >{{ item.editable ? "取消" : "删除" }}</el-button
               >
@@ -258,11 +259,11 @@
         </draggable>
       </table>
 
-      <el-button @click="dialogFormVisible = true" class="add"
+      <el-button @click="dialogFormVisible = true" type="primary" class="add"
         >新增议程内容</el-button
       >
       <div class="center">
-        <el-button class="add" @click="publicAgenda(agendaMsg.status)">
+        <el-button type="primary" class="add" @click="publicAgenda(agendaMsg.status)">
           <i
             class="iconfont"
             :class="agendaMsg.status === 2 ? 'iconlinshi' : 'iconyifabu'"
@@ -345,7 +346,7 @@ export default {
     ])[0]; /* 这里获取到用户点击的议程信息，利用id去抓取数据 */
     console.log(this.agendaMsg, 'agendaMsg');
     axiosPost(
-      '/agenda/getAgendaContent',
+      `${this.$store.state.api}/agenda/getAgendaContent`,
       {
         a_id: this.agendaMsg.a_id
       },
@@ -393,7 +394,7 @@ export default {
       this.dialogForm.timeline_start = Date.parse(this.dialogForm.timeline[0]); // 取出日期对象,转成时间戳
       this.dialogForm.timeline_end = Date.parse(this.dialogForm.timeline[1]);
       axiosPost(
-        '/agenda/newAgendaContent',
+        `${this.$store.state.api}/agenda/newAgendaContent`,
         this.dialogForm,
         res => {
           //
@@ -450,7 +451,7 @@ export default {
       })
         .then(() => {
           axiosPost(
-            '/agenda/updateAgenda',
+            `${this.$store.state.api}/agenda/updateAgenda`,
             this.agendaMsg,
             res => {
               //
@@ -493,7 +494,7 @@ export default {
           /* 在数据库中删除好后提示 */
           this.agendaMsg.status = 0;
           axiosPost(
-            '/agenda/updateAgenda',
+            `${this.$store.state.api}/agenda/updateAgenda`,
             this.agendaMsg,
             res => {
               //
@@ -561,7 +562,7 @@ export default {
           // 向后台发送数据
           let that = this;
           axiosPost(
-            '/agenda/updateAgContByOneClick',
+            `${this.$store.state.api}/agenda/updateAgContByOneClick`,
             { agendaContents: JSON.stringify(agendaContents) },
             res => {
               //
@@ -619,7 +620,7 @@ export default {
         .then(() => {
           this.agendaMsg.status = status;
           axiosPost(
-            '/agenda/updateAgenda',
+            `${this.$store.state.api}/agenda/updateAgenda`,
             this.agendaMsg,
             res => {
               //
@@ -668,7 +669,7 @@ export default {
             row.timeline_start = Date.parse(row.timeline[0]); // 取出日期对象,转成时间戳
             row.timeline_end = Date.parse(row.timeline[1]);
             axiosPost(
-              '/agenda/updateAgendaContent',
+              `${this.$store.state.api}/agenda/updateAgendaContent`,
               row,
               res => {
                 //
@@ -719,7 +720,7 @@ export default {
           .then(() => {
             row.status = 0;
             axiosPost(
-              '/agenda/updateAgendaContent',
+              `${this.$store.state.api}/agenda/updateAgendaContent`,
               row,
               res => {
                 //
@@ -771,7 +772,7 @@ export default {
       });
       // 更新栏目内容排序
       axiosPost(
-        '/column/sortColumn',
+        `${this.$store.state.api}/column/sortColumn`,
         {
           sortData: JSON.stringify(sortData),
           type: 5
@@ -833,14 +834,6 @@ export default {
     .el-form
       background: white
       padding: 40px
-      .save
-        background: #AA476C 100%
-        border: #AA476C
-      .cancel
-        color: #AA476C
-        border: 1px solid #AA476C
-      .cancel:hover
-        background: #f2f2f2
   .contentMsg
     background: white
     .el-table

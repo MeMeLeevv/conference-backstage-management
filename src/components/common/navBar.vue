@@ -91,7 +91,7 @@
       >
         <!-- 头像 -->
         <div class="avatar">
-          <img src="http://img.iimedia.cn/0000117b83e66a86ad4b1d2c9d2984319f463b5f5d2e28075324f8aba0388fc65c95f" alt="Your Avatar" />
+          <img src="../../assets/images/iimedia.png" alt="Your Avatar" />
         </div>
         <div v-for="nav in navMsg" :key="nav.id">
           <el-menu-item
@@ -100,7 +100,7 @@
             @click="$router.push(nav.jump_url)"
           >
             <i :class="nav.icon + ' iconfont'"></i>
-            <span>{{ nav.name }}</span>
+            <span :class="$route.path === nav.jump_url ? 'activeColor' : ''">{{ nav.name }}</span>
           </el-menu-item>
           <!-- 栏目配置 -->
           <el-submenu
@@ -153,7 +153,7 @@
                         <div style="text-align: right; margin: 0">
                           <el-button
                             size="mini"
-                            type="text"
+                            type="default"
                             @click="item.visible = false"
                             >取消</el-button
                           >
@@ -177,7 +177,7 @@
                 </div>
               </draggable>
 
-              <el-button class="addBtn" @click.stop="clickAddC"
+              <el-button type="primary" class="addBtn" @click.stop="clickAddC"
                 >新增栏目</el-button
               >
             </el-menu-item-group>
@@ -231,6 +231,7 @@
               </draggable>
               <el-button
                 class="addBtn"
+                type="primary"
                 @click.stop="clickAddA"
                 :disabled="getAgendaBtnDisabled"
                 >新增议程</el-button
@@ -305,14 +306,16 @@ export default {
           jump_url: '/',
           needAddBtn: false,
           icon: 'icon-index',
-          subTitle: []
+          subTitle: [],
+          active: false
         },
         {
           name: '大会信息',
           jump_url: `/${id}/conferenceMsg`,
           needAddBtn: false,
           icon: 'iconwodedahuiyuan',
-          subTitle: []
+          subTitle: [],
+          active: false
         },
         {
           name: '栏目配置',
@@ -327,68 +330,6 @@ export default {
           icon: 'icon-meeting',
           needAddBtn: true,
           subTitle: []
-        },
-        {
-          name: '订单管理',
-          jump_url: '/orderManage',
-          icon: 'icon-order',
-          subTitle: [
-            {
-              name: '大会头图',
-              jump_url: '/orderManage/headImage'
-            },
-            {
-              name: '大会亮点',
-              jump_url: '/orderManage/highlight'
-            },
-            {
-              name: '大会嘉宾',
-              jump_url: '/orderManage/guests'
-            },
-            {
-              name: '合作伙伴',
-              jump_url: '/orderManage/partners'
-            },
-            {
-              name: '合作媒体',
-              jump_url: '/orderManage/cooperativeMedia'
-            },
-            {
-              name: '大会地址',
-              jump_url: '/orderManage/address'
-            }
-          ]
-        },
-        {
-          name: '客户反馈',
-          jump_url: '/clientFeedback',
-          icon: 'icon-feedback',
-          subTitle: [
-            {
-              name: '大会头图',
-              jump_url: '/clientFeedback/headImage'
-            },
-            {
-              name: '大会亮点',
-              jump_url: '/clientFeedback/highlight'
-            },
-            {
-              name: '大会嘉宾',
-              jump_url: '/clientFeedback/guests'
-            },
-            {
-              name: '合作伙伴',
-              jump_url: '/clientFeedback/partners'
-            },
-            {
-              name: '合作媒体',
-              jump_url: '/clientFeedback/cooperativeMedia'
-            },
-            {
-              name: '大会地址',
-              jump_url: '/clientFeedback/address'
-            }
-          ]
         }
       ],
       openColumn: [openColumn]
@@ -399,7 +340,7 @@ export default {
       // 记录路由的来源和去路
       this.from = from.path;
       this.to = to.path;
-      // 在修改栏目信息之后，再次点击无法高亮！，但是页面有正确跳转，所以这里手动赋予color，并更改栏目配置的路由使其高亮
+      // 在修改栏目信息之后，再次点击无法高亮！，但是页面有正确跳转，所以这里取消elementui的激活样式，手动赋予color，并更改栏目配置的路由使其高亮
       if (to.path.indexOf('columnConfig') === -1) {
         this.columnTitleActive = false;
       } else {
@@ -411,12 +352,10 @@ export default {
         this.agendaTitleActive = true;
       }
       for (let i = 0; i < this.navMsg[2].subTitle.length; i++) {
-        this.navMsg[2].subTitle[i].active =
-          this.navMsg[2].subTitle[i].jump_url === to.path;
+        this.navMsg[2].subTitle[i].active = this.navMsg[2].subTitle[i].jump_url === to.path;
       }
       for (let i = 0; i < this.navMsg[3].subTitle.length; i++) {
-        this.navMsg[3].subTitle[i].active =
-          this.navMsg[3].subTitle[i].jump_url === to.path;
+        this.navMsg[3].subTitle[i].active = this.navMsg[3].subTitle[i].jump_url === to.path;
       }
     }
   },
@@ -428,10 +367,10 @@ export default {
     this.columnTitleActive = this.$route.path.indexOf('/columnConfig') !== -1; // 刷新网页监测路由以是否高亮栏目配置
     this.agendaTitleActive = this.$route.path.indexOf('/agendaManage') !== -1; // 刷新网页监测路由以是否高亮议程配置
     this.p_id = Number(this.$route.params.id)
-    let p1 = this.$axios.get('/column/getColumnList', {
+    let p1 = this.$axios.get(`${this.$store.state.api}/column/getColumnList`, {
       params: { p_id: this.$route.params.id }
     });
-    let p2 = this.$axios.get('/agenda/getAgenda', {
+    let p2 = this.$axios.get(`${this.$store.state.api}/agenda/getAgenda`, {
       params: { p_id: this.$route.params.id }
     });
       // 同时请求栏目列表和议程列表
@@ -490,7 +429,7 @@ export default {
     */
     requestAgenda (deleteAid) {
       let subTitle = deepCopy(this.navMsg[3].subTitle) // 提前储存议程列表
-      axiosGet('/agenda/getAgenda', { p_id: this.$route.params.id }, (res) => { /* 查询大会信息并展示在预览区，如果没有值要有初始化 */
+      axiosGet(`${this.$store.state.api}/agenda/getAgenda`, { p_id: this.$route.params.id }, (res) => { /* 查询大会信息并展示在预览区，如果没有值要有初始化 */
         let data = res.data
         if (data.code === '1') {
           data.data.map(item => {
@@ -565,7 +504,7 @@ export default {
       console.log(item, 'deleteItem');
       let that = this;
       axiosPost(
-        '/column/updateColumn',
+        `${this.$store.state.api}/column/updateColumn`,
         {
           status: 0,
           c_id: item.c_id
@@ -620,7 +559,7 @@ export default {
       );
       // 更新栏目排序
       axiosPost(
-        '/agenda/newAgenda',
+        `${this.$store.state.api}/agenda/newAgenda`,
         this.form,
         res => {
           //
@@ -658,7 +597,7 @@ export default {
             '发送新增栏目请求给后台，后台返回栏目id，然后push进栏目的subTitle中'
           );
           axiosPost(
-            '/column/newColumn',
+            `${this.$store.state.api}/column/newColumn`,
             this.form,
             res => {
               let data = res.data;
@@ -705,7 +644,7 @@ export default {
             '发送新增栏目请求给后台，后台返回栏目id，然后push进栏目的subTitle中'
           );
           axiosPost(
-            '/column/updateColumn',
+            `${this.$store.state.api}/column/updateColumn`,
             this.form,
             res => {
               let data = res.data;
@@ -765,7 +704,7 @@ export default {
       }
       // 更新栏目排序
       axiosPost(
-        '/column/sortColumn',
+        `${this.$store.state.api}/column/sortColumn`,
         {
           sortData: JSON.stringify(sortData),
           type
@@ -814,16 +753,11 @@ export default {
 *
   box-sizing: border-box
 .activeColor
-  color: #ffd04b !important
+  color: #C45E83 !important
 .center
   text-align: center
 .addBtn /* 新增议程按钮 */
   margin-left: 55px
-  background: transparent
-  color: white
-.addBtn:hover
-  color: black
-  background: #f2f2f2
 #navBar
   .el-col-3
     width: 100%
