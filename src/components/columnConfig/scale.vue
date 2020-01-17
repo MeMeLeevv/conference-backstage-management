@@ -21,7 +21,7 @@
         :closable="false"
       >
         <div class="previewArea">
-          <div class="swatch">
+          <div class="swatch" title="如果同时提供标题文字和标题图片，会优先展示标题文字">
             <span class="title">标题： </span>
             <span v-if="!isEditColumn" class="titledis">{{
               columnListShow.title
@@ -38,6 +38,7 @@
             ></ImageShow>
             <UploadImage
               v-if="isEditColumn"
+              :action="`${$store.state.api}/common/uploadImg`"
               inputName="title_img"
               @getImgMsg="getImgMsg"
             ></UploadImage>
@@ -51,6 +52,7 @@
             ></ImageShow>
             <UploadImage
               v-if="isEditColumn"
+              :action="`${$store.state.api}/common/uploadImg`"
               inputName="background_img"
               @getImgMsg="getImgMsg"
             ></UploadImage>
@@ -149,7 +151,7 @@ export default {/* 大会嘉宾只有一组内容 */
         {
           label: '占比(%)',
           widthPercent: 0.12,
-          type: 'text',
+          type: 'number',
           key: 'content'
         },
         {
@@ -223,6 +225,7 @@ export default {/* 大会嘉宾只有一组内容 */
                   this.tableData[j].edit = false; // 是否是编辑状态
                   this.tableData[j].hasChecked = false; // checkbox状态是否勾选
                 }
+                this.columnGListShow[0].tableData = deepCopy(this.tableData)
               } else {
                 this.$message.error(data.msg);
               }
@@ -277,7 +280,7 @@ export default {/* 大会嘉宾只有一组内容 */
         },
         {
           label: '占比(%)',
-          type: 'text',
+          type: 'number',
           key: 'content',
           required: true
         },
@@ -348,6 +351,7 @@ export default {/* 大会嘉宾只有一组内容 */
                     tableData[j].hasChecked = false; // checkbox状态是否勾选
                     this.tableData.push(tableData[j])
                   }
+                  this.columnGListShow[0].tableData = deepCopy(this.tableData)
                 } else {
                   this.$message.error(data.msg);
                 }
@@ -441,7 +445,8 @@ export default {/* 大会嘉宾只有一组内容 */
     @return void
     */
     updateColumnObj (item, index) {
-      this.columnGListShow[0].tableData[index] = item;
+      this.columnGListShow[0].tableData[index] = item
+      this.tableData[index] = item
     },
     /*
     作用：发送更新栏目内容顺序sort请求给后台

@@ -31,6 +31,7 @@
             ></ImageShow>
             <UploadImage
               v-if="isEditColumn"
+              :action="`${$store.state.api}/common/uploadImg`"
               inputName="title_img"
               @getImgMsg="getImgMsg"
             ></UploadImage>
@@ -73,6 +74,7 @@
           type="card"
           closable
           @tab-remove="removeTab"
+          title="请尽量避免相同tab标题出现"
         >
         <!-- 表格 -->
           <el-tab-pane
@@ -93,11 +95,12 @@
                 ></ImageShow>
                 <UploadImage
                   v-if="isEditGroup"
+                  :action="`${$store.state.api}/common/uploadImg`"
                   inputName="title_img"
                   @getImgMsg="getImgMsg"
                 ></UploadImage>
               </div>
-              <div class="swatch">
+              <div class="swatch" title="如果同时提供标题文字和标题图片，会优先展示标题文字">
                 <span class="title">标题： </span>
                 <span v-if="!isEditGroup" class="titledis">{{
                   item.name
@@ -300,6 +303,7 @@ export default {
     getImgMsg (name, imgMsgArr) {
       if (imgMsgArr.length === 1) {
         Object.assign(this.form, getImgMsg(name, imgMsgArr)); // Object.assign(target, ...sources)合并图片对象
+        console.log(this.form, 'getImgMsg-this.form')
       } else { // 多图上传
         this.form.files = getImgMsg(name, imgMsgArr)
       }
@@ -360,6 +364,7 @@ export default {
     @return void
     */
     addbackStageMsg (form, isColumnList) {
+      console.log(form, 'form')
       let that = this;
       let url, imgNum
       if (this.imgLimit > 1) { // 批量上传
@@ -472,11 +477,12 @@ export default {
     batchHS (ids, status) {
       console.log(ids, status, 'batchHS')
       for (let i = 0; i < ids.length; i++) {
-        this.columnGListShow[this.activeName].tableData.forEach(item => {
-          if (item.obj_id === ids[i]) {
-            item.status = status
+        for (let j = 0; j < this.columnGListShow[this.activeName].tableData.length; j++) {
+          if (this.columnGListShow[this.activeName].tableData[j].obj_id === ids[i]) {
+            this.columnGListShow[this.activeName].tableData[j].status = status - 0
+            this.tableData[j].status = status - 0
           }
-        })
+        }
       }
     },
     /*
@@ -493,6 +499,7 @@ export default {
       } else {
         // 更新栏目内容组信息
         url = `${this.$store.state.api}/columnObjgroup/updateColumnObjGroup`;
+        console.log(this.form, 'submitForm- this.form')
       }
       axiosPost(
         url,
@@ -565,6 +572,7 @@ export default {
     @return void
     */
     updateColumnObj (item, index) {
+      this.columnGListShow[this.activeName].tableData = this.columnGListShow[this.activeName].tableData || this.tableData
       this.columnGListShow[this.activeName].tableData[index] = item
     },
     /*

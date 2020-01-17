@@ -31,16 +31,17 @@
             ></ImageShow>
             <UploadImage
               v-if="isEditColumn"
+              :action="`${$store.state.api}/common/uploadImg`"
               inputName="title_img"
               @getImgMsg="getImgMsg"
             ></UploadImage>
           </div>
-          <div class="swatch">
+          <div class="swatch" title="如果同时提供标题文字和标题图片，会优先展示标题文字">
             <span class="title">标题： </span>
             <span v-if="!isEditColumn" class="titledis">{{
               columnListShow.title
             }}</span>
-            <el-input style="width: 60%" v-else v-model="form.title"></el-input>
+            <el-input clearable style="width: 60%" v-else v-model="form.title" ></el-input>
           </div>
           <el-button
             type="primary"
@@ -200,9 +201,15 @@ export default {/* 大会嘉宾只有一组内容 */
         },
         {
           label: '详述',
-          widthPercent: 0.18,
+          widthPercent: 0.10,
           type: 'text',
           key: 'content'
+        },
+        {
+          label: '跳转链接',
+          widthPercent: 0.12,
+          type: 'text',
+          key: 'url'
         },
         {
           label: '显示状态',
@@ -347,8 +354,9 @@ export default {/* 大会嘉宾只有一组内容 */
                   this.tableData[j].edit = false; // 是否是编辑状态
                   this.tableData[j].hasChecked = false; // checkbox状态是否勾选
                 }
+                this.columnGListShow[0].tableData = deepCopy(this.tableData)
               } else {
-                this.$message.error(data.msg);
+                this.$message.error(data.msg)
               }
             },
             err => {
@@ -391,6 +399,7 @@ export default {/* 大会嘉宾只有一组内容 */
     */
     addGroupContent () {
       this.needDialog = true;
+
       if (this.type === 8) { // news
         this.initDialog = [
         //  初始化新增栏目内容组dialog
@@ -419,12 +428,18 @@ export default {/* 大会嘉宾只有一组内容 */
             required: true
           },
           {
+            label: '跳转链接',
+            type: 'text',
+            key: 'url',
+            required: true
+          },
+          {
             label: '状态',
             type: 'Switch',
             key: 'status',
             required: true
           }
-        ];
+        ]
       } else if (this.type === 6) { // guests
         this.initDialog = [
         //  初始化新增栏目内容组dialog
@@ -455,18 +470,41 @@ export default {/* 大会嘉宾只有一组内容 */
         ];
       } else if (this.type === 3) { // highLight
         this.initDialog = [
+        //  初始化新增栏目内容组dialog
           {
-            label: '标题',
+            label: '内容标题',
             type: 'text',
-            key: 'name'
+            key: 'title',
+            required: true
           },
           {
-            label: '背景图',
+            label: '内容标题背景图',
             type: 'image',
-            key: 'background_img'
+            key: 'title_img',
+            required: true
+          },
+          {
+            label: '内容背景图',
+            type: 'image',
+            key: 'background_img',
+            required: true
+          },
+          {
+            label: '描述',
+            type: 'text',
+            key: 'content',
+            required: true
+          },
+          {
+            label: '状态',
+            type: 'Switch',
+            key: 'status',
+            required: true
           }
-        ];
+        ]
       }
+      console.log(this.initDialog, 'dialog')
+
       this.isBatch = false
       this.imgLimit = 1
     },
@@ -521,6 +559,7 @@ export default {/* 大会嘉宾只有一组内容 */
                     tableData[j].hasChecked = false; // checkbox状态是否勾选
                     this.tableData.push(tableData[j])
                   }
+                  this.columnGListShow[0].tableData = deepCopy(this.tableData)
                 } else {
                   this.$message.error(data.msg);
                 }
@@ -569,11 +608,12 @@ export default {/* 大会嘉宾只有一组内容 */
     */
     batchHS (ids, status) {
       for (let i = 0; i < ids.length; i++) {
-        this.columnGListShow[this.activeName].tableData.forEach(item => {
-          if (item.obj_id === ids[i]) {
-            item.status = status;
+        for (let j = 0; j < this.columnGListShow[this.activeName].tableData.length; j++) {
+          if (this.columnGListShow[this.activeName].tableData[j].obj_id === ids[i]) {
+            this.columnGListShow[this.activeName].tableData[j].status = status - 0
+            this.tableData[j].status = status - 0
           }
-        });
+        }
       }
     },
     /*
@@ -615,7 +655,10 @@ export default {/* 大会嘉宾只有一组内容 */
     @return void
     */
     updateColumnObj (item, index) {
-      this.columnGListShow[0].tableData[index] = item;
+      this.columnGListShow[0].tableData = this.columnGListShow[0].tableData || this.tableData
+
+      this.columnGListShow[0].tableData[index] = item
+      this.tableData[index] = item
     },
     /*
     作用：发送更新栏目内容顺序sort请求给后台

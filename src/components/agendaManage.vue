@@ -20,6 +20,7 @@
             v-model="dialogForm.plate"
             autocomplete="off"
             placeholder="请输入所属板块"
+            clearable
           ></el-input>
         </el-form-item>
         <el-form-item label="具体内容 : " :label-width="formLabelWidth">
@@ -28,6 +29,7 @@
               v-model="dialogForm.theme"
               autocomplete="off"
               placeholder="请输入议程地点"
+              clearable
             ></el-input>
           </el-form-item>
           <el-form-item label="主持" style="margin: 10px 0" label-width="50px">
@@ -35,6 +37,7 @@
               v-model="dialogForm.host"
               autocomplete="off"
               placeholder="请输入主持人"
+              clearable
             ></el-input>
           </el-form-item>
           <el-form-item label="嘉宾" label-width="50px">
@@ -43,6 +46,7 @@
               :rows="2"
               placeholder="请输入嘉宾"
               v-model="dialogForm.guest"
+              clearable
             >
             </el-input>
           </el-form-item>
@@ -70,6 +74,7 @@
             placeholder="请输入议程名称"
             :disabled="baseMsgDisabled"
             :title="agendaMsg.agenda_name"
+            clearable
           ></el-input>
         </el-form-item>
         <el-form-item label="议程时间">
@@ -81,6 +86,7 @@
             placeholder="选择日期"
             format="yyyy 年 MM 月 dd 日"
             value-format="yyyy-MM-dd"
+            clearable
           >
           </el-date-picker>
         </el-form-item>
@@ -91,6 +97,7 @@
             v-model="agendaMsg.agenda_department"
             :disabled="baseMsgDisabled"
             :title="agendaMsg.agenda_department"
+            clearable
           ></el-input>
         </el-form-item>
         <el-form-item>

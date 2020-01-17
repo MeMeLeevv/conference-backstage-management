@@ -5,7 +5,7 @@
         <span class="title">主图：  </span>
         <ImageShow  :url="display.background_img" :imgW="display.background_img_width"
         :imgH="display.background_img_height"></ImageShow>
-          <UploadImage v-if="isEdit" inputName="background_img" @getImgMsg="getImgMsg" addMsg="只能上传一张图片"></UploadImage>
+          <UploadImage v-if="isEdit" :action="`${$store.state.api}/common/uploadImg`"  inputName="background_img" @getImgMsg="getImgMsg" addMsg="只能上传一张图片"></UploadImage>
       </div>
       <el-button type="primary" @click="isEdit? submitForm() : (isEdit = true)">{{isEdit ? '保存':'编辑'}}</el-button>
       <el-button type="default" v-if="isEdit" @click="isEdit = false">取消</el-button>

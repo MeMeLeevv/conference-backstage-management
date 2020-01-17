@@ -20,6 +20,7 @@
               style="width: 95%"
               v-model="form[item.key]"
               autocomplete="off"
+              clearable
             ></el-input>
           </el-form-item>
           <!-- 开关类 -->
@@ -37,6 +38,14 @@
             <span>{{ form[item.key] ? "显示" : "隐藏" }}</span>
           </el-form-item>
 
+          <!-- 数字类 -->
+          <el-form-item
+            v-if="item.type === 'number'"
+            :label="item.label"
+            :label-width="formLabelWidth"
+          >
+            <el-input-number v-model="form[item.key]" :min="1" :max="100" label="请输入内容"></el-input-number>
+          </el-form-item>
           <!-- 图片类 -->
           <el-form-item
             v-if="item.type === 'image'"
@@ -45,6 +54,7 @@
             :label-width="formLabelWidth"
           >
             <UploadImage
+              :action="`${$store.state.api}/common/uploadImg`"
               :inputName="item.key"
               @getImgMsg="getImgMsg"
               :limit="imgLimit"
@@ -101,6 +111,7 @@
             :label-width="formLabelWidth"
           >
             <UploadImage
+              :action="`${$store.state.api}/common/uploadImg`"
               :inputName="formData.img_type"
               @getImgMsg="getImgMsg"
               :limit="formData.new_type ? 1 : imgLimit"
@@ -176,7 +187,7 @@ export default {
       dialogVisible: false,
       formData: { // 对象json化字符串
         img_type: '', // title_img_id
-        new_type: false, // 后台接收1或者2
+        new_type: true, // 后台接收1或者2
         new_num: 1
       },
       form: {

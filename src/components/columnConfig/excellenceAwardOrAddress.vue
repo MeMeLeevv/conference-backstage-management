@@ -1,7 +1,7 @@
 <template>
   <div id="excellenceAwardOrAddress"><!-- 内容图(contentImg、主色调(mainColor、背景图(commonImg.imgurl) -->
     <div class="previewArea">
-      <div class="swatch">
+      <div class="swatch" title="如果同时提供标题文字和标题图片，会优先展示标题文字">
         <span class="title">标题：  </span>
         <span v-if="!isEdit" class="titledis">{{display.title}}</span>
         <el-input style="width: 60%" v-else v-model="form.title"></el-input>
@@ -10,13 +10,18 @@
         <span class="title">标题图：  </span>
         <ImageShow title="标题图和标题只需提供一项即可"  :url="display.title_img" :imgW="display.title_img_width"
         :imgH="display.title_img_height"></ImageShow>
-          <UploadImage v-if="isEdit" inputName="title_img" @getImgMsg="getImgMsg"></UploadImage>
+          <UploadImage v-if="isEdit" :action="`${$store.state.api}/common/uploadImg`" inputName="title_img" @getImgMsg="getImgMsg"></UploadImage>
       </div>
       <div class="block">
         <span class="title">主图：  </span>
         <ImageShow  :url="display.background_img" :imgW="display.background_img_width"
         :imgH="display.background_img_height"></ImageShow>
-          <UploadImage v-if="isEdit" inputName="background_img" @getImgMsg="getImgMsg" addMsg="只能上传一张图片"></UploadImage>
+          <UploadImage v-if="isEdit" :action="`${$store.state.api}/common/uploadImg`" inputName="background_img" @getImgMsg="getImgMsg" addMsg="只能上传一张图片"></UploadImage>
+      </div>
+      <div class="block" v-if="type === 5">
+        <span class="title">主图链接：  </span>
+        <span v-if="!isEdit" class="titledis">{{display.jump_url}}</span>
+        <el-input style="width: 60%" v-else v-model="form.jump_url"></el-input>
       </div>
       <el-button type="primary" @click="isEdit? submitForm() : (isEdit = true)">{{isEdit ? '保存':'编辑'}}</el-button>
       <el-button v-if="isEdit" type="default" @click="isEdit = false">取消</el-button>
@@ -55,6 +60,7 @@ export default {
       this.$router.push('/')
       return
     }
+    this.type = cData[0].type
     this.c_id = cData[0].c_id
     this.p_id = cData[0].p_id
     axiosGet(`${this.$store.state.api}/column/getColumnList`, { c_id: this.c_id }, (res) => {

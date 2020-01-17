@@ -64,6 +64,7 @@
               <el-input
                 v-if="multipleSelection.length !== 0 && item.edit"
                 v-model="form.title"
+                clearable
               >
               </el-input>
               <div
@@ -83,6 +84,7 @@
               <el-input
                 v-if="multipleSelection.length !== 0 && item.edit"
                 v-model="form.name"
+                clearable
               >
               </el-input>
               <div
@@ -109,7 +111,7 @@
                 <el-upload
                   v-if="item.edit"
                   class="upload-demo hidden fileInput"
-                  action="/common/uploadImg"
+                  :action="`${$store.state.api}/common/uploadImg`"
                   :on-success="uploadSuccess.bind(null, 'background_img')"
                 >
                   <el-button
@@ -159,7 +161,7 @@
                 <el-upload
                   v-if="item.edit"
                   class="upload-demo hidden fileInput"
-                  action="/common/uploadImg"
+                  :action="`${$store.state.api}/common/uploadImg`"
                   :on-success="uploadSuccess.bind(null, 'title_img')"
                 >
                   <el-button
@@ -208,7 +210,7 @@
                 <el-upload
                   v-if="item.edit"
                   class="upload-demo hidden fileInput"
-                  action="/common/uploadImg"
+                  :action="`${$store.state.api}/common/uploadImg`"
                   :on-success="uploadSuccess.bind(null, 'main_img')"
                 >
                   <el-button
@@ -245,14 +247,34 @@
                 </el-image>
               </div>
             </td>
+            <!-- 如果是描述图地址,描述的宽度比平均长一些 -->
+            <td
+              v-if="hasTableTd.url"
+              :style="`width: ${item.widthPercent * clientWidth}px`"
+            >
+              <el-input
+                v-if="multipleSelection.length !== 0 && item.edit"
+                v-model="form.url"
+                clearable
+              >
+              </el-input>
+              <span
+                v-else
+                class="ellipsis"
+                :style="`width: ${item.widthPercent + .1 * clientWidth}px`"
+                :title="item.url"
+                >{{ item.url }}</span
+              >
+            </td>
             <!-- 如果是描述,描述的宽度比平均长一些 -->
             <td
-              v-if="hasTableTd.content"
-              :style="`width: ${item.widthPercent - -0.07 * clientWidth}px`"
+              v-if="hasTableTd.content && !hasNumber"
+              :style="`width: ${item.widthPercent * clientWidth}px`"
             >
               <el-input
                 v-if="multipleSelection.length !== 0 && item.edit"
                 v-model="form.content"
+                clearable
               >
               </el-input>
               <span
@@ -263,7 +285,20 @@
                 >{{ item.content }}</span
               >
             </td>
-
+            <!-- 如果是规模的占比 -->
+            <td
+              v-if="hasTableTd.content && hasNumber"
+              :style="`width: ${item.widthPercent - -0.07 * clientWidth}px`"
+            >
+              <el-input-number v-if="multipleSelection.length !== 0 && item.edit" v-model="form.content" :min="1" :max="100" label="请输入内容"></el-input-number>
+              <span
+                v-else
+                class="ellipsis"
+                :style="`width: ${item.widthPercent * clientWidth}px`"
+                :title="item.content"
+                >{{ item.content }}%</span
+              >
+            </td>
             <!-- 下拉选择状态 -->
             <td
               v-if="item.status !== undefined"
@@ -288,6 +323,7 @@
               <div v-if="item.edit">
                 <el-button
                   @click.stop="setNewValue(item, index)"
+                  style="display: block; margin: 0 auto"
                   type="primary"
                   size="medium "
                   >确定</el-button
@@ -295,6 +331,7 @@
                 <el-button
                   @click.stop="keepOldValue(item)"
                   type="default"
+                  style="display: block; margin: 10px auto; "
                   size="medium "
                   >取消</el-button
                 >
@@ -404,8 +441,7 @@ export default {
       batch: false, // 批量
       shortInput: '200px', // 短input框长度
       longInput: '250px', // 长input框长度
-      url:
-        'http://img.iimedia.cn/00001228e00fdffb513251e96027c50ff3fd18040576eed1660299eeb278938ef42d8',
+      url: 'http://img.iimedia.cn/00001228e00fdffb513251e96027c50ff3fd18040576eed1660299eeb278938ef42d8',
       options: [ // 状态选择
         {
           value: 1,
@@ -427,8 +463,10 @@ export default {
         name: false,
         status: false,
         title: false,
-        title_img: false
-      }
+        title_img: false,
+        url: false
+      },
+      hasNumber: false
     };
   },
   created () {
@@ -438,6 +476,9 @@ export default {
       this.hasTableTd[this.initTableHeader[i].key] = this.hasTableTd.hasOwnProperty(
         this.initTableHeader[i].key
       );
+      if (this.initTableHeader[i].type === 'number') {
+        this.hasNumber = true
+      }
     }
   },
   methods: {
@@ -546,7 +587,8 @@ export default {
               let data = res.data;
               if (data.code === '1') {
                 // 本地更新
-                this.$emit('updateColumnObj', this.form, index);
+                this.$emit('updateColumnObj', that.form, index);
+                console.log(that.form, 'tableForm')
                 this.toggleSelection(); // 取消所有选择状态，让model的值于data的tableData的值同步更新
                 row.edit = false; // 清除所有编辑状态
                 that.$message({
@@ -581,27 +623,8 @@ export default {
     */
     keepOldValue (row) {
       // 取消更改
-      let that = this;
-      this.$confirm('是否确定恢复原值？', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      })
-        .then(() => {
-          this.toggleSelection();
-          row.edit = false;
-          that.$message({
-            type: 'success',
-            message: '恢复成功!'
-          });
-        })
-        .catch(() => {
-          this.clearSelection(); // 清除checked状态
-          that.$message({
-            type: 'info',
-            message: '已取消恢复'
-          });
-        });
+      this.toggleSelection();
+      row.edit = false
     },
     /*
     作用：清除checked状态
@@ -717,9 +740,7 @@ export default {
           if (data.code === '1') {
             // 本地更新
             this.$emit('batchHS', ids, status);
-            this.checkAll =
-              this.formData.length !== 0 &&
-              this.multipleSelection.length === this.formData.length;
+            this.checkAll = this.formData.length !== 0 && this.multipleSelection.length === this.formData.length;
             that.$message({
               message: data.msg,
               type: 'success'

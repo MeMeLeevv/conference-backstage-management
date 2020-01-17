@@ -25,8 +25,8 @@
       </div>
       <div class="block">
         <span class="title">背景图：  </span>
-        <ImageShow  :url="`${display.background_url_img}`" :imgW="display.background_url_img_width" :imgH="display.background_url_img_height"></ImageShow>
-          <UploadImage v-if="isEdit" inputName="background_url_img" @getImgMsg="getImgMsg" addMsg="只能上传一张图片"></UploadImage>
+        <ImageShow  :url="`${display.background_img}`" :imgW="display.background_img_width" :imgH="display.background_img_height"></ImageShow>
+          <UploadImage v-if="isEdit" inputName="background_img" @getImgMsg="getImgMsg" addMsg="只能上传一张图片"></UploadImage>
       </div>
       <div class="swatch">
         <span class="title">大会名称：  </span>
@@ -143,7 +143,7 @@ export default {
       }
     }, (err) => {
       this.$message.error(err)
-      console.log(err, '根据大会id查找大会信息失败');
+      console.log(err, '根据大会id查找大会信息失败')
     });
   },
   computed: {

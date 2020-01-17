@@ -21,7 +21,7 @@
         :closable="false"
       >
         <div class="previewArea">
-          <div class="swatch">
+          <div class="swatch" title="如果同时提供标题文字和标题图片，会优先展示标题文字">
             <span class="title">标题： </span>
             <span v-if="!isEditColumn" class="titledis">{{
               columnListShow.title
@@ -38,6 +38,7 @@
             ></ImageShow>
             <UploadImage
               v-if="isEditColumn"
+              :action="`${$store.state.api}/common/uploadImg`"
               inputName="title_img"
               @getImgMsg="getImgMsg"
             ></UploadImage>
@@ -128,6 +129,12 @@ export default {/* 大会嘉宾只有一组内容 */
           key: 'main_img'
         },
         {
+          label: '描述图链接',
+          widthPercent: 0.25,
+          type: 'text',
+          key: 'url'
+        },
+        {
           label: '显示状态',
           widthPercent: 0.12,
           type: 'select',
@@ -201,6 +208,8 @@ export default {/* 大会嘉宾只有一组内容 */
                   this.tableData[j].edit = false; // 是否是编辑状态
                   this.tableData[j].hasChecked = false; // checkbox状态是否勾选
                 }
+                this.columnGListShow[0].tableData = deepCopy(this.tableData)
+                console.log(this.tableData, 'tableData')
               } else {
                 this.$message.error(data.msg);
               }
@@ -252,6 +261,12 @@ export default {/* 大会嘉宾只有一组内容 */
           label: '描述图',
           type: 'image',
           key: 'main_img',
+          required: true
+        },
+        {
+          label: '描述图链接',
+          type: 'text',
+          key: 'url',
           required: true
         },
         {
@@ -315,6 +330,7 @@ export default {/* 大会嘉宾只有一组内容 */
                     tableData[j].hasChecked = false; // checkbox状态是否勾选
                     this.tableData.push(tableData[j])
                   }
+                  this.columnGListShow[0].tableData = deepCopy(this.tableData)
                 } else {
                   this.$message.error(data.msg);
                 }
@@ -363,11 +379,12 @@ export default {/* 大会嘉宾只有一组内容 */
     */
     batchHS (ids, status) {
       for (let i = 0; i < ids.length; i++) {
-        this.columnGListShow[this.activeName].tableData.forEach(item => {
-          if (item.obj_id === ids[i]) {
-            item.status = status;
+        for (let j = 0; j < this.columnGListShow[this.activeName].tableData.length; j++) {
+          if (this.columnGListShow[this.activeName].tableData[j].obj_id === ids[i]) {
+            this.columnGListShow[this.activeName].tableData[j].status = status - 0
+            this.tableData[j].status = status - 0
           }
-        });
+        }
       }
     },
     /*
@@ -410,7 +427,9 @@ export default {/* 大会嘉宾只有一组内容 */
     @return void
     */
     updateColumnObj (item, index) {
+      this.columnGListShow[0].tableData = this.columnGListShow[0].tableData || this.tableData
       this.columnGListShow[0].tableData[index] = item;
+      this.tableData[index] = item
     },
     /*
     作用：发送更新栏目内容顺序sort请求给后台

@@ -5,9 +5,9 @@
         <span class="title">标题图：  </span>
         <ImageShow title="标题图和标题只需提供一项即可"  :url="display.title_img" :imgW="display.title_img_width"
         :imgH="display.title_img_height"></ImageShow>
-          <UploadImage v-if="isEdit" inputName="title_img" @getImgMsg="getImgMsg"></UploadImage>
+          <UploadImage v-if="isEdit" :action="`${$store.state.api}/common/uploadImg`" inputName="title_img" @getImgMsg="getImgMsg"></UploadImage>
       </div>
-      <div class="swatch">
+      <div class="swatch" title="如果同时提供标题文字和标题图片，会优先展示标题文字">
         <span class="title">标题：  </span>
         <span v-if="!isEdit" class="titledis">{{display.title}}</span>
         <el-input style="width: 60%" v-else v-model="form.title"></el-input>
@@ -17,11 +17,18 @@
     </div>
     <!-- 大会背景集合 claim: 标题图/标题文字/内容文字-->
     <ConfigHeader class="headTitle" title="背景描述" :needDialog="false" :needInnerDialog="false"></ConfigHeader>
-    <quill-editor :content="isEdit? form.desc_content : display.desc_content"
+    <!-- <quill-editor ref="myQuillEditor" :content="isEdit? form.desc_content : display.desc_content"
                 :options="editorOption"
                 @focus="onEditorFocus($event)"
                 @change="onEditorChange($event)">
-    </quill-editor>
+    </quill-editor> -->
+    <el-input
+      type="textarea"
+      :rows="10"
+      placeholder="请输入背景描述"
+      v-model="form.desc_content"
+      :disabled="!isEdit">
+    </el-input>
     <div class="submit">
       <el-button type="primary" @click="isEdit? submitForm() : (isEdit = true)">{{isEdit ? '保存':'编辑'}}</el-button>
       <el-button type="default" v-if="isEdit" @click="isEdit = false">取消</el-button>
@@ -91,9 +98,9 @@ export default {
   mounted () {
     this.$nextTick(() => {
       // 初始化编辑器
-      let editor = document.querySelector('.ql-container.ql-snow');
+      /* let editor = document.querySelector('.ql-container.ql-snow');
       let editorPanel = document.querySelector('.ql-toolbar.ql-snow');
-      if (this.hideEditorPanel) { /* 是否隐藏editor面板 */
+      if (this.hideEditorPanel) { // 是否隐藏editor面板
         editorPanel.style.columnMsg = 'none';
       }
       this.initStyle(editor, {
@@ -101,7 +108,7 @@ export default {
         'height': '300px',
         'margin-top': '20px',
         'border-top': '1px solid #ccc'
-      });
+      }) */
     });
   },
   methods: {/* 增加数据，由子组件触发 */
@@ -131,7 +138,7 @@ export default {
           if (data.code === '1') {
             this.display = deepCopy(this.form)
             this.isEdit = false
-            // console.log(this.display, 'result')
+            console.log(this.display.desc_content, 'result')
             that.$message({
               message: data.msg,
               type: 'success'
@@ -151,9 +158,9 @@ export default {
     */
     onEditorFocus (editor) {
       if (!this.isEdit) {
-        editor.enable(false)
+        this.$refs.myQuillEditor.quill.enable(false)
       } else {
-        editor.enable(true)
+        this.$refs.myQuillEditor.quill.enable(true)
       }
     },
     /*

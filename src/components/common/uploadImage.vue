@@ -34,7 +34,7 @@ export default {
   props: {
     action: {
       type: String,
-      default: '/common/uploadImg'
+      default: `/common/uploadImg`
     },
     limit: {
       type: Number,

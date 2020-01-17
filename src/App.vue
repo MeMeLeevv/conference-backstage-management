@@ -208,6 +208,6 @@ span
     position: relative
     z-index: 0
   .content
-    padding: 50px
+    padding: 20px
 
 </style>
