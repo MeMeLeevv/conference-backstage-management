@@ -1,10 +1,6 @@
 /* eslint-disable */
 import Vue from 'vue';
 import Vuex from 'vuex';
-/* const Vue = require('vue')
-const Vuex = require('vuex') */
-
-// const cheerio = require('cheerio')
 
 Vue.use(Vuex);
 

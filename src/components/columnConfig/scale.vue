@@ -31,10 +31,14 @@
           <div class="block">
             <span class="title">标题图： </span>
             <ImageShow
+              :isEdit="isEditColumn"
               title="标题图和标题只需提供一项即可"
+              :imgId="columnListShow.title_img_id - 0"
               :url="columnListShow.title_img"
-              :imgW="columnListShow.title_img_width"
-              :imgH="columnListShow.title_img_height"
+              :imgW="columnListShow.title_img_width - 0"
+              :imgH="columnListShow.title_img_height - 0"
+              imgName="title_img"
+              @deleteImg="deleteImg"
             ></ImageShow>
             <UploadImage
               v-if="isEditColumn"
@@ -46,9 +50,13 @@
           <div class="block">
             <span class="title">内容图： </span>
             <ImageShow
+              :isEdit="isEditColumn"
+              :imgId="columnListShow.background_img_id - 0"
               :url="columnListShow.background_img"
-              :imgW="columnListShow.background_img_width"
-              :imgH="columnListShow.background_img_height"
+              :imgW="columnListShow.background_img_width - 0"
+              :imgH="columnListShow.background_img_height - 0"
+              imgName="background_img"
+              @deleteImg="deleteImg"
             ></ImageShow>
             <UploadImage
               v-if="isEditColumn"
@@ -65,7 +73,7 @@
           <el-button
             v-if="isEditColumn"
             type="default"
-            @click="isEditColumn = false"
+            @click="cancel"
             >取消</el-button
           >
           <!-- 新增logo图 -->
@@ -167,7 +175,9 @@ export default {/* 大会嘉宾只有一组内容 */
           key: 'operating'
         }
       ],
-      tableData: '' // 表格数据，初始化不要设为[]，否则template里的table组件v-if="tableData"会默认为真，当刚加载时tableData有数据会无法显示
+      tableData: '', // 表格数据，初始化不要设为[]，否则template里的table组件v-if="tableData"会默认为真，当刚加载时tableData有数据会无法显示
+      isDeleteOriginImg: false, // 是否有点击原图删除
+      originImg: {} // 保存原始图片信息
     };
   },
   created () {
@@ -352,6 +362,7 @@ export default {/* 大会嘉宾只有一组内容 */
                     this.tableData.push(tableData[j])
                   }
                   this.columnGListShow[0].tableData = deepCopy(this.tableData)
+                  this.isDeleteOriginImg = false;
                 } else {
                   this.$message.error(data.msg);
                 }
@@ -484,6 +495,30 @@ export default {/* 大会嘉宾只有一组内容 */
           this.$message.error('排序栏目失败，请重试！' + err);
         }
       );
+    },
+    /*
+    作用：点击删除图标将该图片的信息清空
+    @params clearImgObj Object 子组件传进来的已经清空的图片信息
+    @params originImg Object 子组件传进来的原始的图片信息
+    @return void
+    */
+    deleteImg (clearImgObj, originImg) {
+      this.isDeleteOriginImg = true;
+      this.originImg = Object.assign(this.originImg, originImg);
+      this.columnListShow = Object.assign(this.columnListShow, clearImgObj);
+      this.form = deepCopy(this.columnListShow);
+      console.log(this.form, 'form');
+    },
+    /*
+    作用：恢复数据
+    @return void
+    */
+    cancel () {
+      this.isEditColumn = false;
+      if (this.isDeleteOriginImg) {
+        this.columnListShow = Object.assign(this.columnListShow, this.originImg);
+        this.isDeleteOriginImg = false;
+      }
     }
   },
   components: {
