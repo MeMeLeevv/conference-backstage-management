@@ -2,13 +2,10 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 
-const HeadImage = () => import('./components/columnConfig/headImage')
 const parnerOrMedia = () => import('./components/columnConfig/parnerOrMedia')
 const Scale = () => import('./components/columnConfig/scale')
-const excellenceAwardOrAddress = () => import('./components/columnConfig/excellenceAwardOrAddress')
-const agendaOrContactOrRegis = () => import('./components/columnConfig/agendaOrContactOrRegis')
-const HlOrGuestsOrNews = () => import('./components/columnConfig/hlOrGuestsOrNews')
-const Background = () => import('./components/columnConfig/background')
+const agOrCoOrReOrHlOrGuOrNe = () => import('./components/columnConfig/agOrCoOrReOrHlOrGuOrNe')
+const heOrBaOrExOrAd = () => import('./components/columnConfig/heOrBaOrExOrAd')
 const Home = () => import('./components/home')
 const Login = () => import('./components/login')
 const BackStage = () => import('./components/backStage')
@@ -42,12 +39,8 @@ export default new Router({
           component: ConferenceMsg
         },
         {
-          path: 'columnConfig/headImage/:c_id', /* 这里不能填 /columnConfig/headImage ,第一个“/”会被认为是根目录，而这里应该是继承上一级的id目录 */
-          component: HeadImage
-        },
-        {
-          path: 'columnConfig/background/:c_id', /* 这里不能填 /columnConfig/headImage ,第一个“/”会被认为是根目录，而这里应该是继承上一级的id目录 */
-          component: Background
+          path: 'columnConfig/heOrBaOrExOrAd/:c_id', /* 这里不能填 /columnConfig/headImage ,第一个“/”会被认为是根目录，而这里应该是继承上一级的id目录 */
+          component: heOrBaOrExOrAd
 
         },
         {
@@ -56,19 +49,9 @@ export default new Router({
           component: Scale
         },
         {
-          path: 'columnConfig/excellenceAwardOrAddress/:c_id',
-          name: 'excellenceAwardOrAddress',
-          component: excellenceAwardOrAddress
-        },
-        {
-          path: 'columnConfig/agendaOrContactOrRegis/:c_id',
-          name: 'agendaOrContactOrRegis',
-          component: agendaOrContactOrRegis
-        },
-        {
-          path: 'columnConfig/hlOrGuestsOrNews/:c_id',
-          name: 'hlOrGuestsOrNews',
-          component: HlOrGuestsOrNews
+          path: 'columnConfig/agOrCoOrReOrHlOrGuOrNe/:c_id',
+          name: 'agOrCoOrReOrHlOrGuOrNe',
+          component: agOrCoOrReOrHlOrGuOrNe
         },
         {
           path: 'columnConfig/parnerOrMedia/:c_id',

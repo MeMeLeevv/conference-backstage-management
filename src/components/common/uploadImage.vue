@@ -109,6 +109,7 @@ export default {
     handleRemove (file, fileList) { //
       let index = this.imgList.findIndex((item, index) => item.uid === file.uid)
       this.imgList.splice(index, 1)
+      console.log(this.imgList, 'this.imgList')
       this.$emit('getImgMsg', this.inputName, this.imgList, true) // true表示是移除操作
     },
     /*

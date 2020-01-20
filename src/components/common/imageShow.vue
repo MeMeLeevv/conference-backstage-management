@@ -78,7 +78,7 @@ export default {
       obj[`${name}_jumpurl`] = ''
       obj[`${name}_width`] = ''
       obj[`${name}_height`] = ''
-      obj[`${name}_id`] = ''
+      obj[`${name}_id`] = 0
       this.$emit('deleteImg', obj, originImg)
     }
   }

@@ -286,19 +286,19 @@ export default {
       typeMap: {
         // 请求栏目时根据后台的type来规划router.path
         // 栏目类型
-        1: 'headImage',
-        2: 'background',
-        3: 'hlOrGuestsOrNews',
+        1: 'heOrBaOrExOrAd',
+        2: 'heOrBaOrExOrAd',
+        3: 'agOrCoOrReOrHlOrGuOrNe',
         4: 'scale',
-        5: 'excellenceAwardOrAddress',
-        6: 'hlOrGuestsOrNews',
-        7: 'agendaOrContactOrRegis',
-        8: 'hlOrGuestsOrNews',
-        9: 'agendaOrContactOrRegis',
+        5: 'heOrBaOrExOrAd',
+        6: 'agOrCoOrReOrHlOrGuOrNe',
+        7: 'agOrCoOrReOrHlOrGuOrNe',
+        8: 'agOrCoOrReOrHlOrGuOrNe',
+        9: 'agOrCoOrReOrHlOrGuOrNe',
         10: 'parnerOrMedia',
         11: 'parnerOrMedia',
-        12: 'excellenceAwardOrAddress',
-        13: 'agendaOrContactOrRegis'
+        12: 'heOrBaOrExOrAd',
+        13: 'agOrCoOrReOrHlOrGuOrNe'
       },
       navMsg: [
         {

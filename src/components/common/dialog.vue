@@ -15,6 +15,10 @@
             v-if="item.type === 'text'"
             :label="item.label"
             :label-width="formLabelWidth"
+            :prop="item.key"
+            :rules="[
+              { required: true, message: '请输入内容', trigger: 'blur' }
+            ]"
           >
             <el-input
               style="width: 95%"
@@ -43,15 +47,22 @@
             v-if="item.type === 'number'"
             :label="item.label"
             :label-width="formLabelWidth"
+            :prop="item.key"
+            :rules="[
+              { required: true, message: '请至少选择一个数字', trigger: ['change'] }
+            ]"
           >
             <el-input-number v-model="form[item.key]" :min="1" :max="100" label="请输入内容"></el-input-number>
           </el-form-item>
           <!-- 图片类 -->
           <el-form-item
             v-if="item.type === 'image'"
-            prop="image"
+            :prop="item.key"
             :label="item.label"
             :label-width="formLabelWidth"
+            :rules="[
+              { required: true, message: '请至少选择一张图片', trigger: ['change'] }
+            ]"
           >
             <UploadImage
               :action="`${$store.state.api}/common/uploadImg`"
@@ -64,14 +75,15 @@
       </el-form>
 
       <!-- 批量上传界面 -->
-      <el-form v-if="isBatch&&batchOptions.length > 0">
+      <el-form v-if="isBatch&&batchOptions.length > 0" :model="formData" :rules="rules" ref="ruleForm1" >
         <div>
         <!-- 批量上传图片 - 选择哪类图片上传 -->
           <el-form-item
             label="图片类型"
             :label-width="formLabelWidth"
+            prop="img_type"
           >
-            <el-select v-model="formData.img_type"> <!-- 根据form.key来动态加载图片uploadImage -->
+            <el-select v-model="formData.img_type" required> <!-- 根据form.key来动态加载图片uploadImage -->
               <el-option
                 v-for="item in batchOptions"
                 :key="item.img_type"
@@ -109,6 +121,10 @@
             v-if="formData.img_type"
             label="选择图片"
             :label-width="formLabelWidth"
+            :prop="formData.img_type"
+            :rules="[
+              { required: true, message: '请至少选择一张图片', trigger: ['change'] }
+            ]"
           >
             <UploadImage
               :action="`${$store.state.api}/common/uploadImg`"
@@ -176,26 +192,38 @@ export default {
     needDialog (newV) {
       this.dialogFormVisible = newV
       this.form = {
-        status: 0
       }
     }
   },
   data () {
     return {
       dialogFormVisible: false,
-      formLabelWidth: '100px',
+      formLabelWidth: '150px',
       dialogVisible: false,
       formData: { // 对象json化字符串
         img_type: '', // title_img_id
         new_type: true, // 后台接收1或者2
-        new_num: 1
+        new_num: 1,
+        main_img: '',
+        title_img: '',
+        background_img: ''
       },
       form: {
-        status: 0,
         imgsArr: [] // [imgid1,imgid2,imgid3,….] json化字符串
       },
       batchOptions: [], // 根据传进来的initTableHeader去key=image的字段
-      switchDisabled: false // 批量上传dialog的switch是否禁用
+      switchDisabled: false, // 批量上传dialog的switch是否禁用
+      rules: {
+        name: [
+          { required: true, message: '请输入内容', trigger: 'blur' }
+        ],
+        date: [
+          { type: 'date', required: true, message: '请选择日期', trigger: 'change' }
+        ],
+        img_type: [
+          { required: true, message: '请至少选择一种图片类型', trigger: 'change' }
+        ]
+      }
     };
   },
   mounted () {
@@ -209,7 +237,6 @@ export default {
           })
         }
       }
-      console.log(this.batchOptions, 'batchOptions')
     })
   },
   methods: {
@@ -222,6 +249,9 @@ export default {
     */
     getImgMsg (name, imgMsgList, isRemove) {
       if (this.isBatch) { // 多图上传
+        if (imgMsgList.length > 0) {
+          this.formData[this.formData.img_type] = imgMsgList[0].img_url
+        }
         if (isRemove) { // 如果是移除的话就将this.form.imgsArr全部替换为移除后剩下的图片数组
           let imgsArr = getImgMsg(name, imgMsgList, true) //
           let filterImgArr = []
@@ -243,35 +273,50 @@ export default {
         }
       } else {
         Object.assign(this.form, getImgMsg(name, imgMsgList)); // Object.assign(target, ...sources)合并图片对象
+        Object.assign(this.formData, getImgMsg(name, imgMsgList)); // 验证
       }
     },
     /*
     作用： 提交数据
     @return void
     */
-    submitForm () {
-      this.dialogFormVisible = false;
-      if (this.isBatch) {
-        if (this.formData.new_type) { // 重复上传多张图片
-          for (let i = 0; i < this.formData.new_num - 1; i++) {
-            this.form.imgsArr.push(this.form.imgsArr[0])
+    submitForm (formName) {
+      console.log(this.form, 'form')
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          this.dialogFormVisible = false;
+          if (this.isBatch) {
+            if (this.formData.new_type) { // 重复上传多张图片
+              for (let i = 0; i < this.formData.new_num - 1; i++) {
+                this.form.imgsArr.push(this.form.imgsArr[0])
+              }
+            }
+            this.formData.new_type = this.formData.new_type ? 1 : 2
+            this.formData.img_type = this.formData.img_type + '_id'
+            this.form.data = this.formData
           }
+
+          this.$emit('addbackStageMsg', this.form); /// 触发父组件的addbackStageMsg方法,提交数据给后台
+          this.formData = { // 初始化数据,图片字段需要置空，dialog检验才能有效
+            img_type: '',
+            new_type: false,
+            new_num: 1,
+            main_img: '',
+            title_img: '',
+            background_img: ''
+          }
+          this.form = {
+            status: 0,
+            imgsArr: [],
+            main_img: '',
+            title_img: '',
+            background_img: ''
+          }
+          this.switchDisabled = false
+        } else {
+          return false;
         }
-        this.formData.new_type = this.formData.new_type ? 1 : 2
-        this.formData.img_type = this.formData.img_type + '_id'
-        this.form.data = this.formData
-      }
-      this.$emit('addbackStageMsg', this.form); /// 触发父组件的addbackStageMsg方法,提交数据给后台
-      this.formData = { // 初始化数据
-        img_type: '',
-        new_type: false,
-        new_num: 1
-      }
-      this.form = {
-        status: 0,
-        imgsArr: []
-      }
-      this.switchDisabled = false
+      });
     },
     /*
     作用： 取消提交数据
@@ -283,11 +328,17 @@ export default {
       this.formData = {
         img_type: '',
         new_type: false,
-        new_num: 1
+        new_num: 1,
+        main_img: '',
+        title_img: '',
+        background_img: ''
       }
       this.form = {
         status: 0,
-        imgsArr: []
+        imgsArr: [],
+        main_img: '',
+        title_img: '',
+        background_img: ''
       }
     }
   },

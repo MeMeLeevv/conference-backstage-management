@@ -16,17 +16,17 @@
       <div class="block">
         <span class="title">logo图： </span>
         <ImageShow :url="display.logo_img" :imgW="display.logo_img_width" :imgH="display.logo_img_height"></ImageShow>
-          <UploadImage v-if="isEdit" inputName="logo_img" @getImgMsg="getImgMsg"></UploadImage>
+          <UploadImage v-if="isEdit" inputName="logo_img" @getImgMsg="getImgMsg" :action="`${$store.state.api}/common/uploadImg`"></UploadImage>
       </div>
       <div class="block" :style="isEdit? 'display: block' : ''">
         <span class="title">小  图： </span>
         <ImageShow  :url="display.small_picture_img" :imgW="display.small_picture_img_width" :imgH="display.small_picture_img_height"></ImageShow>
-          <UploadImage v-if="isEdit" inputName="small_picture_img" @getImgMsg="getImgMsg"></UploadImage>
+          <UploadImage v-if="isEdit" inputName="small_picture_img" @getImgMsg="getImgMsg" :action="`${$store.state.api}/common/uploadImg`"></UploadImage>
       </div>
       <div class="block">
         <span class="title">背景图：  </span>
         <ImageShow  :url="`${display.background_img}`" :imgW="display.background_img_width" :imgH="display.background_img_height"></ImageShow>
-          <UploadImage v-if="isEdit" inputName="background_img" @getImgMsg="getImgMsg" addMsg="只能上传一张图片"></UploadImage>
+          <UploadImage v-if="isEdit" inputName="background_img" @getImgMsg="getImgMsg" addMsg="只能上传一张图片" :action="`${$store.state.api}/common/uploadImg`"></UploadImage>
       </div>
       <div class="swatch">
         <span class="title">大会名称：  </span>

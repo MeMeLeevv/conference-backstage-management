@@ -1,8 +1,8 @@
 <template>
   <div id="parnerOrMedia">
-    <!-- 大会亮点集合 -->
+    <!-- 伙伴、媒体集合 -->
     <!-- 弹窗 -->
-    <ddialoog
+    <Dialog
       :needDialog="needDialog"
       :title="dialogTitle"
       :initDialog="initDialog"
@@ -11,7 +11,7 @@
       :isBatch="isBatch"
       :imgLimit="imgLimit"
       :initTableHeader="initTableHeader"
-    ></ddialoog>
+    ></Dialog>
 
     <el-tabs v-model="columnActiveName" type="border-card">
       <el-tab-pane
@@ -26,8 +26,12 @@
             <ImageShow
               title="标题图和标题只需提供一项即可"
               :url="columnListShow.title_img"
-              :imgW="columnListShow.title_img_width"
-              :imgH="columnListShow.title_img_height"
+              :imgW="columnListShow.title_img_width - 0"
+              :imgH="columnListShow.title_img_height - 0"
+              :jump_url="columnListShow.title_img_jumpurl"
+              :isEdit="isEditColumn"
+              imgName="title_img"
+              @deleteImg="deleteImg(arguments)"
             ></ImageShow>
             <UploadImage
               v-if="isEditColumn"
@@ -51,7 +55,7 @@
           <el-button
             v-if="isEditColumn"
             type="default"
-            @click="isEditColumn = false"
+            @click="cancel(null)"
             >取消</el-button
           >
           <!-- 新增logo图 -->
@@ -90,8 +94,12 @@
                 <ImageShow
                   title="标题图和标题只需提供一项即可"
                   :url="item.title_img"
-                  :imgW="item.title_img_width"
-                  :imgH="item.title_img_height"
+                  :imgW="item.title_img_width - 0"
+                  :imgH="item.title_img_height - 0"
+                  :jump_url="item.title_img_jumpurl"
+                  :isEdit="isEditGroup"
+                  imgName="title_img"
+                  @deleteImg="deleteImg(arguments,item, index)"
                 ></ImageShow>
                 <UploadImage
                   v-if="isEditGroup"
@@ -119,7 +127,7 @@
               <el-button
                 v-if="isEditGroup"
                 type="default"
-                @click="isEditGroup = false"
+                @click="cancel(item, index)"
                 >取消</el-button
               >
             </div>
@@ -130,7 +138,6 @@
                 :initDialog="initDialog"
                 @addGroupContent="addGroupContent"
               ></ConfigHeader>
-              <!-- <Table class="flexTable" :initTableHeader="initTableHeader" :tableData="tableData"></Table> -->
               <Table
                 v-if="item.tableData"
                 class="flexTable"
@@ -154,7 +161,7 @@ import { getImgMsg, getLocalData, deepCopy } from '../../assets/js/base';
 import { axiosGet, axiosPost } from '../../assets/js/axios';
 
 const ConfigHeader = () => import('../common/configHeader')
-const ddialoog = () => import('../common/dialog')
+const Dialog = () => import('../common/dialog')
 const Table = () => import('../common/table')
 const ImageShow = () => import('../common/imageShow')
 const UploadImage = () => import('../common/uploadImage')
@@ -170,6 +177,8 @@ export default {
       isEditGroup: false, // 此时是否在编辑组
       needDialog: false, // 是否需要dialog
       initDialog: [],
+      isDeleteOriginImg: false, // 是否有点击原图删除
+      originImg: {}, // 保存原始图片信息
       columnListShow: {}, // 栏目信息展示区
       columnGListShow: [], // 栏目组信息展示区
       groupDetailEmpty: false, // 栏目内容是否为空
@@ -224,22 +233,22 @@ export default {
     });
     // 同时请求栏目信息和栏目内容组信息
     Promise.all([p1, p2])
-      .then(([columnListShow, ColumnObjGroupList]) => {
+      .then(([columnListShow, cGListDisplay]) => {
         return {
           columnListShow: columnListShow.data,
-          ColumnObjGroupList: ColumnObjGroupList.data
+          cGListDisplay: cGListDisplay.data
         };
       })
       .then(showData => {
         if (
           showData.columnListShow.code !== '1' ||
-          showData.ColumnObjGroupList.code !== '1'
+          showData.cGListDisplay.code !== '1'
         ) {
           that.$message.error('请求错误，请刷新！');
           return;
         }
         this.columnListShow = showData.columnListShow.data[0]; // 栏目信息展示
-        this.columnGListShow = showData.ColumnObjGroupList.data; // 栏目内容组信息展示
+        this.columnGListShow = showData.cGListDisplay.data; // 栏目内容组信息展示
         if (this.columnGListShow.length === 0) {
           // tableData初始化，新建组内容
           this.groupDetailEmpty = true
@@ -518,6 +527,7 @@ export default {
               message: data.msg,
               type: 'success'
             });
+            this.isDeleteOriginImg = false
           } else {
             that.$message.error(data.msg);
           }
@@ -611,11 +621,45 @@ export default {
           this.$message.error('排序栏目失败，请重试！' + err);
         }
       );
+    },
+    /*
+    作用：点击删除图标将该图片的信息清空
+    @params clearImgObj Object 子组件传进来的已经清空的图片信息
+    @params originImg Object 子组件传进来的原始的图片信息
+    @return void
+    */
+    deleteImg ([clearImgObj, originImg], item, index) {
+      this.isDeleteOriginImg = true;
+      this.originImg = Object.assign(this.originImg, originImg);
+      if (item) {
+        this.columnGListShow[index] = Object.assign(this.columnGListShow[index], clearImgObj);
+        this.form = deepCopy(this.columnGListShow[index]);
+      } else {
+        this.columnListShow = Object.assign(this.columnListShow, clearImgObj);
+        this.form = deepCopy(this.columnListShow);
+      }
+    },
+    /*
+    作用：恢复数据
+    @return void
+    */
+    cancel (item, index) {
+      console.log(item, index, 'cancel')
+      this.isEditColumn = false;
+      this.isEditGroup = false
+      if (this.isDeleteOriginImg) {
+        if (item) {
+          this.columnGListShow[index] = Object.assign(this.columnGListShow[index], this.originImg);
+        } else {
+          this.columnListShow = Object.assign(this.columnListShow, this.originImg);
+        }
+        this.isDeleteOriginImg = false;
+      }
     }
   },
   components: {
     ConfigHeader,
-    ddialoog,
+    Dialog,
     Table,
     ImageShow,
     UploadImage

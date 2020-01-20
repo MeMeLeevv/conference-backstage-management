@@ -2,7 +2,7 @@
   <div id="scale">
     <!-- 大会亮点集合 -->
     <!-- 弹窗 -->
-    <ddialoog
+    <Dialog
       :needDialog="needDialog"
       :title="dialogTitle"
       :initDialog="initDialog"
@@ -11,7 +11,7 @@
       :imgLimit="imgLimit"
       :initTableHeader="initTableHeader"
       :isBatch="isBatch"
-    ></ddialoog>
+    ></Dialog>
 
     <el-tabs v-model="columnActiveName" type="border-card">
       <el-tab-pane
@@ -114,7 +114,7 @@ import { getImgMsg, getLocalData, deepCopy } from '../../assets/js/base';
 import { axiosGet, axiosPost } from '../../assets/js/axios';
 
 const ConfigHeader = () => import('../common/configHeader')
-const ddialoog = () => import('../common/dialog')
+const Dialog = () => import('../common/dialog')
 const Table = () => import('../common/table')
 const ImageShow = () => import('../common/imageShow')
 const UploadImage = () => import('../common/uploadImage')
@@ -198,22 +198,22 @@ export default {/* 大会嘉宾只有一组内容 */
     });
       // 同时请求栏目信息和栏目内容组信息
     Promise.all([p1, p2])
-      .then(([columnListShow, ColumnObjGroupList]) => {
+      .then(([columnListShow, cGListDisplay]) => {
         return {
           columnListShow: columnListShow.data,
-          ColumnObjGroupList: ColumnObjGroupList.data
+          cGListDisplay: cGListDisplay.data
         };
       })
       .then(showData => {
         if (
           showData.columnListShow.code !== '1' ||
-          showData.ColumnObjGroupList.code !== '1'
+          showData.cGListDisplay.code !== '1'
         ) {
           that.$message.error('请求错误，请刷新！');
           return;
         }
         this.columnListShow = showData.columnListShow.data[0]; // 栏目信息展示
-        this.columnGListShow = showData.ColumnObjGroupList.data; // 栏目内容组信息展示
+        this.columnGListShow = showData.cGListDisplay.data; // 栏目内容组信息展示
         console.log(this.columnGListShow, 'this.columnGListShow')
         if (this.columnGListShow.length === 0) {
           // tableData初始化，新建组内容
@@ -523,7 +523,7 @@ export default {/* 大会嘉宾只有一组内容 */
   },
   components: {
     ConfigHeader,
-    ddialoog,
+    Dialog,
     Table,
     ImageShow,
     UploadImage

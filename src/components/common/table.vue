@@ -12,7 +12,7 @@
           <tr>
             <th scope="col" :style="`width: ${0.01 * clientWidth}px`">
               <el-checkbox
-                :indeterminate="this.multipleSelection.length > 0 && this.multipleSelection.length < this.formData.length"
+                :indeterminate="indeterminate"
                 v-model="checkAll"
                 @change="handleCheckAllChange"
               ></el-checkbox>
@@ -433,6 +433,7 @@ export default {
   },
   data () {
     return {
+      indeterminate: false, // 表头上checkbox是否有选中的样式
       previewDialogUrl: '', // 点击图片预览
       dialogVisible: false,
       checkAll: false,
@@ -468,6 +469,11 @@ export default {
       },
       hasNumber: false
     };
+  },
+  watch: {
+    multipleSelection: function (newV, oldV) { // 不要用箭头函数！不能读取this
+      this.indeterminate = (newV.length > 0) && (newV.length < this.formData.length)
+    }
   },
   created () {
     this.clientWidth = document.body.clientWidth;
@@ -588,7 +594,6 @@ export default {
               if (data.code === '1') {
                 // 本地更新
                 this.$emit('updateColumnObj', that.form, index);
-                console.log(that.form, 'tableForm')
                 this.toggleSelection(); // 取消所有选择状态，让model的值于data的tableData的值同步更新
                 row.edit = false; // 清除所有编辑状态
                 that.$message({
@@ -599,6 +604,7 @@ export default {
                   message: data.msg,
                   type: 'success'
                 });
+                this.multipleSelection = []
               } else {
                 that.$message.error(data.msg);
               }
@@ -625,6 +631,7 @@ export default {
       // 取消更改
       this.toggleSelection();
       row.edit = false
+      this.multipleSelection = []
     },
     /*
     作用：清除checked状态
@@ -763,7 +770,6 @@ export default {
       this.multipleSelection = [];
       if (rows) {
         rows.forEach(row => {
-          // console.log(row, 'row')
           row.hasChecked = !row.hasChecked;
           this.handleCheckedChange(row);
           // this.multipleSelection.push(row.id)// !!!!!!!!!!!!!!!!
