@@ -33,6 +33,6 @@
     "sass-loader": "^7.1.0",
     "vue-template-compiler": "^2.6.10",
     "webpack": "^4.41.2",
-    "ws": "^7.2.0"
+    "ws": "^7.4.6"
   }
 }
